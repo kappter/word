@@ -359,3 +359,223 @@ fantasy,suffix,ly,manner
 fantasy,suffix,ness,condition
 fantasy,suffix,dom,realm
 fantasy,suffix,ship,connection
+
+Normal,prefix,a-,without or not
+Normal,prefix,ab-,away
+Normal,prefix,ad-,to, forward
+Normal,prefix,ante-,before
+Normal,prefix,anti-,against
+Normal,prefix,auto-,self
+Normal,prefix,circum-,round, around
+Normal,prefix,com-,with, together
+Normal,prefix,co-,with, together
+Normal,prefix,con-,with, together
+Normal,prefix,contra-,against
+Normal,prefix,counter-,against
+Normal,prefix,de-,down, off, reversed
+Normal,prefix,dia-,through
+Normal,prefix,dis-,not
+Normal,prefix,e-,out of
+Normal,prefix,en-,put into, cover
+Normal,prefix,ex-,out of, from
+Normal,prefix,equi-,equal
+Normal,prefix,extra-,above, outside
+Normal,prefix,hetero-,different
+Normal,prefix,homo-,same
+Normal,prefix,hyper-,over
+Normal,prefix,il-,not
+Normal,prefix,im-,not
+Normal,prefix,in-,in or not
+Normal,prefix,intra-,within
+Normal,prefix,inter-,between or among
+Normal,prefix,ir-,not
+Normal,prefix,magni-,large
+Normal,prefix,micro-,small
+Normal,prefix,mis-,wrong
+Normal,prefix,mono-,one
+Normal,prefix,multi-,many
+Normal,prefix,neo-,new
+Normal,prefix,non-,not
+Normal,prefix,ob-,against
+Normal,prefix,over-,too much
+Normal,prefix,pan-,all
+Normal,prefix,per-,through
+Normal,prefix,peri-,around
+Normal,prefix,poly-,many
+Normal,prefix,post-,after
+Normal,prefix,pre-,before
+Normal,prefix,pro-,forward
+Normal,prefix,pseudo-,false
+Normal,prefix,re-,again or back
+Normal,prefix,retro-,backward
+Normal,prefix,sub-,under
+Normal,prefix,super-,over
+Normal,prefix,sym-,with or together
+Normal,prefix,syn-,with or together
+Normal,prefix,trans-,across
+Normal,prefix,un-,not
+Normal,root,act,do
+Normal,root,aud,hear
+Normal,root,bene,good
+Normal,root,bio,life
+Normal,root,chron,time
+Normal,root,cred,believe
+Normal,root,dict,say
+Normal,root,duc,lead
+Normal,root,fac,make
+Normal,root,form,shape
+Normal,root,graph,write
+Normal,root,ject,throw
+Normal,root,log,word
+Normal,root,mit,send
+Normal,root,mot,move
+Normal,root,ped,foot
+Normal,root,phon,sound
+Normal,root,port,carry
+Normal,root,rupt,break
+Normal,root,scrib,write
+Normal,root,spec,see
+Normal,root,struct,build
+Normal,root,terr,earth
+Normal,root,therm,heat
+Normal,root,tract,pull
+Normal,root,vac,empty
+Normal,root,vid,see
+Normal,root,vis,see
+Normal,root,voc,call
+Normal,suffix,-able,capable of
+Normal,suffix,-ible,capable of
+Normal,suffix,-al,relating to
+Normal,suffix,-ial,relating to
+Normal,suffix,-an,relating to
+Normal,suffix,-ian,relating to
+Normal,suffix,-ant,performing
+Normal,suffix,-ent,performing
+Normal,suffix,-ary,relating to
+Normal,suffix,-ory,relating to
+Normal,suffix,-ate,make
+Normal,suffix,-cy,state of being
+Normal,suffix,-dom,state of being
+Normal,suffix,-en,make
+Normal,suffix,-ence,state of being
+Normal,suffix,-ance,state of being
+Normal,suffix,-er,one who
+Normal,suffix,-or,one who
+Normal,suffix,-escent,becoming
+Normal,suffix,-fy,make
+Normal,suffix,-hood,state of being
+Normal,suffix,-ic,relating to
+Normal,suffix,-ify,make
+Normal,suffix,-ion,act of
+Normal,suffix,-tion,act of
+Normal,suffix,-sion,act of
+Normal,suffix,-ish,resembling
+Normal,suffix,-ism,belief in
+Normal,suffix,-ist,one who practices
+Normal,suffix,-ity,state of being
+Normal,suffix,-ty,state of being
+Normal,suffix,-ive,relating to
+Normal,suffix,-ize,make
+Normal,suffix,-less,without
+Normal,suffix,-logy,study of
+Normal,suffix,-ly,in the manner of
+Normal,suffix,-ment,action or process
+Normal,suffix,-ness,state of being
+Normal,suffix,-ous,full of
+Normal,suffix,-eous,full of
+Normal,suffix,-ious,full of
+Normal,suffix,-ship,state of being
+Normal,suffix,-some,like
+Normal,suffix,-tude,state of being
+Normal,suffix,-ward,in the direction of
+Normal,suffix,-y,full of
+Geography,suffix,-al,relating to: geological, astronomical, terrestrial
+Geography,root,carb,carbon: carbon dioxide, carbonic acid, carbon cycle
+Geography,prefix,cent,hundred: centimeter, centigram, percent
+Geography,root,cycl,circle, cycle: cyclone, nitrogen cycle, anticyclone
+Geography,prefix,deci,tenth: decibel, decimal, deciliter
+Geography,root,graph,writing, drawing: geography, oceanography, photography, topography
+Geography,root,hydr,water: hydroelectric, hydrate, hydrothermal, hydrosphere
+Geography,root,hygr,water: hydroelectric, hydrate, hydrothermal, hydrosphere
+Geography,suffix,-ist,one who studies: meteorologist, geologist, environmentalist
+Geography,prefix,kilo,thousand: kilogram, kilometer
+Geography,root,meter,measure: barometer, thermometer, diameter
+Geography,suffix,-ology,study of; seismology, meteorology, climatology
+Geography,root,sphere,ball: lithosphere, asthenosphere, geosphere, hydrosphere
+Geography,root,alt,high: altocumulus, altitude, altostratus
+Geography,prefix,anti,against, opposite: anticline, anticyclone
+Geography,root,baro,pressure: barometer, bar, barometric pressure, hyperbaric chamber
+Geography,root,calor,heat: calorimeter, calorie, kilocalorie
+Geography,root,clud,to close: occluded front, exclude, conclude, cluster
+Geography,root,clus,to close: occluded front, exclude, conclude, cluster
+Geography,root,iso,equal: isobar, isotherm, isocline
+Geography,root,nimb,rain: nimbus, cumulonimbus
+Geography,root,therm,heat: thermal, geothermal, thermometer
+Geography,root,circ,ring, around: circumference, circular, circulate
+Geography,root,eco,environment: ecology, ecosystem, ecocline
+Geography,root,halo,salt: halite, halogens, halocline
+Geography,prefix,micro,small: microclimate, microwave
+Geography,prefix,trans,across: transfer, transpiration
+Geography,root,crust,shell: crust, encrusted, crustal
+Geography,prefix,epi,upon, above: epicenter, epicycle
+Geography,root,flu,flowing: fluid, fluctuate, magnetic flux
+Geography,root,fluc,flowing: fluid, fluctuate, magnetic flux
+Geography,root,glaci,ice: glacier, glacial, glaze
+Geography,root,grav,heavy: gravity, gravitate
+Geography,root,ign,fire: igneous, ignite, ignition
+Geography,root,litho,stone: lithosphere, lithify, lithograph
+Geography,root,lum,light: illuminate, luminous, bioluminescence
+Geography,root,magn,great: magnitude, magnify
+Geography,root,meta,change: metamorphic, metabolism, metamorphosis
+Geography,root,morph,form: morphology, metamorphic, polymorph
+Geography,root,ob,against: oblique, obscure, obtuse
+Geography,root,petr,rock: petrify, petroleum, petrology
+Geography,root,seismo,earthquake: seismology, seismograph, seismic wave
+Geography,root,strati,layer: stratify, stratosphere, stratum
+Geography,root,sub,under: subduction, submarine, subterranean
+Geography,root,tecto,building: tectonic, architect
+Geography,root,terr,land: terrain, territory, terrestrial
+Geography,root,volv,roll: revolve, involve, evolve
+Geography,root,zo,animal: zoology, zoogeography, zootoxin
+Math,prefix,uni-,one
+Math,prefix,mono-,one
+Math,prefix,solo-,one
+Math,prefix,bi-,two
+Math,prefix,duo-,two
+Math,prefix,tri-,three
+Math,prefix,quadr-,four
+Math,prefix,tetra-,four
+Math,prefix,penta-,five
+Math,prefix,hexa-,six
+Math,prefix,hepta-,seven
+Math,prefix,octo-,eight
+Math,prefix,nona-,nine
+Math,prefix,deca-,ten
+Math,prefix,centi-,hundredth
+Math,prefix,milli-,thousandth
+Math,prefix,kilo-,thousand
+Math,prefix,mega-,million
+Math,prefix,giga-,billion
+Math,prefix,tera-,trillion
+Math,prefix,micro-,millionth
+Math,prefix,nano-,billionth
+Math,prefix,pico-,trillionth
+Math,prefix,femto-,quadrillionth
+Math,suffix,-gon,shape with angles
+Math,suffix,-metry,measurement of
+Math,suffix,-tion,process of
+Math,suffix,-hedron,solid figure with faces
+Math,root,equi,equal
+Math,root,fract,break
+Math,root,geo,earth (geometry)
+Math,root,graph,write (graphing)
+Math,root,log,reason (logic)
+Math,root,numer,number
+Math,root,poly,many
+Math,root,stat,stand (statistics)
+Math,root,calc,stone (calculate)
+Math,root,alg,pain (algebra - originally setting bones)
+Math,root,arithm,number
+Math,root,prob,prove (probability)
+Math,root,vect,carry (vector)
+
