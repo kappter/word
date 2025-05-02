@@ -107,7 +107,7 @@ const permutationList = document.getElementById('permutationList');
 const generateButton = document.getElementById('generateButton');
 const copyButton = document.getElementById('copyButton');
 const permutationType = document.getElementById('permutationType');
-const themeType = document.getElementById('themeType');
+const themeType = document.getElementById("themeType");
 
 // Simplified pronunciation generator
 function generatePronunciation(word) {
@@ -414,7 +414,7 @@ function updateDisplay() {
 generateButton.addEventListener('click', updateDisplay);
 copyButton.addEventListener('click', copyToClipboard);
 permutationType.addEventListener('change', updateDisplay);
-themeType.addEventListener('change', updateDisplay);
+themeType.addEventListener("change", updateDisplay);
 
 // Initialize themes and generate first word
 initializeThemes();
