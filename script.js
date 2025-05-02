@@ -42,7 +42,7 @@ function parseCSV(csvText) {
             headers.forEach((header, index) => {
                 const value = columns[index];
                 if ((header === "type" || header === "part" || header === "term") && !value) {
-                    console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: "${currentLine}". Skipping entry.`);
+                    // console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                 }
                 entry[header] = value;
@@ -51,18 +51,18 @@ function parseCSV(csvText) {
             if (validEntry && entry.type) {
                  entry.type = entry.type.toLowerCase();
                  if (!entry.type) {
-                    console.warn(`Warning: Empty 'type' after processing line ${i + 1}: "${currentLine}". Skipping entry.`);
+                    // console.warn(`Warning: Empty 'type' after processing line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                  }
             } else if (validEntry && !entry.type) {
-                 console.warn(`Warning: Missing 'type' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
+                 // console.warn(`Warning: Missing 'type' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
                  validEntry = false;
             }
 
             if (validEntry) {
                 const validParts = ["prefix", "root", "suffix"];
                 if (!entry.part || !validParts.includes(entry.part.toLowerCase())) {
-                     console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: "${currentLine}". Skipping entry.`);
+                     // console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: "${currentLine}". Skipping entry.`);
                      validEntry = false;
                 } else {
                     entry.part = entry.part.toLowerCase();
@@ -71,7 +71,7 @@ function parseCSV(csvText) {
 
             if (validEntry) {
                  if (!entry.term) {
-                    console.warn(`Warning: Missing 'term' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
+                    // console.warn(`Warning: Missing 'term' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                  }
             }
@@ -80,90 +80,97 @@ function parseCSV(csvText) {
                 result.push(entry);
             }
         } else {
-             // Only log warning if the line wasn't just whitespace
+             // Only log warning if the line wasn't just whitespace and not empty
              if (currentLine.trim()) {
-                console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: "${currentLine}". Skipping line.`);
+                // console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: "${currentLine}". Skipping line.`);
              }
         }
     }
-    console.log(`Successfully parsed ${result.length} valid entries from CSV using robust parser.`);
+    console.log(`Successfully parsed ${result.length} valid entries from CSV.`);
     return result;
 }
 
 // Themes object (will be populated dynamically from CSV)
 const themes = {};
+let themesLoadedPromise = null; // Promise to track theme loading
 
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
-    // Check if themes are already populated
-    if (Object.keys(themes).length > 0) {
-        console.log("Themes already loaded.");
-        return; // Avoid reloading if already done
+    // If already loading or loaded, return the existing promise/result
+    if (themesLoadedPromise) {
+        console.log("Theme loading already in progress or completed.");
+        return themesLoadedPromise;
     }
 
-    const loadingElement = document.getElementById("loading");
-    if (loadingElement) loadingElement.classList.remove("hidden");
+    // Create a promise that resolves when themes are loaded
+    themesLoadedPromise = new Promise(async (resolve, reject) => {
+        const loadingElement = document.getElementById("loading");
+        if (loadingElement) loadingElement.classList.remove("hidden");
 
-    try {
-        console.log("Fetching word_parts.csv...");
-        const response = await fetch("data/word_parts.csv");
-        console.log("Fetch Response Status:", response.status);
-        if (!response.ok) {
-            throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
-        }
-        const csvText = await response.text();
-        const data = parseCSV(csvText);
-        console.log(`Parsed ${data.length} valid entries from CSV.`);
-
-        // Clear themes object before populating (should be empty here, but safe)
-        for (const key in themes) {
-            delete themes[key];
-        }
-
-        // Populate themes based on type and part
-        data.forEach(({ type, part, term, definition }) => {
-            if (!themes[type]) {
-                 themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
+        try {
+            console.log("Fetching word_parts.csv...");
+            const response = await fetch("data/word_parts.csv");
+            console.log("Fetch Response Status:", response.status);
+            if (!response.ok) {
+                throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
             }
-            let cleanedTerm = term;
-            if (part === "prefix") {
-                cleanedTerm = term.replace(/-+$/, "");
-            } else if (part === "suffix") {
-                cleanedTerm = term.replace(/^-+/, "");
+            const csvText = await response.text();
+            const data = parseCSV(csvText);
+            console.log(`Parsed ${data.length} valid entries from CSV.`);
+
+            // Clear themes object before populating
+            for (const key in themes) {
+                delete themes[key];
             }
-            if (cleanedTerm) {
-                if (part === "prefix") {
-                    themes[type].prefixes.push(cleanedTerm);
-                    themes[type].prefixDefs.push(definition || "");
-                } else if (part === "root") {
-                    themes[type].roots.push(cleanedTerm);
-                    themes[type].rootDefs.push(definition || "");
-                } else if (part === "suffix") {
-                    themes[type].suffixes.push(cleanedTerm);
-                    themes[type].suffixDefs.push(definition || "");
+
+            // Populate themes based on type and part
+            data.forEach(({ type, part, term, definition }) => {
+                if (!themes[type]) {
+                    themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
                 }
-            }
-        });
-
-        console.log("Populated themes:", Object.keys(themes));
-        Object.keys(themes).forEach(theme => {
-            const themeData = themes[theme];
-            console.log(`Theme '${theme}':`, {
-                prefixes: themeData.prefixes.length,
-                roots: themeData.roots.length,
-                suffixes: themeData.suffixes.length
+                let cleanedTerm = term;
+                if (part === "prefix") {
+                    cleanedTerm = term.replace(/-+$/, "");
+                } else if (part === "suffix") {
+                    cleanedTerm = term.replace(/^-+/, "");
+                }
+                if (cleanedTerm) {
+                    if (part === "prefix") {
+                        themes[type].prefixes.push(cleanedTerm);
+                        themes[type].prefixDefs.push(definition || "");
+                    } else if (part === "root") {
+                        themes[type].roots.push(cleanedTerm);
+                        themes[type].rootDefs.push(definition || "");
+                    } else if (part === "suffix") {
+                        themes[type].suffixes.push(cleanedTerm);
+                        themes[type].suffixDefs.push(definition || "");
+                    }
+                }
             });
-            if (!themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
-                console.warn(`Theme '${theme}' is missing some word parts (prefixes, roots, or suffixes). Word generation for this theme might fail.`);
-            }
-        });
 
-    } catch (error) {
-        console.error("Error loading or processing word parts:", error);
-        alert("Failed to load word parts data. Please check the console and ensure data/word_parts.csv is accessible and correctly formatted.");
-    } finally {
-        if (loadingElement) loadingElement.classList.add("hidden");
-    }
+            console.log("Populated themes:", Object.keys(themes));
+            Object.keys(themes).forEach(theme => {
+                const themeData = themes[theme];
+                // console.log(`Theme '${theme}':`, { prefixes: themeData.prefixes.length, roots: themeData.roots.length, suffixes: themeData.suffixes.length });
+                if (!themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
+                    console.warn(`Theme '${theme}' is missing some word parts (prefixes, roots, or suffixes). Word generation for this theme might fail.`);
+                }
+            });
+
+            console.log("Dispatching themesLoaded event...");
+            document.dispatchEvent(new CustomEvent('themesLoaded')); // Dispatch event
+            resolve(themes); // Resolve the promise with the loaded themes
+
+        } catch (error) {
+            console.error("Error loading or processing word parts:", error);
+            alert("Failed to load word parts data. Please check the console and ensure data/word_parts.csv is accessible and correctly formatted.");
+            reject(error); // Reject the promise on error
+        } finally {
+            if (loadingElement) loadingElement.classList.add("hidden");
+        }
+    });
+
+    return themesLoadedPromise;
 }
 
 // Function to populate theme dropdown dynamically (used by both index.html and game.html)
@@ -197,6 +204,7 @@ function populateThemeDropdown() {
         }
     });
 
+    // Try to restore the previous selection, otherwise default to 'all'
     if (currentSelectedValue && themeDropdown.querySelector(`option[value="${currentSelectedValue}"]`)) {
         themeDropdown.value = currentSelectedValue;
     } else {
@@ -357,8 +365,9 @@ function updateDisplay() {
     const permutationType = document.getElementById('permutationType');
     const themeType = document.getElementById("themeType");
 
+    // Ensure elements exist before proceeding (only run if on index.html)
     if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl) {
-        console.warn("Missing display elements on index.html, cannot update.");
+        // console.warn("Missing display elements on index.html, cannot update.");
         return;
     }
 
@@ -412,43 +421,36 @@ function copyToClipboard() {
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("DOM fully loaded and parsed");
 
-    // Ensure themes are loaded once globally
-    if (typeof themes === 'undefined' || Object.keys(themes).length === 0) {
-        console.log("Initiating theme loading...");
-        await loadWordParts(); // Load themes
-        console.log("Dispatching themesLoaded event...");
-        document.dispatchEvent(new CustomEvent('themesLoaded')); // Dispatch event
-    } else {
-        // If themes somehow got loaded before DOMContentLoaded, dispatch immediately
-        console.log("Themes already loaded, dispatching themesLoaded event immediately...");
-        document.dispatchEvent(new CustomEvent('themesLoaded'));
+    // Start loading themes immediately and wait for it to complete
+    try {
+        await loadWordParts();
+    } catch (error) {
+        console.error("Failed to initialize due to theme loading error:", error);
+        return; // Stop initialization if themes failed to load
     }
 
-    // Check if we are on the main page (index.html) for UI initialization
+    // Now that themes are loaded, check which page we are on and initialize accordingly
+
+    // Check for index.html elements
     const generateButton = document.getElementById("generateButton");
-    if (generateButton) {
-        console.log("On index.html, waiting for themesLoaded event for UI setup.");
+    const copyButton = document.getElementById("copyButton");
+    const permutationType = document.getElementById("permutationType");
+    const themeType = document.getElementById("themeType");
 
-        // Wait for themes to be loaded before setting up index.html UI
-        document.addEventListener('themesLoaded', () => {
-            console.log("themesLoaded event received on index.html. Initializing UI.");
-            const copyButton = document.getElementById("copyButton");
-            const permutationType = document.getElementById("permutationType");
-            const themeType = document.getElementById("themeType");
+    if (generateButton && copyButton && permutationType && themeType) {
+        console.log("Initializing index.html UI...");
+        // Setup listeners for index.html elements
+        generateButton.addEventListener("click", updateDisplay);
+        copyButton.addEventListener("click", copyToClipboard);
+        permutationType.addEventListener("change", updateDisplay);
+        themeType.addEventListener("change", updateDisplay);
 
-            // Setup listeners for index.html elements
-            if (generateButton) generateButton.addEventListener("click", updateDisplay);
-            if (copyButton) copyButton.addEventListener("click", copyToClipboard);
-            if (permutationType) permutationType.addEventListener("change", updateDisplay);
-            if (themeType) themeType.addEventListener("change", updateDisplay);
-            else console.error("Theme type dropdown (#themeType) not found on index.html!");
-
-            populateThemeDropdown(); // Populates #themeType
-            updateDisplay(); // Initial word generation for index.html
-        }, { once: true }); // Ensure listener runs only once
+        populateThemeDropdown(); // Populates #themeType
+        updateDisplay(); // Initial word generation for index.html
     } else {
-        console.log("Not on index.html, skipping main page UI initialization.");
-        // Game page initialization is handled by game.js listening for 'themesLoaded'
+        console.log("Not on index.html or missing elements, skipping index.html UI initialization.");
+        // Game page initialization is handled by game.js, which listens for 'themesLoaded'
+        // No need to explicitly check for game.html here, as game.js handles its own setup.
     }
 });
 

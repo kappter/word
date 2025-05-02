@@ -8,27 +8,30 @@ let currentQuestions = []; // { word: '...', definition: '...', options: ['...',
 let selectedGameTheme = 'all';
 
 // DOM Elements
-let gameThemeSelect, startGameButton, questionArea, definitionText, optionsList, feedbackText, scoreDisplay, missesDisplay, questionCounter, gameOverArea, finalScoreDisplay, playAgainButton, nextQuestionButton, themeSelectionArea;
+let gameThemeSelect, startGameButton, gamePlayArea, gameDefinition, choicesArea, feedbackText, scoreSpan, missesSpan, questionNumberSpan, gameOverDiv, finalScoreSpan, playAgainButton, nextQuestionButton, gameSetupArea;
 
 // Function to get DOM elements
 function getGameDOMElements() {
     gameThemeSelect = document.getElementById("gameThemeType");
     startGameButton = document.getElementById("startGameButton");
-    questionArea = document.getElementById("questionArea");
-    definitionText = document.getElementById("definitionText");
-    optionsList = document.getElementById("optionsList");
+    gamePlayArea = document.getElementById("game-play"); // Corrected ID
+    gameDefinition = document.getElementById("gameDefinition"); // Corrected ID
+    choicesArea = document.getElementById("choices-area"); // Corrected ID
     feedbackText = document.getElementById("feedbackText");
-    scoreDisplay = document.getElementById("scoreDisplay");
-    missesDisplay = document.getElementById("missesDisplay");
-    questionCounter = document.getElementById("questionCounter");
-    gameOverArea = document.getElementById("gameOverArea");
-    finalScoreDisplay = document.getElementById("finalScoreDisplay");
+    scoreSpan = document.getElementById("score"); // Corrected ID
+    missesSpan = document.getElementById("misses"); // Corrected ID
+    questionNumberSpan = document.getElementById("questionNumber"); // Corrected ID
+    gameOverDiv = document.getElementById("game-over"); // Corrected ID
+    finalScoreSpan = document.getElementById("finalScore"); // Corrected ID
     playAgainButton = document.getElementById("playAgainButton");
     nextQuestionButton = document.getElementById("nextQuestionButton");
-    themeSelectionArea = document.getElementById("themeSelectionArea"); // Added theme selection area
+    gameSetupArea = document.getElementById("game-setup"); // Corrected ID
 
-    if (!gameThemeSelect || !startGameButton || !questionArea || !definitionText || !optionsList || !feedbackText || !scoreDisplay || !missesDisplay || !questionCounter || !gameOverArea || !finalScoreDisplay || !playAgainButton || !nextQuestionButton || !themeSelectionArea) {
-        console.error("One or more game elements are missing!");
+    // Check all potentially null elements
+    if (!gameThemeSelect || !startGameButton || !gamePlayArea || !gameDefinition || !choicesArea || !feedbackText || !scoreSpan || !missesSpan || !questionNumberSpan || !gameOverDiv || !finalScoreSpan || !playAgainButton || !nextQuestionButton || !gameSetupArea) {
+        console.error("One or more game elements are missing! Check HTML IDs.");
+        // Log which elements are missing
+        console.log({ gameThemeSelect, startGameButton, gamePlayArea, gameDefinition, choicesArea, feedbackText, scoreSpan, missesSpan, questionNumberSpan, gameOverDiv, finalScoreSpan, playAgainButton, nextQuestionButton, gameSetupArea });
         return false;
     }
     return true;
@@ -50,7 +53,7 @@ function generateQuestions(theme) {
     }
 
     let attempts = 0;
-    const maxAttempts = questionsPerRound * 5; // Limit attempts to prevent infinite loops
+    const maxAttempts = questionsPerRound * 10; // Increased attempts limit
 
     while (currentQuestions.length < questionsPerRound && attempts < maxAttempts) {
         attempts++;
@@ -58,14 +61,14 @@ function generateQuestions(theme) {
 
         // Basic validation: ensure word and definition are generated and word hasn't been used yet
         if (word === "Error" || !definition || currentQuestions.some(q => q.word === word)) {
-            console.warn(`Skipping invalid or duplicate word generation: ${word}`);
+            // console.warn(`Skipping invalid or duplicate word generation attempt: ${word}`);
             continue; // Skip this attempt if generation failed or word is duplicate
         }
 
         // Generate distractors (simple approach: generate more words of the same theme)
         const options = [word];
         let distractorAttempts = 0;
-        const maxDistractorAttempts = 20;
+        const maxDistractorAttempts = 30; // Increased attempts
         while (options.length < 4 && distractorAttempts < maxDistractorAttempts) {
             distractorAttempts++;
             const { word: distractorWord } = generateWordAndDefinition(wordType, theme);
@@ -92,7 +95,7 @@ function generateQuestions(theme) {
 
     if (currentQuestions.length < questionsPerRound) {
         console.error(`Failed to generate enough unique questions (${currentQuestions.length}/${questionsPerRound}) for theme '${theme}'.`);
-        alert(`Could only generate ${currentQuestions.length} unique questions for this theme. Please try another theme.`);
+        alert(`Could only generate ${currentQuestions.length} unique questions for this theme. Please try another theme or 'All'.`);
         return false;
     }
 
@@ -103,39 +106,40 @@ function generateQuestions(theme) {
 // Display the current question
 function displayQuestion() {
     if (currentQuestionIndex >= currentQuestions.length) {
-        // This case should ideally not be reached if next button logic is correct
         console.log("Attempted to display question beyond round limit.");
         showGameOver("round_complete");
         return;
     }
     const q = currentQuestions[currentQuestionIndex];
-    definitionText.textContent = q.definition;
-    optionsList.innerHTML = ''; // Clear previous options
+    gameDefinition.textContent = q.definition; // Use corrected variable
+    choicesArea.innerHTML = ''; // Clear previous options using corrected variable
     q.options.forEach(option => {
         const li = document.createElement('li');
         const button = document.createElement('button');
         button.textContent = option;
         button.onclick = () => handleAnswer(option, button);
         li.appendChild(button);
-        optionsList.appendChild(li);
+        choicesArea.appendChild(li); // Use corrected variable
     });
     feedbackText.textContent = '';
+    feedbackText.parentElement.classList.add('hidden'); // Hide feedback area initially
     nextQuestionButton.style.display = 'none'; // Hide next button until answer is given
-    questionArea.style.display = 'block';
+    gamePlayArea.classList.remove('hidden'); // Show game area using corrected variable
     updateScoreboard();
 }
 
 // Handle the user's answer selection
 function handleAnswer(selectedOption, selectedButton) {
     const correctAnswer = currentQuestions[currentQuestionIndex].answer;
-    const buttons = optionsList.querySelectorAll('button');
+    const buttons = choicesArea.querySelectorAll('button'); // Use corrected variable
     buttons.forEach(button => {
         button.disabled = true; // Disable all options
-        // Highlight correct answer
         if (button.textContent === correctAnswer) {
             button.classList.add('correct');
         }
     });
+
+    feedbackText.parentElement.classList.remove('hidden'); // Show feedback area
 
     if (selectedOption === correctAnswer) {
         score++;
@@ -163,19 +167,18 @@ function handleAnswer(selectedOption, selectedButton) {
 
 // Update the score and misses display
 function updateScoreboard() {
-    scoreDisplay.textContent = score;
-    missesDisplay.textContent = maxMisses - misses;
-    // Ensure question index doesn't exceed round length for display
+    scoreSpan.textContent = score; // Use corrected variable
+    missesSpan.textContent = maxMisses - misses; // Use corrected variable
     const displayIndex = Math.min(currentQuestionIndex + 1, questionsPerRound);
-    questionCounter.textContent = `${displayIndex} / ${questionsPerRound}`;
+    questionNumberSpan.textContent = `${displayIndex}`; // Use corrected variable (just the number)
 }
 
 // Show the game over screen
 function showGameOver(reason) {
      console.log("Game Over. Reason:", reason);
-     questionArea.style.display = 'none';
-     gameOverArea.style.display = 'block';
-     finalScoreDisplay.textContent = score;
+     gamePlayArea.classList.add('hidden'); // Use corrected variable
+     gameOverDiv.classList.remove('hidden'); // Use corrected variable
+     finalScoreSpan.textContent = score; // Use corrected variable
      nextQuestionButton.style.display = 'none';
 }
 
@@ -185,27 +188,32 @@ function resetGame() {
     misses = 0;
     currentQuestionIndex = 0;
     currentQuestions = [];
-    gameOverArea.style.display = 'none';
-    questionArea.style.display = 'none';
-    themeSelectionArea.style.display = 'block'; // Show theme selection again
+    gameOverDiv.classList.add('hidden'); // Use corrected variable
+    gamePlayArea.classList.add('hidden'); // Use corrected variable
+    gameSetupArea.classList.remove('hidden'); // Show theme selection again using corrected variable
     feedbackText.textContent = '';
+    feedbackText.parentElement.classList.add('hidden');
     if (gameThemeSelect) gameThemeSelect.value = 'all'; // Reset dropdown selection
     updateScoreboard();
 }
 
 // Start a new game round
 function startGame() {
+    if (!gameThemeSelect) {
+        console.error("Game theme select element not found!");
+        return;
+    }
     selectedGameTheme = gameThemeSelect.value;
     console.log(`Starting game with theme: ${selectedGameTheme}`);
-    themeSelectionArea.style.display = 'none'; // Hide theme selection
-    gameOverArea.style.display = 'none'; // Hide game over area
+    gameSetupArea.classList.add('hidden'); // Hide theme selection using corrected variable
+    gameOverDiv.classList.add('hidden'); // Hide game over area using corrected variable
 
     score = 0;
     misses = 0;
     currentQuestionIndex = 0;
 
     if (generateQuestions(selectedGameTheme)) {
-        questionArea.style.display = 'block'; // Show question area only if questions generated
+        gamePlayArea.classList.remove('hidden'); // Show question area only if questions generated, use corrected variable
         displayQuestion();
     } else {
         // Handle error if questions couldn't be generated
@@ -229,16 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!getGameDOMElements()) {
         console.error("Failed to get all required game DOM elements. Game cannot start.");
-        // Maybe display an error message to the user on the page itself
-        document.body.innerHTML = "<h1>Error: Failed to load game elements.</h1>";
+        document.body.innerHTML = "<h1>Error: Failed to load game elements. Check console.</h1>";
         return;
     }
 
     // Initial UI state
-    questionArea.style.display = 'none';
-    gameOverArea.style.display = 'none';
+    gamePlayArea.classList.add('hidden');
+    gameOverDiv.classList.add('hidden');
     nextQuestionButton.style.display = 'none';
-    themeSelectionArea.style.display = 'block';
+    gameSetupArea.classList.remove('hidden');
+    feedbackText.parentElement.classList.add('hidden');
 
     // Add event listeners
     startGameButton.addEventListener('click', startGame);
@@ -257,13 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
              populateThemeDropdown(); // Call the function from script.js
         } else {
              console.error("populateThemeDropdown function is not available!");
-             // Fallback or error message if needed
              if(gameThemeSelect) gameThemeSelect.innerHTML = '<option value="error">Error loading themes</option>';
         }
     }, { once: true }); // Run only once
 
      // Check if themes might already be loaded before this listener is added
-     // This handles race conditions where script.js finishes loading before game.js listener is ready
      if (typeof themes !== 'undefined' && Object.keys(themes).length > 0) {
          console.log("Themes seem to be already loaded, attempting to populate dropdown immediately.");
          if (typeof populateThemeDropdown === "function") {

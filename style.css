@@ -187,3 +187,15 @@ main {
     }
 }
 
+
+
+/* Play Game Button Style */
+.btn-play {
+    background-color: #28a745; /* Green */
+}
+
+.btn-play:hover {
+    background-color: #218838; /* Darker green */
+    transform: scale(1.05);
+}
+
