@@ -3,21 +3,35 @@ const themes = {}; // Dynamically populated from CSV
 
 // Function to parse CSV content
 function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
+    const lines = csvText.trim().split("\n");
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase()); // lowercase headers
     const result = [];
 
     for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length === headers.length && values.every(v => v !== '')) {
+        // Basic split is likely fine here, but let's stick to it for now.
+           console.log("Processing line:", line);
+        const columns = line.split(",");
+        if (values.length === headers.length) {
             const entry = {};
+            let validEntry = true;
             headers.forEach((header, index) => {
-                entry[header] = values[index];
+                const value = (values[index] || "").trim(); // Trim and handle potential undefined
+                if (!value) validEntry = false; // Mark invalid if any field is empty after trimming
+                entry[header] = value;
             });
-            result.push(entry);
+
+            // Normalize theme name specifically
+            if (entry.type) {
+                entry.type = entry.type.toLowerCase();
+            } else {
+                validEntry = false; // Ensure 'type' header exists and has a value
+            }
+
+            if (validEntry) {
+                result.push(entry);
+            }
         }
     }
-
     return result;
 }
 
@@ -38,32 +52,41 @@ async function loadWordParts() {
         const data = parseCSV(csvText);
         console.log('Parsed Data:', data);
 
-        // Clear existing theme data
-        Object.keys(themes).forEach(theme => {
-            themes[theme].prefixes = [];
-            themes[theme].prefixDefs = [];
-            themes[theme].roots = [];
-            themes[theme].rootDefs = [];
-            themes[theme].suffixes = [];
-            themes[theme].suffixDefs = [];
-        });
+        // Clear themes object before populating
+        for (const key in themes) { // Clear existing properties
+            delete themes[key];
+        }
 
         // Populate themes based on type and part
-        data.forEach(({ type, part, term, definition }) => {
-            // Ensure theme exists in the themes object
-            if (!themes[type]) {
-                 themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
-            }
+     // Populate themes based on type and part
+data.forEach(({ type, part, term, definition }) => {
+    // Ensure theme exists (already lowercase from parseCSV)
+    if (!themes[type]) {
+         themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
+    }
 
-            // Add the word part to the corresponding theme
-            if (part === 'prefix') {
-                themes[type].prefixes.push(term);
-                themes[type].prefixDefs.push(definition);
-            } else if (part === 'root') {
-                themes[type].roots.push(term);
-                themes[type].rootDefs.push(definition);
-            } else if (part === 'suffix') {
-                themes[type].suffixes.push(term);
+    // Clean term based on part type and add
+    let cleanedTerm = term; // Use original term by default
+    if (part === "prefix") {
+        cleanedTerm = term.replace(/-+$/, ""); // Remove trailing hyphens
+    } else if (part === "suffix") {
+        cleanedTerm = term.replace(/^-+/, ""); // Remove leading hyphens
+    }
+
+    // Only add if cleanedTerm is not empty
+    if (cleanedTerm) {
+        if (part === "prefix") {
+            themes[type].prefixes.push(cleanedTerm);
+            themes[type].prefixDefs.push(definition);
+        } else if (part === "root") {
+            themes[type].roots.push(cleanedTerm); // Roots assumed clean
+            themes[type].rootDefs.push(definition);
+        } else if (part === "suffix") {
+            themes[type].suffixes.push(cleanedTerm);
+            themes[type].suffixDefs.push(definition);
+        }
+    }
+});erm);
                 themes[type].suffixDefs.push(definition);
             }
         });
@@ -396,8 +419,8 @@ function generateWordAndDefinition(type, theme) {
             def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme);
     }
 
-    // Filter out empty or undefined parts before joining
-    word = wordParts.filter(Boolean).join('-');
+    // Clean and filter parts before joining
+    word = wordParts.map(part => (part || ").trim()).filter(part => part.length > 0).join("-");
 
     return { word, def, x, y, z, y2 };
 }
@@ -458,5 +481,11 @@ copyButton.addEventListener('click', copyToClipboard);
 permutationType.addEventListener('change', updateDisplay);
 themeType.addEventListener("change", updateDisplay);
 
-// Initialize themes and generate first word
-initializeThemes();
+// Load data on startup
+async function initializeThemes() {
+    await loadWordParts();
+    populateThemeDropdown(); // Populate dropdown after loading data
+    updateDisplay(); // Generate initial word after data is loaded
+}
+
+initializeThemes(); // Call the initialization function
