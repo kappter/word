@@ -90,6 +90,13 @@ async function loadWordParts() {
 // Function to populate theme dropdown dynamically
 function populateThemeDropdown() {
     themeType.innerHTML = ''; // Clear existing options
+    // Add "All" option first
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.text = "All";
+    allOption.setAttribute("key", -1); // Assign a unique key
+    themeType.appendChild(allOption);
+
     const sortedThemes = Object.keys(themes).sort(); // Sort themes alphabetically
     sortedThemes.forEach((themeKey, index) => {
         const option = document.createElement("option");
@@ -331,41 +338,66 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, su
 }
 
 function generateWordAndDefinition(type, theme) {
-    const themeData = themes[theme];
-    if (!themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
-        return { word: 'Error', def: 'Error: Theme data not loaded', x: -1, y: -1, z: -1, y2: -1 };
+    let themeData;
+    if (theme === 'all') {
+        // Combine all parts from all themes
+        themeData = {
+            prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: []
+        };
+        Object.values(themes).forEach(t => {
+            themeData.prefixes.push(...t.prefixes);
+            themeData.prefixDefs.push(...t.prefixDefs);
+            themeData.roots.push(...t.roots);
+            themeData.rootDefs.push(...t.rootDefs);
+            themeData.suffixes.push(...t.suffixes);
+            themeData.suffixDefs.push(...t.suffixDefs);
+        });
+    } else {
+        themeData = themes[theme];
     }
-    let word, def, x, y, z, y2;
+
+    if (!themeData || !themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
+        return { word: 'Error', def: 'Error: Theme data not loaded or insufficient parts', x: -1, y: -1, z: -1, y2: -1 };
+    }
+    let wordParts = [], word, def, x, y, z, y2;
     x = Math.floor(Math.random() * themeData.prefixes.length);
     y = Math.floor(Math.random() * themeData.roots.length);
     z = Math.floor(Math.random() * themeData.suffixes.length);
     y2 = Math.floor(Math.random() * themeData.roots.length);
 
+    // Ensure y2 is different from y if possible
+    if (themeData.roots.length > 1 && y2 === y) {
+        y2 = (y + 1) % themeData.roots.length;
+    }
+
     switch (type) {
         case 'pre-root-suf':
-            word = `${themeData.prefixes[x]}-${themeData.roots[y]}-${themeData.suffixes[z]}`;
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme);
+            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.suffixes[z]];
+            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme); // Use 'normal' logic for 'all' theme definitions for simplicity
             break;
         case 'root-suf':
-            word = `${themeData.roots[y]}-${themeData.suffixes[z]}`;
-            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme);
+            wordParts = [themeData.roots[y], themeData.suffixes[z]];
+            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme);
             break;
         case 'pre-root':
-            word = `${themeData.prefixes[x]}-${themeData.roots[y]}`;
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, null, -1, theme);
+            wordParts = [themeData.prefixes[x], themeData.roots[y]];
+            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, null, -1, theme === 'all' ? 'normal' : theme);
             break;
         case 'pre-root-root':
-            word = `${themeData.prefixes[x]}-${themeData.roots[y]}-${themeData.roots[y2]}`;
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], themeData.rootDefs[y2], null, -1, theme);
+            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.roots[y2]];
+            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], themeData.rootDefs[y2], null, -1, theme === 'all' ? 'normal' : theme);
             break;
         case 'root':
-            word = themeData.roots[y];
-            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, null, -1, theme);
+            wordParts = [themeData.roots[y]];
+            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, null, -1, theme === 'all' ? 'normal' : theme);
             break;
-        default:
-            word = `${themeData.prefixes[x]}-${themeData.roots[y]}-${themeData.suffixes[z]}`;
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme);
+        default: // Default to pre-root-suf
+            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.suffixes[z]];
+            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme);
     }
+
+    // Filter out empty or undefined parts before joining
+    word = wordParts.filter(Boolean).join('-');
 
     return { word, def, x, y, z, y2 };
 }
