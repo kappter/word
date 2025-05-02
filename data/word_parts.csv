@@ -359,7 +359,6 @@ fantasy,suffix,ly,manner
 fantasy,suffix,ness,condition
 fantasy,suffix,dom,realm
 fantasy,suffix,ship,connection
-
 Normal,prefix,a-,without or not
 Normal,prefix,ab-,away
 Normal,prefix,ad-,to, forward
@@ -489,54 +488,6 @@ Normal,suffix,-some,like
 Normal,suffix,-tude,state of being
 Normal,suffix,-ward,in the direction of
 Normal,suffix,-y,full of
-Geography,suffix,-al,relating to: geological, astronomical, terrestrial
-Geography,root,carb,carbon: carbon dioxide, carbonic acid, carbon cycle
-Geography,prefix,cent,hundred: centimeter, centigram, percent
-Geography,root,cycl,circle, cycle: cyclone, nitrogen cycle, anticyclone
-Geography,prefix,deci,tenth: decibel, decimal, deciliter
-Geography,root,graph,writing, drawing: geography, oceanography, photography, topography
-Geography,root,hydr,water: hydroelectric, hydrate, hydrothermal, hydrosphere
-Geography,root,hygr,water: hydroelectric, hydrate, hydrothermal, hydrosphere
-Geography,suffix,-ist,one who studies: meteorologist, geologist, environmentalist
-Geography,prefix,kilo,thousand: kilogram, kilometer
-Geography,root,meter,measure: barometer, thermometer, diameter
-Geography,suffix,-ology,study of; seismology, meteorology, climatology
-Geography,root,sphere,ball: lithosphere, asthenosphere, geosphere, hydrosphere
-Geography,root,alt,high: altocumulus, altitude, altostratus
-Geography,prefix,anti,against, opposite: anticline, anticyclone
-Geography,root,baro,pressure: barometer, bar, barometric pressure, hyperbaric chamber
-Geography,root,calor,heat: calorimeter, calorie, kilocalorie
-Geography,root,clud,to close: occluded front, exclude, conclude, cluster
-Geography,root,clus,to close: occluded front, exclude, conclude, cluster
-Geography,root,iso,equal: isobar, isotherm, isocline
-Geography,root,nimb,rain: nimbus, cumulonimbus
-Geography,root,therm,heat: thermal, geothermal, thermometer
-Geography,root,circ,ring, around: circumference, circular, circulate
-Geography,root,eco,environment: ecology, ecosystem, ecocline
-Geography,root,halo,salt: halite, halogens, halocline
-Geography,prefix,micro,small: microclimate, microwave
-Geography,prefix,trans,across: transfer, transpiration
-Geography,root,crust,shell: crust, encrusted, crustal
-Geography,prefix,epi,upon, above: epicenter, epicycle
-Geography,root,flu,flowing: fluid, fluctuate, magnetic flux
-Geography,root,fluc,flowing: fluid, fluctuate, magnetic flux
-Geography,root,glaci,ice: glacier, glacial, glaze
-Geography,root,grav,heavy: gravity, gravitate
-Geography,root,ign,fire: igneous, ignite, ignition
-Geography,root,litho,stone: lithosphere, lithify, lithograph
-Geography,root,lum,light: illuminate, luminous, bioluminescence
-Geography,root,magn,great: magnitude, magnify
-Geography,root,meta,change: metamorphic, metabolism, metamorphosis
-Geography,root,morph,form: morphology, metamorphic, polymorph
-Geography,root,ob,against: oblique, obscure, obtuse
-Geography,root,petr,rock: petrify, petroleum, petrology
-Geography,root,seismo,earthquake: seismology, seismograph, seismic wave
-Geography,root,strati,layer: stratify, stratosphere, stratum
-Geography,root,sub,under: subduction, submarine, subterranean
-Geography,root,tecto,building: tectonic, architect
-Geography,root,terr,land: terrain, territory, terrestrial
-Geography,root,volv,roll: revolve, involve, evolve
-Geography,root,zo,animal: zoology, zoogeography, zootoxin
 Math,prefix,uni-,one
 Math,prefix,mono-,one
 Math,prefix,solo-,one
@@ -578,4 +529,32 @@ Math,root,alg,pain (algebra - originally setting bones)
 Math,root,arithm,number
 Math,root,prob,prove (probability)
 Math,root,vect,carry (vector)
-
+Geography,root,iso,"equal: isobar; isotherm; isocline"
+Geography,root,nimb,"rain: nimbus; cumulonimbus"
+Geography,root,therm,"heat: thermal; geothermal; thermometer"
+Geography,root,circ,"ring, around: circumference; circular; circulate"
+Geography,root,eco,"environment: ecology; ecosystem; ecocline"
+Geography,root,halo,"salt: halite; halogens; halocline"
+Geography,prefix,micro,"small: microclimate; microwave"
+Geography,prefix,trans,"across: transfer; transpiration"
+Geography,root,crust,"shell: crust; encrusted; crustal"
+Geography,prefix,epi,"upon, above: epicenter; epicycle"
+Geography,root,flu,"flowing: fluid; fluctuate; magnetic flux"
+Geography,root,fluc,"flowing: fluid; fluctuate; magnetic flux"
+Geography,root,glaci,"ice: glacier; glacial; glaze"
+Geography,root,grav,"heavy: gravity; gravitate"
+Geography,root,ign,"fire: igneous; ignite; ignition"
+Geography,root,litho,"stone: lithosphere; lithify; lithograph"
+Geography,root,lum,"light: illuminate; luminous; bioluminescence"
+Geography,root,magn,"great: magnitude; magnify"
+Geography,root,meta,"change: metamorphic; metabolism; metamorphosis"
+Geography,root,morph,"form: morphology; metamorphic; polymorph"
+Geography,root,ob,"against: oblique; obscure; obtuse"
+Geography,root,petr,"rock: petrify; petroleum; petrology"
+Geography,root,seismo,"earthquake: seismology; seismograph; seismic wave"
+Geography,root,strati,"layer: stratify; stratosphere; stratum"
+Geography,root,sub,"under: subduction; submarine; subterranean"
+Geography,root,tecto,"building: tectonic; architect"
+Geography,root,terr,"land: terrain; territory; terrestrial"
+Geography,root,volv,"roll: revolve; involve; evolve"
+Geography,root,zo,"animal: zoology; zoogeography; zootoxin"

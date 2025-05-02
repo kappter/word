@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Creator - Game Mode</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Word Creator - Game Mode</h1>
+        <a href="index.html" class="back-link">Back to Word Creator</a>
+
+        <div id="game-setup">
+            <h2>Select Theme and Start</h2>
+            <div class="options-container">
+                <div class="option-group">
+                    <label for="gameThemeType">Select Theme:</label>
+                    <select id="gameThemeType">
+                        <!-- Options will be populated by JS -->
+                        <option value="loading">Loading themes...</option>
+                    </select>
+                </div>
+            </div>
+            <button id="startGameButton">Start Game</button>
+        </div>
+
+        <div id="game-play" class="hidden">
+            <h2>Guess the Word!</h2>
+            <div id="question-area">
+                <p><strong>Definition:</strong></p>
+                <p id="gameDefinition">---</p>
+                <p><strong>Which word matches this definition?</strong></p>
+                <div id="choices-area">
+                    <!-- Multiple choice buttons will be added here -->
+                </div>
+            </div>
+            <div id="feedback-area" class="hidden">
+                <p id="feedbackText"></p>
+                <button id="nextQuestionButton">Next Question</button>
+            </div>
+            <div id="score-area">
+                <p>Score: <span id="score">0</span></p>
+                <p>Misses Remaining: <span id="misses">3</span></p>
+                <p>Question: <span id="questionNumber">1</span> / 5</p>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden">
+            <h2>Game Over!</h2>
+            <p>Your final score: <span id="finalScore">0</span></p>
+            <button id="playAgainButton">Play Again</button>
+        </div>
+
+        <div id="loading-game" class="hidden">
+            <p>Loading game data...</p>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script> <!-- Need functions from script.js -->
+    <script src="game.js"></script> <!-- New JS file for game logic -->
+</body>
+</html>

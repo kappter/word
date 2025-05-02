@@ -1,72 +1,78 @@
-// Function to parse CSV content
+// Function to parse CSV content with handling for quoted fields
 function parseCSV(csvText) {
     const lines = csvText.trim().split("\n");
-    if (lines.length < 2) { // Need at least header and one data line
+    if (lines.length < 2) {
         console.error("CSV file is empty or only contains headers.");
         return [];
     }
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase()); // lowercase headers
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
     const result = [];
     const expectedColumns = headers.length;
 
-    // Check if essential headers are present
     if (!headers.includes("type") || !headers.includes("part") || !headers.includes("term") || !headers.includes("definition")) {
         console.error("CSV file is missing required headers (type, part, term, definition).");
         alert("CSV file is missing required headers (type, part, term, definition).");
         return [];
     }
 
+    const regex = /(?:"([^"]*(?:""[^"]*)*)"|([^,]*))(?:,|$)/g;
+
     for (let i = 1; i < lines.length; i++) {
-        const currentLine = lines[i].trim(); // Get the current line and trim whitespace
-        if (!currentLine) continue; // Skip empty lines
+        const currentLine = lines[i].trim();
+        if (!currentLine) continue;
 
-        // Basic split by comma - assumes no commas within fields
-        const columns = currentLine.split(",");
+        let columns = [];
+        let match;
+        regex.lastIndex = 0; // Reset regex index for each line
 
-        // Check if the number of columns matches the headers
+        while ((match = regex.exec(currentLine))) {
+            let value = match[1] !== undefined ? match[1].replace(/""/g, '"') : match[2];
+            columns.push((value || "").trim());
+            if (match[0].endsWith(",")) continue;
+            if (match[0] === "" && regex.lastIndex === currentLine.length) break;
+            if (regex.lastIndex === currentLine.length) break;
+        }
+        if (columns.length > expectedColumns && columns[columns.length - 1] === "") {
+             columns.pop();
+        }
+
         if (columns.length === expectedColumns) {
             const entry = {};
             let validEntry = true;
             headers.forEach((header, index) => {
-                const value = (columns[index] || "").trim(); // Use columns[index] and trim
-                // Check specifically for required fields (type, part, term)
+                const value = columns[index];
                 if ((header === "type" || header === "part" || header === "term") && !value) {
-                    console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                    console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                 }
                 entry[header] = value;
             });
 
-            // Normalize theme name specifically if entry is potentially valid
             if (validEntry && entry.type) {
-                 entry.type = entry.type.toLowerCase().trim(); // Ensure lowercase and trimmed
-                 if (!entry.type) { // Check if type became empty after trimming
-                    console.warn(`Warning: Empty 'type' after trimming on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                 entry.type = entry.type.toLowerCase();
+                 if (!entry.type) {
+                    console.warn(`Warning: Empty 'type' after processing line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                  }
-            } else if (validEntry && !entry.type) { // If type header exists but value is empty
-                 console.warn(`Warning: Missing 'type' value on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+            } else if (validEntry && !entry.type) {
+                 console.warn(`Warning: Missing 'type' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
                  validEntry = false;
             }
 
             if (validEntry) {
-                // Further validation: ensure part is one of the expected types
                 const validParts = ["prefix", "root", "suffix"];
-                if (!entry.part || !validParts.includes(entry.part.toLowerCase().trim())) {
-                     console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                if (!entry.part || !validParts.includes(entry.part.toLowerCase())) {
+                     console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: "${currentLine}". Skipping entry.`);
                      validEntry = false;
                 } else {
-                    entry.part = entry.part.toLowerCase().trim(); // Normalize part
+                    entry.part = entry.part.toLowerCase();
                 }
             }
 
             if (validEntry) {
-                 // Ensure term is not empty
-                 if (!entry.term || !entry.term.trim()) {
-                    console.warn(`Warning: Missing 'term' value on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                 if (!entry.term) {
+                    console.warn(`Warning: Missing 'term' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
-                 } else {
-                    entry.term = entry.term.trim(); // Trim term
                  }
             }
 
@@ -74,10 +80,13 @@ function parseCSV(csvText) {
                 result.push(entry);
             }
         } else {
-             console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: \"${currentLine}\". Skipping line.`);
+             // Only log warning if the line wasn't just whitespace
+             if (currentLine.trim()) {
+                console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: "${currentLine}". Skipping line.`);
+             }
         }
     }
-    console.log(`Successfully parsed ${result.length} valid entries from CSV.`);
+    console.log(`Successfully parsed ${result.length} valid entries from CSV using robust parser.`);
     return result;
 }
 
@@ -86,48 +95,48 @@ const themes = {};
 
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) loadingElement.classList.remove('hidden'); // Show loading indicator
+    // Check if themes are already populated
+    if (Object.keys(themes).length > 0) {
+        console.log("Themes already loaded.");
+        return; // Avoid reloading if already done
+    }
+
+    const loadingElement = document.getElementById("loading");
+    if (loadingElement) loadingElement.classList.remove("hidden");
 
     try {
-        console.log('Fetching word_parts.csv...');
-        const response = await fetch('data/word_parts.csv');
-        console.log('Fetch Response Status:', response.status);
+        console.log("Fetching word_parts.csv...");
+        const response = await fetch("data/word_parts.csv");
+        console.log("Fetch Response Status:", response.status);
         if (!response.ok) {
             throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
         }
         const csvText = await response.text();
-        // console.log('CSV Text:', csvText); // Optional: Log CSV text for debugging
         const data = parseCSV(csvText);
         console.log(`Parsed ${data.length} valid entries from CSV.`);
 
-        // Clear themes object before populating
+        // Clear themes object before populating (should be empty here, but safe)
         for (const key in themes) {
             delete themes[key];
         }
 
         // Populate themes based on type and part
         data.forEach(({ type, part, term, definition }) => {
-            // Ensure theme exists (already lowercase and trimmed from parseCSV)
             if (!themes[type]) {
                  themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
             }
-
-            // Clean term based on part type and add
-            let cleanedTerm = term; // Use original term by default
+            let cleanedTerm = term;
             if (part === "prefix") {
-                cleanedTerm = term.replace(/-+$/, ""); // Remove trailing hyphens
+                cleanedTerm = term.replace(/-+$/, "");
             } else if (part === "suffix") {
-                cleanedTerm = term.replace(/^-+/, ""); // Remove leading hyphens
+                cleanedTerm = term.replace(/^-+/, "");
             }
-
-            // Only add if cleanedTerm is not empty
             if (cleanedTerm) {
                 if (part === "prefix") {
                     themes[type].prefixes.push(cleanedTerm);
-                    themes[type].prefixDefs.push(definition || ""); // Ensure definition is string
+                    themes[type].prefixDefs.push(definition || "");
                 } else if (part === "root") {
-                    themes[type].roots.push(cleanedTerm); // Roots assumed clean
+                    themes[type].roots.push(cleanedTerm);
                     themes[type].rootDefs.push(definition || "");
                 } else if (part === "suffix") {
                     themes[type].suffixes.push(cleanedTerm);
@@ -136,7 +145,6 @@ async function loadWordParts() {
             }
         });
 
-        // Validate that all themes have data after population
         console.log("Populated themes:", Object.keys(themes));
         Object.keys(themes).forEach(theme => {
             const themeData = themes[theme];
@@ -151,44 +159,50 @@ async function loadWordParts() {
         });
 
     } catch (error) {
-        console.error('Error loading or processing word parts:', error);
-        alert('Failed to load word parts data. Please check the console and ensure data/word_parts.csv is accessible and correctly formatted.');
+        console.error("Error loading or processing word parts:", error);
+        alert("Failed to load word parts data. Please check the console and ensure data/word_parts.csv is accessible and correctly formatted.");
     } finally {
-        if (loadingElement) loadingElement.classList.add('hidden'); // Hide loading indicator
+        if (loadingElement) loadingElement.classList.add("hidden");
     }
 }
 
-// Function to populate theme dropdown dynamically
+// Function to populate theme dropdown dynamically (used by both index.html and game.html)
 function populateThemeDropdown() {
-    const themeType = document.getElementById("themeType");
-    if (!themeType) {
-        console.error("Theme dropdown element not found!");
+    let themeDropdown = document.getElementById("themeType") || document.getElementById("gameThemeType");
+
+    if (!themeDropdown) {
+        console.error("Theme dropdown element not found on this page!");
         return;
     }
-    themeType.innerHTML = ''; // Clear existing options
 
-    // Add "All" option first
+    const currentSelectedValue = themeDropdown.value;
+    themeDropdown.innerHTML = ''; // Clear existing options
+
     const allOption = document.createElement("option");
     allOption.value = "all";
     allOption.text = "All";
-    themeType.appendChild(allOption);
+    themeDropdown.appendChild(allOption);
 
-    // Get theme keys, sort them, and add them
     const sortedThemes = Object.keys(themes).sort();
     console.log("Themes to populate dropdown:", ["All", ...sortedThemes]);
     sortedThemes.forEach((themeKey) => {
-        // Check if theme has enough parts before adding to dropdown
         const themeData = themes[themeKey];
         if (themeData && themeData.prefixes.length > 0 && themeData.roots.length > 0 && themeData.suffixes.length > 0) {
             const option = document.createElement("option");
             option.value = themeKey;
-            // Capitalize first letter for display
             option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
-            themeType.appendChild(option);
+            themeDropdown.appendChild(option);
         } else {
             console.warn(`Theme '${themeKey}' not added to dropdown because it lacks sufficient parts.`);
         }
     });
+
+    if (currentSelectedValue && themeDropdown.querySelector(`option[value="${currentSelectedValue}"]`)) {
+        themeDropdown.value = currentSelectedValue;
+    } else {
+        themeDropdown.value = "all";
+    }
+    console.log(`Theme dropdown populated. Current value: ${themeDropdown.value}`);
 }
 
 // Get a random element from an array
@@ -203,9 +217,7 @@ function generateWordAndDefinition(wordType, themeKey) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
     let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
-    let currentTheme = themeKey;
 
-    // If theme is 'all', get parts from all available themes
     const allPrefixes = [], allPrefixDefs = [];
     const allRoots = [], allRootDefs = [];
     const allSuffixes = [], allSuffixDefs = [];
@@ -219,74 +231,67 @@ function generateWordAndDefinition(wordType, themeKey) {
             allSuffixes.push(...themeData.suffixes);
             allSuffixDefs.push(...themeData.suffixDefs);
         });
-        // Check if 'all' has enough parts
         if (allPrefixes.length === 0 || allRoots.length === 0 || allSuffixes.length === 0) {
             console.error("Cannot generate word for 'All' theme: Insufficient parts across all themes.");
             return { word: "Error", definition: "Insufficient parts for 'All' theme.", pronunciation: "" };
         }
     } else {
-        // Check if selected theme exists and has parts
         if (!themes[themeKey] || !themes[themeKey].prefixes.length || !themes[themeKey].roots.length || !themes[themeKey].suffixes.length) {
             console.error(`Selected theme '${themeKey}' not found or has insufficient parts.`);
-            return { word: "Error", definition: `Theme '${themeKey}' has missing parts.`, pronunciation: "" };
+            if (themes['normal'] && themes['normal'].prefixes.length && themes['normal'].roots.length && themes['normal'].suffixes.length) {
+                console.warn(`Defaulting to 'normal' theme.`);
+                themeKey = 'normal';
+            } else {
+                 return { word: "Error", definition: `Theme '${themeKey}' has missing parts.`, pronunciation: "" };
+            }
         }
     }
 
     const getParts = (partType) => {
-        if (themeKey === 'all') {
-            switch (partType) {
-                case 'prefix': return { elements: allPrefixes, defs: allPrefixDefs };
-                case 'root': return { elements: allRoots, defs: allRootDefs };
-                case 'suffix': return { elements: allSuffixes, defs: allSuffixDefs };
-                default: return { elements: [], defs: [] };
-            }
-        } else {
-            const themeData = themes[themeKey];
-            switch (partType) {
-                case 'prefix': return { elements: themeData.prefixes, defs: themeData.prefixDefs };
-                case 'root': return { elements: themeData.roots, defs: themeData.rootDefs };
-                case 'suffix': return { elements: themeData.suffixes, defs: themeData.suffixDefs };
-                default: return { elements: [], defs: [] };
-            }
+        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
+        switch (partType) {
+            case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
+            case 'root': return { elements: source.roots, defs: source.rootDefs };
+            case 'suffix': return { elements: source.suffixes, defs: source.suffixDefs };
+            default: return { elements: [], defs: [] };
         }
     };
 
-    // Select parts based on wordType
     if (wordType === 'pre-root-suf' || wordType === 'pre-root') {
-        const { elements: prefixes, defs: prefixDefsArr } = getParts('prefix');
-        const result = getRandomElement(prefixes);
+        const { elements, defs } = getParts('prefix');
+        const result = getRandomElement(elements);
         prefix = result.element;
         prefixIndex = result.index;
-        prefixDef = prefixDefsArr[prefixIndex] || '';
+        prefixDef = defs[prefixIndex] || '';
     }
     if (wordType.includes('root')) {
-        const { elements: roots, defs: rootDefsArr } = getParts('root');
-        const result1 = getRandomElement(roots);
+        const { elements, defs } = getParts('root');
+        const result1 = getRandomElement(elements);
         root1 = result1.element;
         root1Index = result1.index;
-        rootDef1 = rootDefsArr[root1Index] || '';
+        rootDef1 = defs[root1Index] || '';
 
         if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
-            const result2 = getRandomElement(roots);
+            const result2 = getRandomElement(elements);
             root2 = result2.element;
             root2Index = result2.index;
-            rootDef2 = rootDefsArr[root2Index] || '';
+            rootDef2 = defs[root2Index] || '';
         }
     }
     if (wordType.endsWith('suf')) {
-        const { elements: suffixes, defs: suffixDefsArr } = getParts('suffix');
-        const result = getRandomElement(suffixes);
+        const { elements, defs } = getParts('suffix');
+        const result = getRandomElement(elements);
         suffix = result.element;
         suffixIndex = result.index;
-        suffixDef = suffixDefsArr[suffixIndex] || '';
+        suffixDef = defs[suffixIndex] || '';
     }
 
-    // Construct the word, filtering out empty parts *before* joining
     const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
-    const word = parts.join('-');
+    let word = parts.join('-');
+    // Basic double hyphen check
+    word = word.replace(/--+/g, '-');
 
-    // Generate definition and pronunciation
-    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey); // Use 'normal' logic for 'all' theme defs for now
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = generatePronunciation(word);
 
     return { word, definition, pronunciation };
@@ -294,54 +299,58 @@ function generateWordAndDefinition(wordType, themeKey) {
 
 // Simplified pronunciation generator
 function generatePronunciation(word) {
-    // Basic placeholder - replace with a more sophisticated method if needed
     return `/${word.replace(/-/g, ' / ')}/`;
 }
 
 // Determine part of speech (basic placeholder)
 function getPartOfSpeech(type, suffixIndex, theme) {
-    // This is highly simplified and might need refinement based on actual suffixes
     if (type.endsWith('suf') && suffixIndex !== -1) {
-        const suffix = (theme === 'all' ? allSuffixes : themes[theme].suffixes)[suffixIndex];
+        let suffix = '';
+        const source = theme === 'all' ? null : themes[theme]; // Cannot reliably get suffix for 'all'
+        if (source && source.suffixes.length > suffixIndex) {
+            suffix = source.suffixes[suffixIndex];
+        }
+
         if (['ly', 'th'].includes(suffix)) return 'adverb';
-        if (['ize', 'ify', 'en'].includes(suffix)) return 'verb';
-        if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible'].includes(suffix)) return 'adjective';
+        if (['ize', 'ify', 'en', 'ate'].includes(suffix)) return 'verb';
+        if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible', 'ish', 'ive', 'less', 'some', 'y'].includes(suffix)) return 'adjective';
+        if (['ics', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ion', 'tion', 'sion', 'ship', 'dom', 'hood', 'logy', 'ology', 'phobia', 'philia', 'er', 'or', 'ant', 'ent', 'ard', 'ry', 'cy', 'tude'].includes(suffix)) return 'noun';
     }
-    return 'noun'; // Default to noun
+    // Default or if no suffix/match
+    return 'noun';
 }
 
 // Enhanced definition generator (simplified version)
 function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, suffixIndex, theme) {
     let definition = '';
     const partOfSpeech = getPartOfSpeech(type, suffixIndex, theme);
-
-    // Combine definitions simply for now
     const partsDefs = [preDef, rootDef1, rootDef2, sufDef].filter(def => def && def.trim() !== '');
-    definition = `A ${partOfSpeech} related to: ${partsDefs.join(', ')}.`;
 
-    // Basic attempt to make it slightly more natural
-    if (type === 'pre-root-suf') {
-        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, characterized by ${preDef} and resulting in ${sufDef}.`;
-    } else if (type === 'root-suf') {
-        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, resulting in ${sufDef}.`;
-    } else if (type === 'pre-root') {
-        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, characterized by ${preDef}.`;
-    } else if (type === 'root') {
-        definition = `(${partOfSpeech}) Related to ${rootDef1}.`;
-    } // Add more cases if needed for root-root etc.
+    definition = `(${partOfSpeech}) `;
 
-    // Fallback if definitions are missing
-    if (!preDef && !rootDef1 && !rootDef2 && !sufDef) {
-        definition = `(${partOfSpeech}) A generated word.`;
+    if (partsDefs.length === 0) {
+        definition += "A generated word.";
+    } else if (partsDefs.length === 1) {
+        definition += `Related to ${partsDefs[0]}.`;
+    } else {
+        let combined = partsDefs[0];
+        for (let i = 1; i < partsDefs.length; i++) {
+            combined += (i === partsDefs.length - 1 ? ' and ' : ', ') + partsDefs[i];
+        }
+        definition += `Pertaining to ${combined}.`;
     }
 
-    return definition.charAt(0).toUpperCase() + definition.slice(1); // Capitalize first letter
+    // Capitalize first letter of the main definition part
+    const firstCharIndex = definition.indexOf(')') + 2;
+    if (firstCharIndex < definition.length) {
+       definition = definition.substring(0, firstCharIndex) + definition.charAt(firstCharIndex).toUpperCase() + definition.slice(firstCharIndex + 1);
+    }
+
+    return definition;
 }
 
-
-// Function to update the display with the generated word
+// Function to update the display with the generated word (for index.html)
 function updateDisplay() {
-    const wordContainer = document.getElementById('wordContainer');
     const generatedWordEl = document.getElementById('generatedWord');
     const pronunciationEl = document.getElementById('pronunciation');
     const wordDefinitionEl = document.getElementById('wordDefinition');
@@ -349,18 +358,17 @@ function updateDisplay() {
     const themeType = document.getElementById("themeType");
 
     if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl) {
-        console.error("One or more display elements are missing!");
+        console.warn("Missing display elements on index.html, cannot update.");
         return;
     }
 
     const selectedWordType = permutationType.value;
     const selectedTheme = themeType.value;
 
-    console.log(`Generating word with type: ${selectedWordType}, theme: ${selectedTheme}`);
+    console.log(`Generating word for index.html - type: ${selectedWordType}, theme: ${selectedTheme}`);
 
-    // Check if themes object is populated
     if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
-        console.warn("Themes not loaded yet, cannot generate word.");
+        console.warn("Themes not loaded yet for index.html.");
         generatedWordEl.textContent = "Loading...";
         pronunciationEl.textContent = "";
         wordDefinitionEl.textContent = "Please wait for data to load.";
@@ -372,66 +380,75 @@ function updateDisplay() {
     generatedWordEl.textContent = word;
     pronunciationEl.textContent = pronunciation;
     wordDefinitionEl.textContent = definition;
-
-    // Optional: Update permutation list (if needed)
-    // updatePermutationList(word, definition);
 }
 
-// Function to copy word and definition to clipboard
+// Function to copy word and definition to clipboard (for index.html)
 function copyToClipboard() {
-    const generatedWord = document.getElementById('generatedWord').textContent;
-    const wordDefinition = document.getElementById('wordDefinition').textContent;
+    const generatedWord = document.getElementById('generatedWord')?.textContent || '';
+    const wordDefinition = document.getElementById('wordDefinition')?.textContent || '';
+    if (!generatedWord) {
+        console.warn("No word generated to copy.");
+        return;
+    }
     const textToCopy = `Word: ${generatedWord}\nDefinition: ${wordDefinition}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        // Optional: Show feedback to the user
         const copyButton = document.getElementById('copyButton');
-        const originalText = copyButton.textContent;
-        copyButton.textContent = 'Copied!';
-        setTimeout(() => {
-            copyButton.textContent = originalText;
-        }, 1500);
+        if (copyButton) {
+            const originalText = copyButton.textContent;
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = originalText;
+            }, 1500);
+        }
     }).catch(err => {
         console.error('Failed to copy text: ', err);
         alert('Failed to copy text.');
     });
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', async () => {
+// --- Initialization --- //
+
+document.addEventListener("DOMContentLoaded", async () => {
     console.log("DOM fully loaded and parsed");
-    const generateButton = document.getElementById('generateButton');
-    const copyButton = document.getElementById('copyButton');
-    const permutationType = document.getElementById('permutationType');
-    const themeType = document.getElementById("themeType");
 
+    // Ensure themes are loaded once globally
+    if (typeof themes === 'undefined' || Object.keys(themes).length === 0) {
+        console.log("Initiating theme loading...");
+        await loadWordParts(); // Load themes
+        console.log("Dispatching themesLoaded event...");
+        document.dispatchEvent(new CustomEvent('themesLoaded')); // Dispatch event
+    } else {
+        // If themes somehow got loaded before DOMContentLoaded, dispatch immediately
+        console.log("Themes already loaded, dispatching themesLoaded event immediately...");
+        document.dispatchEvent(new CustomEvent('themesLoaded'));
+    }
+
+    // Check if we are on the main page (index.html) for UI initialization
+    const generateButton = document.getElementById("generateButton");
     if (generateButton) {
-        generateButton.addEventListener('click', updateDisplay);
-    } else {
-        console.error("Generate button not found!");
-    }
+        console.log("On index.html, waiting for themesLoaded event for UI setup.");
 
-    if (copyButton) {
-        copyButton.addEventListener('click', copyToClipboard);
-    } else {
-        console.error("Copy button not found!");
-    }
+        // Wait for themes to be loaded before setting up index.html UI
+        document.addEventListener('themesLoaded', () => {
+            console.log("themesLoaded event received on index.html. Initializing UI.");
+            const copyButton = document.getElementById("copyButton");
+            const permutationType = document.getElementById("permutationType");
+            const themeType = document.getElementById("themeType");
 
-    if (permutationType) {
-        permutationType.addEventListener('change', updateDisplay);
-    } else {
-        console.error("Permutation type dropdown not found!");
-    }
+            // Setup listeners for index.html elements
+            if (generateButton) generateButton.addEventListener("click", updateDisplay);
+            if (copyButton) copyButton.addEventListener("click", copyToClipboard);
+            if (permutationType) permutationType.addEventListener("change", updateDisplay);
+            if (themeType) themeType.addEventListener("change", updateDisplay);
+            else console.error("Theme type dropdown (#themeType) not found on index.html!");
 
-    if (themeType) {
-        themeType.addEventListener('change', updateDisplay);
+            populateThemeDropdown(); // Populates #themeType
+            updateDisplay(); // Initial word generation for index.html
+        }, { once: true }); // Ensure listener runs only once
     } else {
-        console.error("Theme type dropdown not found!");
+        console.log("Not on index.html, skipping main page UI initialization.");
+        // Game page initialization is handled by game.js listening for 'themesLoaded'
     }
-
-    // Load data and initialize
-    await loadWordParts();
-    populateThemeDropdown();
-    updateDisplay(); // Initial word generation
 });
 
