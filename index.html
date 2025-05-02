@@ -1,0 +1,187 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordMaker</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="https://kappter.github.io/wordmaker/css/output.css">
+    <link rel="stylesheet" href="https://kappter.github.io/wordmaker/css/styles.css">
+    <!-- Temporary inline styles (can be removed once external CSS works) -->
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #f5f5dc, #d2b48c) !important;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        header {
+            background-color: #f5a623 !important;
+            color: white !important;
+            padding: 1rem;
+            text-align: center;
+        }
+        #wordContainer {
+            background-color: #fff8e1 !important;
+            border-left: 4px solid #8b4513 !important;
+            padding: 1.5rem;
+            margin: 0 auto;
+            width: 90%;
+            border-radius: 0.5rem;
+        }
+        button.generate-btn {
+            background-color: #f5a623 !important;
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+        }
+        button.generate-btn:hover {
+            background-color: #d97706 !important;
+        }
+        button.copy-btn {
+            background-color: #6b7280 !important;
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+        }
+        button.copy-btn:hover {
+            background-color: #4b5563 !important;
+        }
+        #generatedWord {
+            font-size: 1.5rem !important;
+            color: #d97706 !important;
+        }
+        #pronunciation {
+            font-style: italic !important;
+            color: #5c4033 !important;
+        }
+        #wordDefinition {
+            font-size: 1.125rem !important;
+            color: #3c2f2f !important;
+        }
+        footer {
+            background-color: #fff8e1 !important;
+            color: #5c4033 !important;
+            border-top: 1px solid #d2b48c !important;
+            padding: 1rem 0 !important;
+            text-align: center !important;
+        }
+    </style>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+</head>
+<body class="font-sans">
+    <header class="bg-amber-500 text-white p-4 text-center">
+        <h1 class="text-3xl font-bold">WordMaker</h1>
+        <p class="mt-2">Generate creative words with ease!</p>
+    </header>
+    <div id="loading" class="text-center text-gray-500 mt-4 hidden">Loading word parts...</div>
+    <main class="max-w-2xl mx-auto p-4">
+        <div class="flex justify-center space-x-4 mb-4">
+            <div>
+                <label for="permutationType" class="block text-sm font-medium text-gray-700">Structure:</label>
+                <select id="permutationType" class="mt-1 block w-full p-2 border rounded-md">
+                    <option value="pre-root-suf">Prefix-Root-Suffix</option>
+                    <option value="root-suf">Root-Suffix</option>
+                    <option value="pre-root">Prefix-Root</option>
+                    <option value="pre-root-root">Prefix-Root-Root</option>
+                    <option value="root">Root Only</option>
+                </select>
+            </div>
+            <div>
+                <label for="themeType" class="block text-sm font-medium text-gray-700">Theme:</label>
+                <select id="themeType" class="mt-1 block w-full p-2 border rounded-md">
+                    <option value="normal">Normal</option>
+                    <option value="technical">Technical</option>
+                    <option value="shakespearian">Shakespearian</option>
+                    <option value="popculture">Pop Culture</option>
+                    <option value="astronomy">Astronomy</option>
+                    <option value="fantasy">Fantasy</option>
+                </select>
+            </div>
+        </div>
+        <div id="wordContainer" class="bg-white p-6 rounded-lg shadow-md text-center transition-opacity duration-300">
+            <h2 id="generatedWord" class="text-2xl font-semibold text-amber-600"></h2>
+            <p id="pronunciation" class="text-gray-600 mt-2"></p>
+            <p id="wordDefinition" class="text-gray-800 mt-2"></p>
+        </div>
+        <div class="flex justify-center space-x-4 mt-4">
+            <button id="generateButton" class="generate-btn bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600">Generate New Word</button>
+            <button id="copyButton" class="copy-btn bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Copy to Clipboard</button>
+        </div>
+        <div class="mt-6">
+            <h3 class="text-lg font-medium text-gray-700">Other Permutations:</h3>
+            <ul id="permutationList" class="mt-2 text-gray-600 list-disc list-inside"></ul>
+        </div>
+    </main>
+    <footer>© 2025 Kappter. All rights reserved.</footer>
+    <script src="script.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93927cb55e78bfa7',t:'MTc0NjEzNjE0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9397b8b7091853c8',t:'MTc0NjE5MTAzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
