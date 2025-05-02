@@ -1,491 +1,437 @@
-// Themes object (will be populated dynamically from CSV)
-const themes = {}; // Dynamically populated from CSV
-
 // Function to parse CSV content
 function parseCSV(csvText) {
     const lines = csvText.trim().split("\n");
+    if (lines.length < 2) { // Need at least header and one data line
+        console.error("CSV file is empty or only contains headers.");
+        return [];
+    }
     const headers = lines[0].split(",").map(h => h.trim().toLowerCase()); // lowercase headers
     const result = [];
+    const expectedColumns = headers.length;
+
+    // Check if essential headers are present
+    if (!headers.includes("type") || !headers.includes("part") || !headers.includes("term") || !headers.includes("definition")) {
+        console.error("CSV file is missing required headers (type, part, term, definition).");
+        alert("CSV file is missing required headers (type, part, term, definition).");
+        return [];
+    }
 
     for (let i = 1; i < lines.length; i++) {
-        // Basic split is likely fine here, but let's stick to it for now.
-           console.log("Processing line:", line);
-        const columns = line.split(",");
-        if (values.length === headers.length) {
+        const currentLine = lines[i].trim(); // Get the current line and trim whitespace
+        if (!currentLine) continue; // Skip empty lines
+
+        // Basic split by comma - assumes no commas within fields
+        const columns = currentLine.split(",");
+
+        // Check if the number of columns matches the headers
+        if (columns.length === expectedColumns) {
             const entry = {};
             let validEntry = true;
             headers.forEach((header, index) => {
-                const value = (values[index] || "").trim(); // Trim and handle potential undefined
-                if (!value) validEntry = false; // Mark invalid if any field is empty after trimming
+                const value = (columns[index] || "").trim(); // Use columns[index] and trim
+                // Check specifically for required fields (type, part, term)
+                if ((header === "type" || header === "part" || header === "term") && !value) {
+                    console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                    validEntry = false;
+                }
                 entry[header] = value;
             });
 
-            // Normalize theme name specifically
-            if (entry.type) {
-                entry.type = entry.type.toLowerCase();
-            } else {
-                validEntry = false; // Ensure 'type' header exists and has a value
+            // Normalize theme name specifically if entry is potentially valid
+            if (validEntry && entry.type) {
+                 entry.type = entry.type.toLowerCase().trim(); // Ensure lowercase and trimmed
+                 if (!entry.type) { // Check if type became empty after trimming
+                    console.warn(`Warning: Empty 'type' after trimming on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                    validEntry = false;
+                 }
+            } else if (validEntry && !entry.type) { // If type header exists but value is empty
+                 console.warn(`Warning: Missing 'type' value on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                 validEntry = false;
+            }
+
+            if (validEntry) {
+                // Further validation: ensure part is one of the expected types
+                const validParts = ["prefix", "root", "suffix"];
+                if (!entry.part || !validParts.includes(entry.part.toLowerCase().trim())) {
+                     console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                     validEntry = false;
+                } else {
+                    entry.part = entry.part.toLowerCase().trim(); // Normalize part
+                }
+            }
+
+            if (validEntry) {
+                 // Ensure term is not empty
+                 if (!entry.term || !entry.term.trim()) {
+                    console.warn(`Warning: Missing 'term' value on line ${i + 1}: \"${currentLine}\". Skipping entry.`);
+                    validEntry = false;
+                 } else {
+                    entry.term = entry.term.trim(); // Trim term
+                 }
             }
 
             if (validEntry) {
                 result.push(entry);
             }
+        } else {
+             console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: \"${currentLine}\". Skipping line.`);
         }
     }
+    console.log(`Successfully parsed ${result.length} valid entries from CSV.`);
     return result;
 }
+
+// Themes object (will be populated dynamically from CSV)
+const themes = {};
 
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
     const loadingElement = document.getElementById('loading');
-    loadingElement.classList.remove('hidden'); // Show loading indicator
+    if (loadingElement) loadingElement.classList.remove('hidden'); // Show loading indicator
 
     try {
         console.log('Fetching word_parts.csv...');
         const response = await fetch('data/word_parts.csv');
-        console.log('Fetch Response:', response);
+        console.log('Fetch Response Status:', response.status);
         if (!response.ok) {
             throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
         }
         const csvText = await response.text();
-        console.log('CSV Text:', csvText);
+        // console.log('CSV Text:', csvText); // Optional: Log CSV text for debugging
         const data = parseCSV(csvText);
-        console.log('Parsed Data:', data);
+        console.log(`Parsed ${data.length} valid entries from CSV.`);
 
         // Clear themes object before populating
-        for (const key in themes) { // Clear existing properties
+        for (const key in themes) {
             delete themes[key];
         }
 
         // Populate themes based on type and part
-     // Populate themes based on type and part
-data.forEach(({ type, part, term, definition }) => {
-    // Ensure theme exists (already lowercase from parseCSV)
-    if (!themes[type]) {
-         themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
-    }
+        data.forEach(({ type, part, term, definition }) => {
+            // Ensure theme exists (already lowercase and trimmed from parseCSV)
+            if (!themes[type]) {
+                 themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
+            }
 
-    // Clean term based on part type and add
-    let cleanedTerm = term; // Use original term by default
-    if (part === "prefix") {
-        cleanedTerm = term.replace(/-+$/, ""); // Remove trailing hyphens
-    } else if (part === "suffix") {
-        cleanedTerm = term.replace(/^-+/, ""); // Remove leading hyphens
-    }
+            // Clean term based on part type and add
+            let cleanedTerm = term; // Use original term by default
+            if (part === "prefix") {
+                cleanedTerm = term.replace(/-+$/, ""); // Remove trailing hyphens
+            } else if (part === "suffix") {
+                cleanedTerm = term.replace(/^-+/, ""); // Remove leading hyphens
+            }
 
-    // Only add if cleanedTerm is not empty
-    if (cleanedTerm) {
-        if (part === "prefix") {
-            themes[type].prefixes.push(cleanedTerm);
-            themes[type].prefixDefs.push(definition);
-        } else if (part === "root") {
-            themes[type].roots.push(cleanedTerm); // Roots assumed clean
-            themes[type].rootDefs.push(definition);
-        } else if (part === "suffix") {
-            themes[type].suffixes.push(cleanedTerm);
-            themes[type].suffixDefs.push(definition);
-        }
-    }
-});erm);
-                themes[type].suffixDefs.push(definition);
+            // Only add if cleanedTerm is not empty
+            if (cleanedTerm) {
+                if (part === "prefix") {
+                    themes[type].prefixes.push(cleanedTerm);
+                    themes[type].prefixDefs.push(definition || ""); // Ensure definition is string
+                } else if (part === "root") {
+                    themes[type].roots.push(cleanedTerm); // Roots assumed clean
+                    themes[type].rootDefs.push(definition || "");
+                } else if (part === "suffix") {
+                    themes[type].suffixes.push(cleanedTerm);
+                    themes[type].suffixDefs.push(definition || "");
+                }
             }
         });
 
-        // Validate that all themes have data
+        // Validate that all themes have data after population
+        console.log("Populated themes:", Object.keys(themes));
         Object.keys(themes).forEach(theme => {
-            console.log(`Theme ${theme}:`, {
-                prefixes: themes[theme].prefixes.length,
-                roots: themes[theme].roots.length,
-                suffixes: themes[theme].suffixes.length
+            const themeData = themes[theme];
+            console.log(`Theme '${theme}':`, {
+                prefixes: themeData.prefixes.length,
+                roots: themeData.roots.length,
+                suffixes: themeData.suffixes.length
             });
-            if (!themes[theme].prefixes.length || !themes[theme].roots.length || !themes[theme].suffixes.length) {
-                console.warn(`Theme ${theme} is missing some word parts.`);
+            if (!themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
+                console.warn(`Theme '${theme}' is missing some word parts (prefixes, roots, or suffixes). Word generation for this theme might fail.`);
             }
         });
+
     } catch (error) {
-        console.error('Error loading word parts:', error);
-        alert('Failed to load word parts data. Please check data/word_parts.csv.');
+        console.error('Error loading or processing word parts:', error);
+        alert('Failed to load word parts data. Please check the console and ensure data/word_parts.csv is accessible and correctly formatted.');
     } finally {
-        loadingElement.classList.add('hidden'); // Hide loading indicator
+        if (loadingElement) loadingElement.classList.add('hidden'); // Hide loading indicator
     }
 }
 
 // Function to populate theme dropdown dynamically
 function populateThemeDropdown() {
+    const themeType = document.getElementById("themeType");
+    if (!themeType) {
+        console.error("Theme dropdown element not found!");
+        return;
+    }
     themeType.innerHTML = ''; // Clear existing options
+
     // Add "All" option first
     const allOption = document.createElement("option");
     allOption.value = "all";
     allOption.text = "All";
-    allOption.setAttribute("key", -1); // Assign a unique key
     themeType.appendChild(allOption);
 
-    const sortedThemes = Object.keys(themes).sort(); // Sort themes alphabetically
-    sortedThemes.forEach((themeKey, index) => {
-        const option = document.createElement("option");
-        option.value = themeKey;
-        // Capitalize first letter for display
-        option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
-        option.setAttribute("key", index);
-        themeType.appendChild(option);
+    // Get theme keys, sort them, and add them
+    const sortedThemes = Object.keys(themes).sort();
+    console.log("Themes to populate dropdown:", ["All", ...sortedThemes]);
+    sortedThemes.forEach((themeKey) => {
+        // Check if theme has enough parts before adding to dropdown
+        const themeData = themes[themeKey];
+        if (themeData && themeData.prefixes.length > 0 && themeData.roots.length > 0 && themeData.suffixes.length > 0) {
+            const option = document.createElement("option");
+            option.value = themeKey;
+            // Capitalize first letter for display
+            option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
+            themeType.appendChild(option);
+        } else {
+            console.warn(`Theme '${themeKey}' not added to dropdown because it lacks sufficient parts.`);
+        }
     });
 }
 
-// Load data on startup
-async function initializeThemes() {
-    await loadWordParts();
-    populateThemeDropdown(); // Populate dropdown after loading data
-    updateDisplay(); // Generate initial word after data is loaded
+// Get a random element from an array
+function getRandomElement(arr) {
+    if (!arr || arr.length === 0) return { element: null, index: -1 };
+    const index = Math.floor(Math.random() * arr.length);
+    return { element: arr[index], index: index };
 }
 
-// DOM elements
-const wordContainer = document.getElementById('wordContainer');
-const generatedWord = document.getElementById('generatedWord');
-const pronunciation = document.getElementById('pronunciation');
-const wordDefinition = document.getElementById('wordDefinition');
-const permutationList = document.getElementById('permutationList');
-const generateButton = document.getElementById('generateButton');
-const copyButton = document.getElementById('copyButton');
-const permutationType = document.getElementById('permutationType');
-const themeType = document.getElementById("themeType");
+// Generate word and definition based on selected types
+function generateWordAndDefinition(wordType, themeKey) {
+    let prefix = '', root1 = '', root2 = '', suffix = '';
+    let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
+    let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+    let currentTheme = themeKey;
+
+    // If theme is 'all', get parts from all available themes
+    const allPrefixes = [], allPrefixDefs = [];
+    const allRoots = [], allRootDefs = [];
+    const allSuffixes = [], allSuffixDefs = [];
+
+    if (themeKey === 'all') {
+        Object.values(themes).forEach(themeData => {
+            allPrefixes.push(...themeData.prefixes);
+            allPrefixDefs.push(...themeData.prefixDefs);
+            allRoots.push(...themeData.roots);
+            allRootDefs.push(...themeData.rootDefs);
+            allSuffixes.push(...themeData.suffixes);
+            allSuffixDefs.push(...themeData.suffixDefs);
+        });
+        // Check if 'all' has enough parts
+        if (allPrefixes.length === 0 || allRoots.length === 0 || allSuffixes.length === 0) {
+            console.error("Cannot generate word for 'All' theme: Insufficient parts across all themes.");
+            return { word: "Error", definition: "Insufficient parts for 'All' theme.", pronunciation: "" };
+        }
+    } else {
+        // Check if selected theme exists and has parts
+        if (!themes[themeKey] || !themes[themeKey].prefixes.length || !themes[themeKey].roots.length || !themes[themeKey].suffixes.length) {
+            console.error(`Selected theme '${themeKey}' not found or has insufficient parts.`);
+            return { word: "Error", definition: `Theme '${themeKey}' has missing parts.`, pronunciation: "" };
+        }
+    }
+
+    const getParts = (partType) => {
+        if (themeKey === 'all') {
+            switch (partType) {
+                case 'prefix': return { elements: allPrefixes, defs: allPrefixDefs };
+                case 'root': return { elements: allRoots, defs: allRootDefs };
+                case 'suffix': return { elements: allSuffixes, defs: allSuffixDefs };
+                default: return { elements: [], defs: [] };
+            }
+        } else {
+            const themeData = themes[themeKey];
+            switch (partType) {
+                case 'prefix': return { elements: themeData.prefixes, defs: themeData.prefixDefs };
+                case 'root': return { elements: themeData.roots, defs: themeData.rootDefs };
+                case 'suffix': return { elements: themeData.suffixes, defs: themeData.suffixDefs };
+                default: return { elements: [], defs: [] };
+            }
+        }
+    };
+
+    // Select parts based on wordType
+    if (wordType === 'pre-root-suf' || wordType === 'pre-root') {
+        const { elements: prefixes, defs: prefixDefsArr } = getParts('prefix');
+        const result = getRandomElement(prefixes);
+        prefix = result.element;
+        prefixIndex = result.index;
+        prefixDef = prefixDefsArr[prefixIndex] || '';
+    }
+    if (wordType.includes('root')) {
+        const { elements: roots, defs: rootDefsArr } = getParts('root');
+        const result1 = getRandomElement(roots);
+        root1 = result1.element;
+        root1Index = result1.index;
+        rootDef1 = rootDefsArr[root1Index] || '';
+
+        if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
+            const result2 = getRandomElement(roots);
+            root2 = result2.element;
+            root2Index = result2.index;
+            rootDef2 = rootDefsArr[root2Index] || '';
+        }
+    }
+    if (wordType.endsWith('suf')) {
+        const { elements: suffixes, defs: suffixDefsArr } = getParts('suffix');
+        const result = getRandomElement(suffixes);
+        suffix = result.element;
+        suffixIndex = result.index;
+        suffixDef = suffixDefsArr[suffixIndex] || '';
+    }
+
+    // Construct the word, filtering out empty parts *before* joining
+    const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
+    const word = parts.join('-');
+
+    // Generate definition and pronunciation
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey); // Use 'normal' logic for 'all' theme defs for now
+    const pronunciation = generatePronunciation(word);
+
+    return { word, definition, pronunciation };
+}
 
 // Simplified pronunciation generator
 function generatePronunciation(word) {
-    const syllables = word.split('-').map(part => {
-        return part.replace(/[aeiou]/gi, match => `_${match}_`).replace(/([bcdfghjklmnpqrstvwxyz]+)/gi, '$1');
-    });
-    return `\\${syllables.join(' - ')}\\`;
+    // Basic placeholder - replace with a more sophisticated method if needed
+    return `/${word.replace(/-/g, ' / ')}/`;
 }
 
-// Determine part of speech based on suffix or word type
+// Determine part of speech (basic placeholder)
 function getPartOfSpeech(type, suffixIndex, theme) {
-    if (type === 'pre-root' || type === 'pre-root-root' || type === 'root') {
-        return 'noun';
+    // This is highly simplified and might need refinement based on actual suffixes
+    if (type.endsWith('suf') && suffixIndex !== -1) {
+        const suffix = (theme === 'all' ? allSuffixes : themes[theme].suffixes)[suffixIndex];
+        if (['ly', 'th'].includes(suffix)) return 'adverb';
+        if (['ize', 'ify', 'en'].includes(suffix)) return 'verb';
+        if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible'].includes(suffix)) return 'adjective';
     }
-    if (suffixIndex === -1) {
-        return 'noun';
-    }
-    const suffix = themes[theme].suffixes[suffixIndex];
-    if (['ly', 'th'].includes(suffix)) return 'adverb';
-    if (['ize', 'ify'].includes(suffix)) return 'verb';
-    if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar'].includes(suffix)) return 'adjective';
-    return 'noun';
+    return 'noun'; // Default to noun
 }
 
-// Enhanced definition generator with natural language, avoiding word parts
+// Enhanced definition generator (simplified version)
 function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, suffixIndex, theme) {
     let definition = '';
     const partOfSpeech = getPartOfSpeech(type, suffixIndex, theme);
 
-    // Helper to combine prefix and root meanings without using word parts
-    const combinePreRoot = (pre, root) => {
-        if (!pre) return root;
-        switch (pre) {
-            case 'negation': return `absence of ${root}`;
-            case 'opposition': return `resistance to ${root}`;
-            case 'connection': return `link between ${root}`;
-            case 'internal': return `inner ${root}`;
-            case 'external': return `outer ${root}`;
-            case 'additional': return `extra ${root}`;
-            case 'absence': return `lack of ${root}`;
-            case 'equality': return `balanced ${root}`;
-            case 'prior': return `earlier ${root}`;
-            case 'subsequent': return `later ${root}`;
-            case 'excess': return `excessive ${root}`;
-            case 'deficiency': return `insufficient ${root}`;
-            case 'support': return `promotion of ${root}`;
-            case 'center': return `central ${root}`;
-            case 'self': return `personal ${root}`;
-            case 'difference': return `distinct ${root}`;
-            case 'inclusion': return `contained ${root}`;
-            case 'movement': return `transferred ${root}`;
-            case 'subordination': return `lesser ${root}`;
-            case 'superiority': return `greater ${root}`;
-            case 'digital': return `digital ${root}`;
-            case 'microscopic': return `tiny ${root}`;
-            case 'biological': return `living ${root}`;
-            case 'technological': return `technical ${root}`;
-            case 'informational': return `data-driven ${root}`;
-            case 'electrical': return `electric ${root}`;
-            case 'mechanical': return `mechanical ${root}`;
-            case 'automatic': return `automated ${root}`;
-            case 'data-related': return `data-based ${root}`;
-            case 'quantitative': return `measured ${root}`;
-            case 'over': return `excessive ${root}`;
-            case 'away': return `distant ${root}`;
-            case 'covered': return `covered ${root}`;
-            case 'wrong': return `incorrect ${root}`;
-            case 'distant': return `far ${root}`;
-            case 'toward': return `approaching ${root}`;
-            case 'before': return `earlier ${root}`;
-            case 'together': return `combined ${root}`;
-            case 'apart': return `separate ${root}`;
-            case 'massive': return `huge ${root}`;
-            case 'extreme': return `intense ${root}`;
-            case 'new': return `modern ${root}`;
-            case 'nostalgic': return `retro ${root}`;
-            case 'popular': return `popular ${root}`;
-            case 'fashionable': return `trendy ${root}`;
-            case 'spreading': return `viral ${root}`;
-            case 'humorous': return `funny ${root}`;
-            case 'fanatic': return `fan-driven ${root}`;
-            case 'stellar': return `star-related ${root}`;
-            case 'cosmic': return `cosmic ${root}`;
-            case 'galactic': return `galaxy-related ${root}`;
-            case 'starry': return `star-filled ${root}`;
-            case 'lunar': return `moon-related ${root}`;
-            case 'solar': return `sun-related ${root}`;
-            case 'nebulous': return `cloudy ${root}`;
-            case 'orbital': return `orbiting ${root}`;
-            case 'explosive': return `explosive ${root}`;
-            case 'sun-related': return `solar ${root}`;
-            case 'magical': return `magical ${root}`;
-            case 'elf-related': return `elven ${root}`;
-            case 'dragon-related': return `draconic ${root}`;
-            case 'mythical': return `mythical ${root}`;
-            case 'mysterious': return `mysterious ${root}`;
-            case 'fairy-related': return `fairy-like ${root}`;
-            case 'dark': return `dark ${root}`;
-            case 'bright': return `bright ${root}`;
-            case 'ethereal': return `ethereal ${root}`;
-            case 'runic': return `runic ${root}`;
-            default: return `${root} involving ${pre}`;
-        }
-    };
+    // Combine definitions simply for now
+    const partsDefs = [preDef, rootDef1, rootDef2, sufDef].filter(def => def && def.trim() !== '');
+    definition = `A ${partOfSpeech} related to: ${partsDefs.join(', ')}.`;
 
-    // Normalize root for grammatical correctness
-    const normalizeRoot = (root) => {
-        if (root.endsWith('ing') || root.endsWith('s')) return root;
-        return root.replace(/ness$|ty$|ment$/, '');
-    };
+    // Basic attempt to make it slightly more natural
+    if (type === 'pre-root-suf') {
+        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, characterized by ${preDef} and resulting in ${sufDef}.`;
+    } else if (type === 'root-suf') {
+        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, resulting in ${sufDef}.`;
+    } else if (type === 'pre-root') {
+        definition = `(${partOfSpeech}) Pertaining to ${rootDef1}, characterized by ${preDef}.`;
+    } else if (type === 'root') {
+        definition = `(${partOfSpeech}) Related to ${rootDef1}.`;
+    } // Add more cases if needed for root-root etc.
 
-    switch (type) {
-        case 'pre-root-suf':
-            const preRoot = combinePreRoot(preDef, normalizeRoot(rootDef1));
-            switch (sufDef) {
-                case 'study': definition = `The academic study of ${preRoot}`; break;
-                case 'fear': definition = `An intense fear of ${preRoot}`; break;
-                case 'affection': definition = `A strong affection for ${preRoot}`; break;
-                case 'expert': definition = `A person specializing in ${preRoot}`; break;
-                case 'manner': definition = `A way characterized by ${preRoot}`; break;
-                case 'abundance': definition = `Filled with ${preRoot}`; break;
-                case 'quality': definition = `The characteristic of ${preRoot}`; break;
-                case 'creation': definition = `The act of creating ${preRoot}`; break;
-                case 'process': definition = `The process involving ${preRoot}`; break;
-                case 'action': definition = `The activity of ${preRoot}`; break;
-                case 'condition': definition = `The state of ${preRoot}`; break;
-                case 'location': definition = `A place characterized by ${preRoot}`; break;
-                case 'style': definition = `A style resembling ${preRoot}`; break;
-                case 'fullness': definition = `Abundance of ${preRoot}`; break;
-                case 'relation': definition = `Something related to ${preRoot}`; break;
-                case 'association': definition = `Something associated with ${preRoot}`; break;
-                case 'containment': definition = `The containment of ${preRoot}`; break;
-                case 'female': definition = `A female connected to ${preRoot}`; break;
-                case 'origin': definition = `Something originating from ${preRoot}`; break;
-                case 'capability': definition = `The ability to perform ${preRoot}`; break;
-                case 'disease': definition = `A disorder related to ${preRoot}`; break;
-                case 'decomposition': definition = `A substance that breaks down ${preRoot}`; break;
-                case 'inhabitant': definition = `A resident associated with ${preRoot}`; break;
-                case 'possession': definition = `Possessing ${preRoot}`; break;
-                case 'performance': definition = `The performance of ${preRoot}`; break;
-                case 'resemblance': definition = `Something resembling ${preRoot}`; break;
-                case 'outcome': definition = `The result of ${preRoot}`; break;
-                case 'science': definition = `The science of ${preRoot}`; break;
-                case 'belief': definition = `A belief in ${preRoot}`; break;
-                case 'measurement': definition = `The measurement of ${preRoot}`; break;
-                case 'character': definition = `A person characterized by ${preRoot}`; break;
-                case 'extreme': definition = `The most extreme form of ${preRoot}`; break;
-                case 'agent': definition = `A person performing ${preRoot}`; break;
-                case 'nature': definition = `The nature of ${preRoot}`; break;
-                case 'realm': definition = `A kingdom of ${preRoot}`; break;
-                case 'connection': definition = `A bond of ${preRoot}`; break;
-                default: definition = `Something characterized by ${preRoot}`;
-            }
-            break;
-        case 'root-suf':
-            const root = normalizeRoot(rootDef1);
-            switch (sufDef) {
-                case 'study': definition = `The academic study of ${root}`; break;
-                case 'fear': definition = `An intense fear of ${root}`; break;
-                case 'affection': definition = `A strong affection for ${root}`; break;
-                case 'expert': definition = `A person specializing in ${root}`; break;
-                case 'manner': definition = `A way characterized by ${root}`; break;
-                case 'abundance': definition = `Filled with ${root}`; break;
-                case 'quality': definition = `The characteristic of ${root}`; break;
-                case 'creation': definition = `The act of creating ${root}`; break;
-                case 'process': definition = `The process involving ${root}`; break;
-                case 'action': definition = `The activity of ${root}`; break;
-                case 'condition': definition = `The state of ${root}`; break;
-                case 'location': definition = `A place characterized by ${root}`; break;
-                case 'style': definition = `A style resembling ${root}`; break;
-                case 'fullness': definition = `Abundance of ${root}`; break;
-                case 'relation': definition = `Something related to ${root}`; break;
-                case 'association': definition = `Something associated with ${root}`; break;
-                case 'containment': definition = `The containment of ${root}`; break;
-                case 'female': definition = `A female connected to ${root}`; break;
-                case 'origin': definition = `Something originating from ${root}`; break;
-                case 'capability': definition = `The ability to perform ${root}`; break;
-                case 'disease': definition = `A disorder related to ${root}`; break;
-                case 'decomposition': definition = `A substance that breaks down ${root}`; break;
-                case 'inhabitant': definition = `A resident associated with ${root}`; break;
-                case 'possession': definition = `Possessing ${root}`; break;
-                case 'performance': definition = `The performance of ${root}`; break;
-                case 'resemblance': definition = `Something resembling ${root}`; break;
-                case 'outcome': definition = `The result of ${root}`; break;
-                case 'science': definition = `The science of ${root}`; break;
-                case 'belief': definition = `A belief in ${root}`; break;
-                case 'measurement': definition = `The measurement of ${root}`; break;
-                case 'character': definition = `A person characterized by ${root}`; break;
-                case 'extreme': definition = `The most extreme form of ${root}`; break;
-                case 'agent': definition = `A person performing ${root}`; break;
-                case 'nature': definition = `The nature of ${root}`; break;
-                case 'realm': definition = `A kingdom of ${root}`; break;
-                case 'connection': definition = `A bond of ${root}`; break;
-                default: definition = `Something characterized by ${root}`;
-            }
-            break;
-        case 'pre-root':
-            definition = `Something characterized by ${combinePreRoot(preDef, normalizeRoot(rootDef1))}`;
-            break;
-        case 'pre-root-root':
-            definition = `Something combining ${combinePreRoot(preDef, normalizeRoot(rootDef1))} and ${normalizeRoot(rootDef2)}`;
-            break;
-        case 'root':
-            definition = `The concept of ${normalizeRoot(rootDef1)}`;
-            break;
-        default:
-            definition = `Something characterized by ${combinePreRoot(preDef, normalizeRoot(rootDef1))}`;
+    // Fallback if definitions are missing
+    if (!preDef && !rootDef1 && !rootDef2 && !sufDef) {
+        definition = `(${partOfSpeech}) A generated word.`;
     }
 
-    return `${partOfSpeech.charAt(0).toUpperCase() + partOfSpeech.slice(1)}: ${definition}`;
+    return definition.charAt(0).toUpperCase() + definition.slice(1); // Capitalize first letter
 }
 
-function generateWordAndDefinition(type, theme) {
-    let themeData;
-    if (theme === 'all') {
-        // Combine all parts from all themes
-        themeData = {
-            prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: []
-        };
-        Object.values(themes).forEach(t => {
-            themeData.prefixes.push(...t.prefixes);
-            themeData.prefixDefs.push(...t.prefixDefs);
-            themeData.roots.push(...t.roots);
-            themeData.rootDefs.push(...t.rootDefs);
-            themeData.suffixes.push(...t.suffixes);
-            themeData.suffixDefs.push(...t.suffixDefs);
-        });
-    } else {
-        themeData = themes[theme];
-    }
 
-    if (!themeData || !themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
-        return { word: 'Error', def: 'Error: Theme data not loaded or insufficient parts', x: -1, y: -1, z: -1, y2: -1 };
-    }
-    let wordParts = [], word, def, x, y, z, y2;
-    x = Math.floor(Math.random() * themeData.prefixes.length);
-    y = Math.floor(Math.random() * themeData.roots.length);
-    z = Math.floor(Math.random() * themeData.suffixes.length);
-    y2 = Math.floor(Math.random() * themeData.roots.length);
-
-    // Ensure y2 is different from y if possible
-    if (themeData.roots.length > 1 && y2 === y) {
-        y2 = (y + 1) % themeData.roots.length;
-    }
-
-    switch (type) {
-        case 'pre-root-suf':
-            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.suffixes[z]];
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme); // Use 'normal' logic for 'all' theme definitions for simplicity
-            break;
-        case 'root-suf':
-            wordParts = [themeData.roots[y], themeData.suffixes[z]];
-            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme);
-            break;
-        case 'pre-root':
-            wordParts = [themeData.prefixes[x], themeData.roots[y]];
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, null, -1, theme === 'all' ? 'normal' : theme);
-            break;
-        case 'pre-root-root':
-            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.roots[y2]];
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], themeData.rootDefs[y2], null, -1, theme === 'all' ? 'normal' : theme);
-            break;
-        case 'root':
-            wordParts = [themeData.roots[y]];
-            def = generateSentenceDefinition(type, null, themeData.rootDefs[y], null, null, -1, theme === 'all' ? 'normal' : theme);
-            break;
-        default: // Default to pre-root-suf
-            wordParts = [themeData.prefixes[x], themeData.roots[y], themeData.suffixes[z]];
-            def = generateSentenceDefinition(type, themeData.prefixDefs[x], themeData.rootDefs[y], null, themeData.suffixDefs[z], z, theme === 'all' ? 'normal' : theme);
-    }
-
-    // Clean and filter parts before joining
-    word = wordParts.map(part => (part || ").trim()).filter(part => part.length > 0).join("-");
-
-    return { word, def, x, y, z, y2 };
-}
-
-function generatePermutations(x, y, z, y2, currentType, theme) {
-    const permutations = [];
-    const types = ['pre-root-suf', 'root-suf', 'pre-root', 'pre-root-root', 'root'];
-    
-    types.forEach(type => {
-        if (type !== currentType) {
-            const { word, def } = generateWordAndDefinition(type, theme);
-            if (word !== 'Error') {
-                permutations.push(`<strong>${word}</strong>: ${def}`);
-            }
-        }
-    });
-
-    return permutations;
-}
-
-function copyToClipboard() {
-    const word = generatedWord.textContent;
-    const pron = pronunciation.textContent;
-    const def = wordDefinition.textContent;
-    const textToCopy = `${word}\n${pron}\n${def}`;
-    
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Word, pronunciation, and definition copied to clipboard!');
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-        alert('Failed to copy to clipboard.');
-    });
-}
-
+// Function to update the display with the generated word
 function updateDisplay() {
-    const type = permutationType.value;
-    const theme = themeType.value;
-    const { word, def, x, y, z, y2 } = generateWordAndDefinition(type, theme);
+    const wordContainer = document.getElementById('wordContainer');
+    const generatedWordEl = document.getElementById('generatedWord');
+    const pronunciationEl = document.getElementById('pronunciation');
+    const wordDefinitionEl = document.getElementById('wordDefinition');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById("themeType");
 
-    generatedWord.textContent = word;
-    pronunciation.textContent = generatePronunciation(word);
-    wordDefinition.textContent = def;
+    if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl) {
+        console.error("One or more display elements are missing!");
+        return;
+    }
 
-    // Generate permutations
-    const permutations = generatePermutations(x, y, z, y2, type, theme);
-    permutationList.innerHTML = permutations.map(p => `<li>${p}</li>`).join('');
+    const selectedWordType = permutationType.value;
+    const selectedTheme = themeType.value;
 
-    // Add animation
-    wordContainer.style.opacity = '0';
-    setTimeout(() => {
-        wordContainer.style.opacity = '1';
-    }, 100);
+    console.log(`Generating word with type: ${selectedWordType}, theme: ${selectedTheme}`);
+
+    // Check if themes object is populated
+    if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
+        console.warn("Themes not loaded yet, cannot generate word.");
+        generatedWordEl.textContent = "Loading...";
+        pronunciationEl.textContent = "";
+        wordDefinitionEl.textContent = "Please wait for data to load.";
+        return;
+    }
+
+    const { word, definition, pronunciation } = generateWordAndDefinition(selectedWordType, selectedTheme);
+
+    generatedWordEl.textContent = word;
+    pronunciationEl.textContent = pronunciation;
+    wordDefinitionEl.textContent = definition;
+
+    // Optional: Update permutation list (if needed)
+    // updatePermutationList(word, definition);
 }
 
-// Event listeners
-generateButton.addEventListener('click', updateDisplay);
-copyButton.addEventListener('click', copyToClipboard);
-permutationType.addEventListener('change', updateDisplay);
-themeType.addEventListener("change", updateDisplay);
+// Function to copy word and definition to clipboard
+function copyToClipboard() {
+    const generatedWord = document.getElementById('generatedWord').textContent;
+    const wordDefinition = document.getElementById('wordDefinition').textContent;
+    const textToCopy = `Word: ${generatedWord}\nDefinition: ${wordDefinition}`;
 
-// Load data on startup
-async function initializeThemes() {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        // Optional: Show feedback to the user
+        const copyButton = document.getElementById('copyButton');
+        const originalText = copyButton.textContent;
+        copyButton.textContent = 'Copied!';
+        setTimeout(() => {
+            copyButton.textContent = originalText;
+        }, 1500);
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text.');
+    });
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("DOM fully loaded and parsed");
+    const generateButton = document.getElementById('generateButton');
+    const copyButton = document.getElementById('copyButton');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById("themeType");
+
+    if (generateButton) {
+        generateButton.addEventListener('click', updateDisplay);
+    } else {
+        console.error("Generate button not found!");
+    }
+
+    if (copyButton) {
+        copyButton.addEventListener('click', copyToClipboard);
+    } else {
+        console.error("Copy button not found!");
+    }
+
+    if (permutationType) {
+        permutationType.addEventListener('change', updateDisplay);
+    } else {
+        console.error("Permutation type dropdown not found!");
+    }
+
+    if (themeType) {
+        themeType.addEventListener('change', updateDisplay);
+    } else {
+        console.error("Theme type dropdown not found!");
+    }
+
+    // Load data and initialize
     await loadWordParts();
-    populateThemeDropdown(); // Populate dropdown after loading data
-    updateDisplay(); // Generate initial word after data is loaded
-}
+    populateThemeDropdown();
+    updateDisplay(); // Initial word generation
+});
 
-initializeThemes(); // Call the initialization function
