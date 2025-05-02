@@ -1,12 +1,5 @@
 // Themes object (will be populated dynamically from CSV)
-const themes = {
-    normal: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] },
-    technical: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] },
-    shakespearian: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] },
-    popculture: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] },
-    astronomy: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] },
-    fantasy: { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] }
-};
+const themes = {}; // Dynamically populated from CSV
 
 // Function to parse CSV content
 function parseCSV(csvText) {
@@ -57,19 +50,21 @@ async function loadWordParts() {
 
         // Populate themes based on type and part
         data.forEach(({ type, part, term, definition }) => {
-            if (themes[type]) {
-                if (part === 'prefix') {
-                    themes[type].prefixes.push(term);
-                    themes[type].prefixDefs.push(definition);
-                } else if (part === 'root') {
-                    themes[type].roots.push(term);
-                    themes[type].rootDefs.push(definition);
-                } else if (part === 'suffix') {
-                    themes[type].suffixes.push(term);
-                    themes[type].suffixDefs.push(definition);
-                }
-            } else {
-                console.warn(`Unknown theme type: ${type}`);
+            // Ensure theme exists in the themes object
+            if (!themes[type]) {
+                 themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
+            }
+
+            // Add the word part to the corresponding theme
+            if (part === 'prefix') {
+                themes[type].prefixes.push(term);
+                themes[type].prefixDefs.push(definition);
+            } else if (part === 'root') {
+                themes[type].roots.push(term);
+                themes[type].rootDefs.push(definition);
+            } else if (part === 'suffix') {
+                themes[type].suffixes.push(term);
+                themes[type].suffixDefs.push(definition);
             }
         });
 
@@ -92,9 +87,24 @@ async function loadWordParts() {
     }
 }
 
+// Function to populate theme dropdown dynamically
+function populateThemeDropdown() {
+    themeType.innerHTML = ''; // Clear existing options
+    const sortedThemes = Object.keys(themes).sort(); // Sort themes alphabetically
+    sortedThemes.forEach((themeKey, index) => {
+        const option = document.createElement("option");
+        option.value = themeKey;
+        // Capitalize first letter for display
+        option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
+        option.setAttribute("key", index);
+        themeType.appendChild(option);
+    });
+}
+
 // Load data on startup
 async function initializeThemes() {
     await loadWordParts();
+    populateThemeDropdown(); // Populate dropdown after loading data
     updateDisplay(); // Generate initial word after data is loaded
 }
 
