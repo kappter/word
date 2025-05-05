@@ -57,8 +57,6 @@
     <div id="loading-game" class="loading-indicator">Loading word parts...</div>
 
     <main>
-        <a href="#" class="back-link">Back to Word Creator</a>
-
         <div id="game-setup" class="controls">
             <h2>Select Options and Generate</h2>
             <div class="option-group">
@@ -74,6 +72,7 @@
             <div class="option-group">
                 <label for="themeType">Select Theme:</label>
                 <select id="themeType">
+                    <option value="all">All</option>
                     <option value="normal">Normal</option>
                     <option value="technical">Technical</option>
                     <option value="shakespearian">Shakespearian</option>
@@ -88,7 +87,6 @@
         </div>
 
         <div id="word-container" class="word-container">
-            <h2>Generated Word:</h2>
             <p id="generatedWord" class="text-2xl font-semibold"></p>
             <p id="pronunciation" class="italic"></p>
             <p id="wordDefinition"></p>
