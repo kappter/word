@@ -1,0 +1,110 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Creator - Guess the Real Word</title>
+    <!-- Link to Merriweather font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Word Creator - Guess the Real Word</h1>
+
+    <div id="loading-game" class="loading-indicator">Loading game data...</div>
+
+    <main>
+        <a href="index.html" class="back-link">Back to Word Creator</a>
+
+        <div id="game-setup" class="controls">
+            <h2>Select Theme and Start</h2>
+            <div class="option-group">
+                <label for="gameThemeType">Select Theme for Generated Words:</label>
+                <select id="gameThemeType">
+                    <!-- Options will be populated by JS -->
+                    <option value="loading">Loading themes...</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button id="startGameButton" class="btn btn-generate">Start Game</button>
+            </div>
+        </div>
+
+        <div id="game-play" class="hidden">
+            <h2>Which Word is Real?</h2>
+            <div id="question-area" class="word-container">
+                <p><strong>Definition of the Real Word:</strong></p>
+                <p id="gameDefinition">---</p>
+                <p><strong>Choose the real English word:</strong></p>
+                <div id="choices-area">
+                    <!-- Multiple choice buttons will be added here -->
+                </div>
+            </div>
+            <div id="feedback-area" class="hidden">
+                <p id="feedbackText"></p>
+                <div class="buttons">
+                    <button id="nextQuestionButton" class="btn btn-generate">Next Question</button>
+                </div>
+            </div>
+            <div id="score-area">
+                <p>Score: <span id="score">0</span></p>
+                <p>Misses Remaining: <span id="misses">3</span></p>
+                <p>Question: <span id="questionNumber">1</span> / 5</p>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden">
+            <h2>Game Over!</h2>
+            <p>Your final score: <span id="finalScore">0</span></p>
+            <div class="buttons">
+                <button id="playAgainButton" class="btn btn-generate">Play Again</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="guess_real.js"></script>
+</body>
+</html>

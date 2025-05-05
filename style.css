@@ -233,6 +233,15 @@ main {
     transform: scale(1.05);
 }
 
+.btn-guess-real {
+    background-color: #007bff; /* Blue */
+}
+
+.btn-guess-real:hover {
+    background-color: #0056b3; /* Darker blue */
+    transform: scale(1.05);
+}
+
 /* Hidden Class */
 .hidden {
     display: none !important;
