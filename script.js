@@ -84,6 +84,51 @@ function parseCSV(csvText) {
 const themes = {};
 let themesLoadedPromise = null;
 
+// Definition templates by theme and POS
+const definitionTemplates = {
+    normal: {
+        noun: "A thing characterized by [prefixDef] [rootDef1] [rootDef2] [suffixDef].",
+        verb: "To [rootDef1] in a [prefixDef] manner [suffixDef].",
+        adjective: "Capable of [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "In a manner that [prefixDef] [rootDef1] [suffixDef]."
+    },
+    fantasy: {
+        noun: "A mythical [object] imbued with [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To magically [rootDef1] with a [prefixDef] essence [suffixDef].",
+        adjective: "Having the magical property of [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "With a mystical [prefixDef] [rootDef1] quality [suffixDef]."
+    },
+    astronomy: {
+        noun: "A celestial entity defined by [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] across the cosmos in a [prefixDef] way [suffixDef].",
+        adjective: "Pertaining to a [prefixDef] [rootDef1] phenomenon [suffixDef].",
+        adverb: "In a [prefixDef] [rootDef1] cosmic manner [suffixDef]."
+    }
+    // Add more themes as needed
+};
+
+// Example sentence templates by theme and POS
+const exampleTemplates = {
+    normal: {
+        noun: "The [word] was essential for the project’s success.",
+        verb: "They [word] the resources to ensure fairness.",
+        adjective: "The [word] tool made the task easier.",
+        adverb: "She completed the task [word]."
+    },
+    fantasy: {
+        noun: "The wizard used the [word] to cast a powerful spell.",
+        verb: "The elves [word] their magic to protect the forest.",
+        adjective: "The [word] artifact glowed with ancient power.",
+        adverb: "The dragon flew [word] through the enchanted sky."
+    },
+    astronomy: {
+        noun: "The [word] was discovered in a distant galaxy.",
+        verb: "Scientists [word] the signals from the star system.",
+        adjective: "The [word] telescope captured stunning images.",
+        adverb: "The probe transmitted data [word] from deep space."
+    }
+};
+
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
     if (themesLoadedPromise) return themesLoadedPromise;
@@ -231,10 +276,12 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     if (options.removeHyphens) {
         word = word.replace(/-/g, '');
     }
-    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
+    const pos = getPartOfSpeech(wordType, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, themeKey === 'all' ? 'normal' : themeKey);
+    const example = generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = generatePronunciation(word);
 
-    return { word, definition, pronunciation, parts };
+    return { word, definition: `${definition} ${example}`, pronunciation, parts, pos };
 }
 
 function generatePronunciation(word) {
@@ -242,35 +289,52 @@ function generatePronunciation(word) {
 }
 
 function getPartOfSpeech(type, suffixIndex, theme) {
+    let pos = 'noun'; // Default to noun
+    const source = theme === 'all' ? null : themes[theme];
+    let suffix = '';
+
     if (type.endsWith('suf') && suffixIndex !== -1) {
-        const source = theme === 'all' ? null : themes[theme];
-        let suffix = '';
         if (source && source.suffixes.length > suffixIndex) suffix = source.suffixes[suffixIndex];
 
         if (['ly', 'th'].includes(suffix)) return 'adverb';
         if (['ize', 'ify', 'en', 'ate'].includes(suffix)) return 'verb';
         if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible', 'ish', 'ive', 'less', 'some', 'y'].includes(suffix)) return 'adjective';
         if (['ics', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ion', 'tion', 'sion', 'ship', 'dom', 'hood', 'logy', 'ology', 'phobia', 'philia', 'er', 'or', 'ant', 'ent', 'ard', 'ry', 'cy', 'tude'].includes(suffix)) return 'noun';
+    } else if (type.includes('root') && !type.endsWith('suf')) {
+        // If there's no suffix, the root might determine the POS
+        // For simplicity, assume roots are verbs unless specified otherwise in data
+        pos = 'verb';
     }
-    return 'noun';
+
+    return pos;
 }
 
-function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, suffixIndex, theme) {
-    let definition = `(${getPartOfSpeech(type, suffixIndex, theme)}) `;
+function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, theme) {
+    let definition = `(${pos}) `;
     const partsDefs = [preDef, rootDef1, rootDef2, sufDef].filter(def => def && def.trim() !== '');
 
     if (partsDefs.length === 0) {
         definition += "A generated word.";
-    } else if (partsDefs.length === 1) {
-        definition += `Related to ${partsDefs[0]}.`;
     } else {
-        let combined = partsDefs[0];
-        for (let i = 1; i < partsDefs.length; i++) {
-            combined += (i === partsDefs.length - 1 ? ' and ' : ', ') + partsDefs[i];
-        }
-        definition += `Pertaining to ${combined}.`;
+        // Use the appropriate template based on theme and POS
+        let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
+        if (!template) template = "A generated word with [prefixDef] [rootDef1] [rootDef2] [suffixDef].";
+
+        // Fill in the template
+        let filledTemplate = template
+            .replace('[prefixDef]', preDef || '')
+            .replace('[rootDef1]', rootDef1 || '')
+            .replace('[rootDef2]', rootDef2 || '')
+            .replace('[suffixDef]', sufDef || '')
+            .replace('[object]', pos === 'noun' ? 'entity' : '');
+
+        // Clean up any leftover placeholders or extra spaces
+        filledTemplate = filledTemplate.replace(/\s+/g, ' ').trim();
+
+        definition += filledTemplate;
     }
 
+    // Capitalize the first letter after the POS
     const firstCharIndex = definition.indexOf(')') + 2;
     if (firstCharIndex < definition.length) {
         definition = definition.substring(0, firstCharIndex) + definition.charAt(firstCharIndex).toUpperCase() + definition.slice(firstCharIndex + 1);
@@ -279,18 +343,43 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, su
     return definition;
 }
 
+function generateExampleSentence(word, pos, theme) {
+    let template = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
+    if (!template) template = "Example: The [word] was used.";
+
+    return template.replace('[word]', word);
+}
+
 function generateOtherForms(word, parts, type, theme) {
     const forms = [];
     const pos = getPartOfSpeech(type, parts.length > 0 ? parts.findIndex(p => p === parts[parts.length - 1]) : -1, theme);
 
     if (parts.length > 0) {
-        forms.push({ word: parts[0], pos: 'noun', def: `A concept or thing related to ${parts[0]}. Example: Its presence was noted.` });
+        const formWord = parts[0];
+        forms.push({ 
+            word: formWord, 
+            pos: 'noun', 
+            def: `A concept related to ${parts[0]}.`, 
+            example: `Example: The ${formWord} was central to the story.` 
+        });
     }
     if (parts.length > 1) {
-        forms.push({ word: parts.slice(0, 2).join('-'), pos: pos, def: `Pertaining to ${parts.slice(0, 2).join(' and ')}. Example: It had a characteristic appearance.` });
+        const formWord = parts.slice(0, 2).join('-');
+        forms.push({ 
+            word: formWord, 
+            pos: pos, 
+            def: `Involving ${parts.slice(0, 2).join(' and ')}.`, 
+            example: `Example: It had a ${formWord} quality.` 
+        });
     }
     if (parts.length > 2) {
-        forms.push({ word: parts.slice(0, 3).join('-'), pos: 'noun', def: `A connection thing involving ${parts.slice(0, 3).join(' and ')}. Example: Its presence was noted.` });
+        const formWord = parts.slice(0, 3).join('-');
+        forms.push({ 
+            word: formWord, 
+            pos: 'noun', 
+            def: `A thing involving ${parts.slice(0, 3).join(' and ')}.`, 
+            example: `Example: The ${formWord} glowed brightly.` 
+        });
     }
 
     return forms;
@@ -345,7 +434,7 @@ function updateDisplay() {
     pronunciationEl.textContent = pronunciation;
     wordDefinitionEl.textContent = definition;
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
-        .map(f => `<li>${f.word} (${f.pos}): ${f.def}</li>`).join('');
+        .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
     amalgamationsEl.innerHTML = generateAmalgamations(parts)
         .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
     updateLikes();
