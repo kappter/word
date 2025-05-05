@@ -44,8 +44,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Creator</title>
     <link rel="icon" href="data:,">
-    <!-- Link to Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Link to Merriweather font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,57 +51,64 @@
     <!-- Link to custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 font-merriweather flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-3xl font-bold text-brown-700 text-center mb-4">Word Creator</h1>
+<body>
+    <h1>Word Creator</h1>
 
-        <div id="loading" class="text-center text-brown-500 hidden">Loading word parts...</div>
+    <div id="loading-game" class="loading-indicator">Loading word parts...</div>
 
-        <div class="mb-4">
-            <label for="permutationType" class="block text-brown-700">Select Word Type:</label>
-            <select id="permutationType" class="w-full p-2 border rounded">
-                <option value="pre-root-suf">Prefix-Root-Suffix</option>
-                <option value="root-suf">Root-Suffix</option>
-                <option value="pre-root">Prefix-Root</option>
-                <option value="pre-root-root">Prefix-Root-Root</option>
-                <option value="root">Root Only</option>
-            </select>
-        </div>
+    <main>
+        <a href="#" class="back-link">Back to Word Creator</a>
 
-        <div class="mb-4">
-            <label for="themeType" class="block text-brown-700">Select Theme:</label>
-            <select id="themeType" class="w-full p-2 border rounded">
-                <option value="normal">Normal</option>
-                <option value="technical">Technical</option>
-                <option value="shakespearian">Shakespearian</option>
-                <option value="popculture">Pop Culture</option>
-                <option value="astronomy">Astronomy</option>
-                <option value="fantasy">Fantasy</option>
-            </select>
-        </div>
-
-        <div id="wordContainer" class="bg-cream-100 border-2 border-brown-300 rounded-lg p-4 mb-4 transition-opacity duration-300 opacity-100">
-            <h2 id="generatedWord" class="text-2xl font-semibold text-brown-700"></h2>
-            <p id="pronunciation" class="text-brown-600 italic"></p>
-            <p id="wordDefinition" class="text-brown-700"></p>
-            <div class="mt-2">
-                <h3 class="text-lg font-medium text-brown-700">Other Forms:</h3>
-                <ul id="otherForms" class="list-disc list-inside text-brown-700"></ul>
+        <div id="game-setup" class="controls">
+            <h2>Select Options and Generate</h2>
+            <div class="option-group">
+                <label for="permutationType">Select Word Type:</label>
+                <select id="permutationType">
+                    <option value="pre-root-suf">Prefix-Root-Suffix</option>
+                    <option value="root-suf">Root-Suffix</option>
+                    <option value="pre-root">Prefix-Root</option>
+                    <option value="pre-root-root">Prefix-Root-Root</option>
+                    <option value="root">Root Only</option>
+                </select>
             </div>
-            <div class="mt-2">
-                <h3 class="text-lg font-medium text-brown-700">Playful Amalgamations:</h3>
-                <button id="shuffleButton" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Shuffle Parts</button>
-                <ul id="amalgamations" class="list-disc list-inside text-brown-700 mt-2"></ul>
+            <div class="option-group">
+                <label for="themeType">Select Theme:</label>
+                <select id="themeType">
+                    <option value="normal">Normal</option>
+                    <option value="technical">Technical</option>
+                    <option value="shakespearian">Shakespearian</option>
+                    <option value="popculture">Pop Culture</option>
+                    <option value="astronomy">Astronomy</option>
+                    <option value="fantasy">Fantasy</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button id="generateButton" class="btn btn-generate">Generate New Word</button>
             </div>
         </div>
 
-        <div class="flex justify-center gap-4">
-            <button id="generateButton" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Generate New Word</button>
-            <button id="copyButton" class="bg-brown-500 text-white px-4 py-2 rounded hover:bg-brown-600">Copy Word</button>
-            <a href="game.html"><button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Play Game</button></a>
-            <a href="guess_real.html"><button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Guess the Real Word</button></a>
+        <div id="word-container" class="word-container">
+            <h2>Generated Word:</h2>
+            <p id="generatedWord" class="text-2xl font-semibold"></p>
+            <p id="pronunciation" class="italic"></p>
+            <p id="wordDefinition"></p>
+            <div class="mt-2">
+                <h3>Other Forms:</h3>
+                <ul id="otherForms" class="list-disc list-inside"></ul>
+            </div>
+            <div class="mt-2">
+                <h3>Playful Amalgamations:</h3>
+                <button id="shuffleButton" class="btn btn-generate">Shuffle Parts</button>
+                <ul id="amalgamations" class="list-disc list-inside mt-2"></ul>
+            </div>
         </div>
-    </div>
+
+        <div class="buttons">
+            <button id="copyButton" class="btn btn-copy">Copy Word</button>
+            <a href="game.html"><button class="btn btn-play">Play Game</button></a>
+            <a href="guess_real.html"><button class="btn btn-generate">Guess the Real Word</button></a>
+        </div>
+    </main>
 
     <script src="script.js"></script>
 </body>
