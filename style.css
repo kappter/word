@@ -247,6 +247,59 @@ main {
     display: none !important;
 }
 
+/* Custom color definitions */
+:root {
+    --cream-100: #fffaf0;
+    --brown-300: #d2b48c;
+    --brown-500: #8b4513;
+    --brown-600: #7f3f12;
+    --brown-700: #3a2d24;
+    --orange-500: #e89f43;
+    --orange-600: #d08c3a;
+}
+
+.font-merriweather {
+    font-family: 'Merriweather', serif;
+}
+
+#wordContainer {
+    animation: fadeIn 0.5s ease-in;
+}
+
+#wordContainer.opacity-0 {
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#amalgamations li, #otherForms li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.like-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+    color: #ff0000;
+    display: flex;
+    align-items: center;
+}
+
+.like-btn.liked {
+    color: #ff0000;
+}
+
+.like-btn:hover {
+    color: #cc0000;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 600px) {
     h1 {
