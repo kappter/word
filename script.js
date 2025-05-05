@@ -136,7 +136,7 @@ async function loadWordParts() {
 }
 
 function populateThemeDropdown() {
-    const themeDropdown = document.getElementById("themeType");
+    const themeDropdown = document.getElementById("themeType") || document.getElementById("gameThemeType");
     if (!themeDropdown) return;
 
     themeDropdown.innerHTML = '';
@@ -163,7 +163,7 @@ function getRandomElement(arr) {
     return { element: arr[index], index: index };
 }
 
-function generateWordAndDefinition(wordType, themeKey) {
+function generateWordAndDefinition(wordType, themeKey, options = {}) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
     let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
@@ -227,7 +227,10 @@ function generateWordAndDefinition(wordType, themeKey) {
     }
 
     const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
-    const word = parts.join('-').replace(/--+/g, '-');
+    let word = parts.join('-').replace(/--+/g, '-');
+    if (options.removeHyphens) {
+        word = word.replace(/-/g, '');
+    }
     const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = generatePronunciation(word);
 
@@ -294,6 +297,10 @@ function generateOtherForms(word, parts, type, theme) {
 }
 
 function generateAmalgamations(parts) {
+    if (!parts || parts.length < 2) {
+        console.warn("Not enough parts to generate amalgamations:", parts);
+        return [];
+    }
     const amalgamations = [];
     for (let i = 0; i < parts.length; i++) {
         for (let j = 0; j < parts.length; j++) {
@@ -302,7 +309,9 @@ function generateAmalgamations(parts) {
             }
         }
     }
-    return [...new Set(amalgamations)].slice(0, 5); // Limit to 5 unique combinations
+    const uniqueAmalgamations = [...new Set(amalgamations)].slice(0, 5); // Limit to 5 unique combinations
+    console.log("Generated amalgamations:", uniqueAmalgamations);
+    return uniqueAmalgamations;
 }
 
 function updateDisplay() {
@@ -314,7 +323,10 @@ function updateDisplay() {
     const permutationType = document.getElementById('permutationType');
     const themeType = document.getElementById('themeType');
 
-    if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) return;
+    if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
+        console.error("One or more required elements are missing:", { generatedWordEl, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
+        return;
+    }
 
     const selectedWordType = permutationType.value;
     const selectedTheme = themeType.value;
@@ -335,7 +347,7 @@ function updateDisplay() {
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
         .map(f => `<li>${f.word} (${f.pos}): ${f.def}</li>`).join('');
     amalgamationsEl.innerHTML = generateAmalgamations(parts)
-        .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></button></li>`).join('');
+        .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
     updateLikes();
 }
 
@@ -360,9 +372,34 @@ function copyToClipboard() {
 
 function shuffleAmalgamations() {
     const amalgamationsEl = document.getElementById('amalgamations');
-    const parts = document.getElementById('generatedWord').textContent.split('-');
-    amalgamationsEl.innerHTML = generateAmalgamations(parts)
-        .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></button></li>`).join('');
+    const generatedWordEl = document.getElementById('generatedWord');
+
+    if (!amalgamationsEl || !generatedWordEl) {
+        console.error("Required elements for shuffling are missing:", { amalgamationsEl, generatedWordEl });
+        return;
+    }
+
+    const wordText = generatedWordEl.textContent;
+    if (!wordText) {
+        console.warn("No generated word available to shuffle.");
+        amalgamationsEl.innerHTML = '<li>No word parts available to shuffle.</li>';
+        return;
+    }
+
+    const parts = wordText.split('-');
+    if (parts.length < 2) {
+        console.warn("Not enough parts to shuffle:", parts);
+        amalgamationsEl.innerHTML = '<li>Not enough parts to shuffle.</li>';
+        return;
+    }
+
+    const newAmalgamations = generateAmalgamations(parts);
+    if (newAmalgamations.length === 0) {
+        amalgamationsEl.innerHTML = '<li>No amalgamations generated.</li>';
+    } else {
+        amalgamationsEl.innerHTML = newAmalgamations
+            .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+    }
     updateLikes();
 }
 
@@ -380,8 +417,14 @@ function toggleLike(event) {
 }
 
 function updateLikes() {
-    document.querySelectorAll('.like-btn').forEach(button => {
-        button.textContent = getLikeStatus(button.getAttribute('data-word')) ? '❤️' : '🤍';
+    const buttons = document.querySelectorAll('.like-btn');
+    if (buttons.length === 0) {
+        console.warn("No like buttons found to update.");
+    }
+    buttons.forEach(button => {
+        const word = button.getAttribute('data-word');
+        button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+        button.removeEventListener('click', toggleLike); // Prevent duplicate listeners
         button.addEventListener('click', toggleLike);
     });
 }
@@ -396,12 +439,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const permutationType = document.getElementById("permutationType");
     const themeType = document.getElementById("themeType");
 
-    if (generateButton && copyButton && permutationType && themeType) {
-        generateButton.addEventListener("click", updateDisplay);
-        copyButton.addEventListener("click", copyToClipboard);
-        shuffleButton.addEventListener("click", shuffleAmalgamations);
-        permutationType.addEventListener("change", updateDisplay);
-        themeType.addEventListener("change", updateDisplay);
-        updateDisplay();
+    if (!generateButton || !copyButton || !shuffleButton || !permutationType || !themeType) {
+        console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, permutationType, themeType });
+        return;
     }
+
+    generateButton.addEventListener("click", updateDisplay);
+    copyButton.addEventListener("click", copyToClipboard);
+    shuffleButton.addEventListener("click", () => {
+        console.log("Shuffle button clicked.");
+        shuffleAmalgamations();
+    });
+    permutationType.addEventListener("change", updateDisplay);
+    themeType.addEventListener("change", updateDisplay);
+    updateDisplay();
 });
