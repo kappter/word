@@ -9,9 +9,9 @@ function parseCSV(csvText) {
     const result = [];
     const expectedColumns = headers.length;
 
-    if (!headers.includes("type") || !headers.includes("part") || !headers.includes("term") || !headers.includes("definition")) {
-        console.error("CSV file is missing required headers (type, part, term, definition).");
-        alert("CSV file is missing required headers (type, part, term, definition).");
+    if (!headers.includes("type") || !headers.includes("part") || !headers.includes("term") || !headers.includes("definition") || !headers.includes("pos")) {
+        console.error("CSV file is missing required headers (type, part, term, definition, pos).");
+        alert("CSV file is missing required headers (type, part, term, definition, pos).");
         return [];
     }
 
@@ -72,6 +72,17 @@ function parseCSV(csvText) {
             }
 
             if (validEntry) {
+                // Ensure pos is lowercase and valid if present
+                if (entry.part === "root" && entry.pos) {
+                    entry.pos = entry.pos.toLowerCase();
+                    const validPos = ["noun", "verb", "adjective"];
+                    if (!validPos.includes(entry.pos)) {
+                        console.warn(`Invalid POS '${entry.pos}' for root '${entry.term}', defaulting to 'noun'.`);
+                        entry.pos = "noun";
+                    }
+                } else {
+                    entry.pos = ""; // Ensure pos is empty for non-roots
+                }
                 result.push(entry);
             }
         }
@@ -103,8 +114,37 @@ const definitionTemplates = {
         verb: "To [rootDef1] across the cosmos in a [prefixDef] way [suffixDef].",
         adjective: "Pertaining to a [prefixDef] [rootDef1] phenomenon [suffixDef].",
         adverb: "In a [prefixDef] [rootDef1] cosmic manner [suffixDef]."
+    },
+    shakespearian: {
+        noun: "A noble [object] of [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] with [prefixDef] intent [suffixDef].",
+        adjective: "Marked by [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "In a [prefixDef] [rootDef1] fashion [suffixDef]."
+    },
+    popculture: {
+        noun: "A trendy [object] with [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] in a [prefixDef] viral way [suffixDef].",
+        adjective: "Known for [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "With a [prefixDef] [rootDef1] flair [suffixDef]."
+    },
+    technical: {
+        noun: "A system involving [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] using [prefixDef] technology [suffixDef].",
+        adjective: "Related to [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "In a [prefixDef] [rootDef1] technical manner [suffixDef]."
+    },
+    math: {
+        noun: "A mathematical concept of [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] with [prefixDef] precision [suffixDef].",
+        adjective: "Describing [prefixDef] [rootDef1] [suffixDef].",
+        adverb: "In a [prefixDef] [rootDef1] mathematical way [suffixDef]."
+    },
+    geography: {
+        noun: "A geographical feature with [prefixDef] [rootDef1] [suffixDef].",
+        verb: "To [rootDef1] across [prefixDef] landscapes [suffixDef].",
+        adjective: "Pertaining to [prefixDef] [rootDef1] regions [suffixDef].",
+        adverb: "In a [prefixDef] [rootDef1] geographical manner [suffixDef]."
     }
-    // Add more themes as needed
 };
 
 // Example sentence templates by theme and POS
@@ -126,6 +166,36 @@ const exampleTemplates = {
         verb: "Scientists [word] the signals from the star system.",
         adjective: "The [word] telescope captured stunning images.",
         adverb: "The probe transmitted data [word] from deep space."
+    },
+    shakespearian: {
+        noun: "The bard crafted a [word] for the king’s court.",
+        verb: "They [word] their sorrow in the great hall.",
+        adjective: "The [word] knight stood boldly before the queen.",
+        adverb: "She spoke [word] of her love for the prince."
+    },
+    popculture: {
+        noun: "The [word] went viral on social media.",
+        verb: "They [word] their latest dance move online.",
+        adjective: "The [word] influencer gained millions of followers.",
+        adverb: "The song spread [word] across streaming platforms."
+    },
+    technical: {
+        noun: "The [word] improved the system’s efficiency.",
+        verb: "Engineers [word] the data to optimize performance.",
+        adjective: "The [word] algorithm processed the input quickly.",
+        adverb: "The software operated [word] during the test."
+    },
+    math: {
+        noun: "The [word] was key to solving the equation.",
+        verb: "They [word] the values to find the solution.",
+        adjective: "The [word] method simplified the calculation.",
+        adverb: "The problem was solved [word] using geometry."
+    },
+    geography: {
+        noun: "The [word] shaped the region’s climate.",
+        verb: "Rivers [word] the terrain over centuries.",
+        adjective: "The [word] landscape attracted many explorers.",
+        adverb: "The volcano erupted [word] in the valley."
     }
 };
 
@@ -145,9 +215,13 @@ async function loadWordParts() {
 
             for (const key in themes) delete themes[key];
 
-            data.forEach(({ type, part, term, definition }) => {
+            data.forEach(({ type, part, term, definition, pos }) => {
                 if (!themes[type]) {
-                    themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
+                    themes[type] = { 
+                        prefixes: [], prefixDefs: [], 
+                        roots: [], rootDefs: [], rootPos: [], 
+                        suffixes: [], suffixDefs: [] 
+                    };
                 }
                 let cleanedTerm = term;
                 if (part === "prefix") cleanedTerm = term.replace(/-+$/, "");
@@ -159,6 +233,7 @@ async function loadWordParts() {
                     } else if (part === "root") {
                         themes[type].roots.push(cleanedTerm);
                         themes[type].rootDefs.push(definition || "");
+                        themes[type].rootPos.push(pos || "noun"); // Default to noun if pos is missing
                     } else if (part === "suffix") {
                         themes[type].suffixes.push(cleanedTerm);
                         themes[type].suffixDefs.push(definition || "");
@@ -211,10 +286,11 @@ function getRandomElement(arr) {
 function generateWordAndDefinition(wordType, themeKey, options = {}) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
+    let rootPos1 = '', rootPos2 = '';
     let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
 
     const allPrefixes = [], allPrefixDefs = [];
-    const allRoots = [], allRootDefs = [];
+    const allRoots = [], allRootDefs = [], allRootPos = [];
     const allSuffixes = [], allSuffixDefs = [];
 
     if (themeKey === 'all') {
@@ -223,6 +299,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
             allPrefixDefs.push(...themeData.prefixDefs);
             allRoots.push(...themeData.roots);
             allRootDefs.push(...themeData.rootDefs);
+            allRootPos.push(...themeData.rootPos);
             allSuffixes.push(...themeData.suffixes);
             allSuffixDefs.push(...themeData.suffixDefs);
         });
@@ -233,12 +310,16 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     }
 
     const getParts = (partType) => {
-        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
+        const source = themeKey === 'all' ? { 
+            prefixes: allPrefixes, prefixDefs: allPrefixDefs, 
+            roots: allRoots, rootDefs: allRootDefs, rootPos: allRootPos, 
+            suffixes: allSuffixes, suffixDefs: allSuffixDefs 
+        } : themes[themeKey];
         switch (partType) {
             case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
-            case 'root': return { elements: source.roots, defs: source.rootDefs };
+            case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.rootPos };
             case 'suffix': return { elements: source.suffixes, defs: source.suffixDefs };
-            default: return { elements: [], defs: [] };
+            default: return { elements: [], defs: [], pos: [] };
         }
     };
 
@@ -250,17 +331,19 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         prefixDef = defs[prefixIndex] || '';
     }
     if (wordType.includes('root')) {
-        const { elements, defs } = getParts('root');
+        const { elements, defs, pos } = getParts('root');
         const result1 = getRandomElement(elements);
         root1 = result1.element;
         root1Index = result1.index;
         rootDef1 = defs[root1Index] || '';
+        rootPos1 = pos[root1Index] || 'noun';
 
         if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
             const result2 = getRandomElement(elements);
             root2 = result2.element;
             root2Index = result2.index;
             rootDef2 = defs[root2Index] || '';
+            rootPos2 = pos[root2Index] || 'noun';
         }
     }
     if (wordType.endsWith('suf')) {
@@ -276,7 +359,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     if (options.removeHyphens) {
         word = word.replace(/-/g, '');
     }
-    const pos = getPartOfSpeech(wordType, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
+    const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
     const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, themeKey === 'all' ? 'normal' : themeKey);
     const example = generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = generatePronunciation(word);
@@ -288,11 +371,24 @@ function generatePronunciation(word) {
     return `/${word.replace(/-/g, ' / ')}/`;
 }
 
-function getPartOfSpeech(type, suffixIndex, theme) {
+function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
     let pos = 'noun'; // Default to noun
     const source = theme === 'all' ? null : themes[theme];
     let suffix = '';
+    let rootPos1 = 'noun', rootPos2 = 'noun';
 
+    // Get the POS of the root(s)
+    if (type.includes('root')) {
+        const rootSource = theme === 'all' ? themes['normal'] : themes[theme]; // Fallback to normal if 'all'
+        if (root1Index !== -1 && rootSource && rootSource.rootPos[root1Index]) {
+            rootPos1 = rootSource.rootPos[root1Index];
+        }
+        if (root2Index !== -1 && rootSource && rootSource.rootPos[root2Index]) {
+            rootPos2 = rootSource.rootPos[root2Index];
+        }
+    }
+
+    // If there's a suffix, it usually determines the POS
     if (type.endsWith('suf') && suffixIndex !== -1) {
         if (source && source.suffixes.length > suffixIndex) suffix = source.suffixes[suffixIndex];
 
@@ -301,9 +397,16 @@ function getPartOfSpeech(type, suffixIndex, theme) {
         if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible', 'ish', 'ive', 'less', 'some', 'y'].includes(suffix)) return 'adjective';
         if (['ics', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ion', 'tion', 'sion', 'ship', 'dom', 'hood', 'logy', 'ology', 'phobia', 'philia', 'er', 'or', 'ant', 'ent', 'ard', 'ry', 'cy', 'tude'].includes(suffix)) return 'noun';
     } else if (type.includes('root') && !type.endsWith('suf')) {
-        // If there's no suffix, the root might determine the POS
-        // For simplicity, assume roots are verbs unless specified otherwise in data
-        pos = 'verb';
+        // If there's no suffix, the root's POS determines the word's POS
+        pos = rootPos1; // Use the first root's POS
+    } else {
+        // If no suffix and no root, default to noun
+        pos = 'noun';
+    }
+
+    // If there are two roots and no suffix, use the first root's POS
+    if ((type === 'pre-root-root' || type === 'root-root') && !type.endsWith('suf')) {
+        pos = rootPos1;
     }
 
     return pos;
@@ -352,7 +455,7 @@ function generateExampleSentence(word, pos, theme) {
 
 function generateOtherForms(word, parts, type, theme) {
     const forms = [];
-    const pos = getPartOfSpeech(type, parts.length > 0 ? parts.findIndex(p => p === parts[parts.length - 1]) : -1, theme);
+    const pos = getPartOfSpeech(type, parts.length > 0 ? parts.findIndex(p => p === parts[parts.length - 1]) : -1, -1, -1, theme);
 
     if (parts.length > 0) {
         const formWord = parts[0];
