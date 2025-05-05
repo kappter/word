@@ -1,560 +1,560 @@
-type,part,term,definition
-normal,prefix,super,additional
-normal,prefix,un,negation
-normal,prefix,anti,opposition
-normal,prefix,inter,connection
-normal,prefix,in,internal
-normal,prefix,ex,external
-normal,prefix,sub,support
-normal,prefix,pre,prior
-normal,prefix,post,subsequent
-normal,prefix,over,excess
-normal,prefix,under,deficiency
-normal,prefix,mid,center
-normal,prefix,auto,self
-normal,prefix,contra,difference
-normal,prefix,co,inclusion
-normal,prefix,trans,movement
-normal,prefix,sub,subordination
-normal,prefix,hyper,superiority
-normal,prefix,hypo,inferiority
-normal,prefix,equi,equality
-normal,root,vid,seeing
-normal,root,aud,hearing
-normal,root,fract,breaking
-normal,root,struct,building
-normal,root,form,shape
-normal,root,port,carrying
-normal,root,tract,pulling
-normal,root,scrib,writing
-normal,root,dict,speaking
-normal,root,spec,looking
-normal,root,therm,heat
-normal,root,hydr,water
-normal,root,phon,sound
-normal,root,graph,writing
-normal,root,chron,time
-normal,root,terr,land
-normal,root,flor,flower
-normal,root,lun,moon
-normal,root,sol,sun
-normal,root,aqua,water
-normal,suffix,ology,study
-normal,suffix,phobia,fear
-normal,suffix,philia,affection
-normal,suffix,ist,expert
-normal,suffix,ly,manner
-normal,suffix,able,capability
-normal,suffix,ful,abundance
-normal,suffix,ness,quality
-normal,suffix,ify,creation
-normal,suffix,ize,process
-normal,suffix,ing,action
-normal,suffix,ment,condition
-normal,suffix,ity,quality
-normal,suffix,ion,action
-normal,suffix,er,agent
-normal,suffix,est,extreme
-normal,suffix,al,relation
-normal,suffix,an,association
-normal,suffix,ic,style
-normal,suffix,ous,possession
-technical,prefix,cyber,digital
-technical,prefix,micro,microscopic
-technical,prefix,bio,biological
-technical,prefix,techno,technological
-technical,prefix,info,informational
-technical,prefix,electro,electrical
-technical,prefix,mecha,mechanical
-technical,prefix,auto,automatic
-technical,prefix,data,data-related
-technical,prefix,quant,quantitative
-technical,prefix,algo,algorithmic
-technical,prefix,neura,neural
-technical,prefix,opto,optical
-technical,prefix,therm,thermal
-technical,prefix,geo,geographic
-technical,prefix,meta,metadata
-technical,prefix,infra,infrastructural
-technical,prefix,macro,macroscopic
-technical,prefix,nano,nanoscale
-technical,prefix,virtu,virtual
-technical,root,comp,computation
-technical,root,sys,system
-technical,root,net,network
-technical,root,code,coding
-technical,root,algo,algorithm
-technical,root,dat,data
-technical,root,mod,model
-technical,root,sim,simulation
-technical,root,opt,optimization
-technical,root,graph,graphics
-technical,root,proc,processing
-technical,root,trans,transmission
-technical,root,sec,security
-technical,root,vir,virtuality
-technical,root,auto,automation
-technical,root,stat,statistics
-technical,root,log,logic
-technical,root,quant,quantification
-technical,root,oper,operation
-technical,root,form,formation
-technical,suffix,ics,science
-technical,suffix,ism,belief
-technical,suffix,ize,action
-technical,suffix,ify,creation
-technical,suffix,ing,process
-technical,suffix,ment,development
-technical,suffix,ity,quality
-technical,suffix,ion,action
-technical,suffix,er,agent
-technical,suffix,al,relation
-technical,suffix,ic,style
-technical,suffix,ous,possession
-technical,suffix,ive,quality
-technical,suffix,able,capability
-technical,suffix,ly,manner
-technical,suffix,ist,expert
-technical,suffix,ness,condition
-technical,suffix,ance,performance
-technical,suffix,ence,experience
-technical,suffix,or,operator
-shakespearian,prefix,oer,over
-shakespearian,prefix,yon,distant
-shakespearian,prefix,for,away
-shakespearian,prefix,en,covered
-shakespearian,prefix,mis,wrong
-shakespearian,prefix,hence,distant
-shakespearian,prefix,fore,toward
-shakespearian,prefix,afore,before
-shakespearian,prefix,twixt,between
-shakespearian,prefix,be,together
-shakespearian,prefix,beseech,apart
-shakespearian,prefix,un,negation
-shakespearian,prefix,with,connection
-shakespearian,prefix,anti,opposition
-shakespearian,prefix,ex,external
-shakespearian,prefix,mid,center
-shakespearian,prefix,co,inclusion
-shakespearian,prefix,trans,movement
-shakespearian,prefix,sub,subordination
-shakespearian,prefix,hyper,superiority
-shakespearian,root,mirth,merriment
-shakespearian,root,wit,cleverness
-shakespearian,root,fain,willingness
-shakespearian,root,woe,sorrow
-shakespearian,root,gall,bravery
-shakespearian,root,quoth,speaking
-shakespearian,root,thine,possession
-shakespearian,root,hath,holding
-shakespearian,root,doth,doing
-shakespearian,root,valor,courage
-shakespearian,root,shrew,temper
-shakespearian,root,bard,poetry
-shakespearian,root,knave,deceit
-shakespearian,root,fool,jester
-shakespearian,root,quest,journey
-shakespearian,root,glee,joy
-shakespearian,root,scorn,disdain
-shakespearian,root,plight,hardship
-shakespearian,root,merry,cheerfulness
-shakespearian,root,fray,battle
-shakespearian,suffix,ful,fullness
-shakespearian,suffix,est,extreme
-shakespearian,suffix,eth,action
-shakespearian,suffix,ard,character
-shakespearian,suffix,ly,manner
-shakespearian,suffix,ness,quality
-shakespearian,suffix,ing,action
-shakespearian,suffix,ment,condition
-shakespearian,suffix,ion,action
-shakespearian,suffix,er,agent
-shakespearian,suffix,al,relation
-shakespearian,suffix,ic,style
-shakespearian,suffix,ous,possession
-shakespearian,suffix,ive,quality
-shakespearian,suffix,able,capability
-shakespearian,suffix,ist,expert
-shakespearian,suffix,ance,performance
-shakespearian,suffix,ence,experience
-shakespearian,suffix,th,outcome
-shakespearian,suffix,ty,nature
-popculture,prefix,mega,massive
-popculture,prefix,ultra,extreme
-popculture,prefix,neo,new
-popculture,prefix,retro,nostalgic
-popculture,prefix,pop,popular
-popculture,prefix,trend,fashionable
-popculture,prefix,viral,spreading
-popculture,prefix,meme,humorous
-popculture,prefix,fan,fanatic
-popculture,prefix,super,additional
-popculture,prefix,un,negation
-popculture,prefix,anti,opposition
-popculture,prefix,inter,connection
-popculture,prefix,in,internal
-popculture,prefix,ex,external
-popculture,prefix,sub,support
-popculture,prefix,pre,prior
-popculture,prefix,post,subsequent
-popculture,prefix,over,excess
-popculture,prefix,under,deficiency
-popculture,root,star,celebrity
-popculture,root,vibe,feeling
-popculture,root,hype,excitement
-popculture,root,trend,fashion
-popculture,root,icon,symbol
-popculture,root,ship,relationship
-popculture,root,fan,enthusiast
-popculture,root,beat,rhythm
-popculture,root,stream,media
-popculture,root,chat,discussion
-popculture,root,game,competition
-popculture,root,score,achievement
-popculture,root,flex,boast
-popculture,root,click,attention
-popculture,root,share,distribution
-popculture,root,buzz,interest
-popculture,root,clip,moment
-popculture,root,post,sharing
-popculture,root,like,approval
-popculture,root,flick,movie
-popculture,suffix,ify,creation
-popculture,suffix,ize,action
-popculture,suffix,er,agent
-popculture,suffix,ing,action
-popculture,suffix,ment,condition
-popculture,suffix,ion,action
-popculture,suffix,al,relation
-popculture,suffix,ic,style
-popculture,suffix,ous,possession
-popculture,suffix,ive,quality
-popculture,suffix,able,capability
-popculture,suffix,ly,manner
-popculture,suffix,ist,expert
-popculture,suffix,ness,condition
-popculture,suffix,ance,performance
-popculture,suffix,ence,experience
-popculture,suffix,ty,nature
-popculture,suffix,ism,belief
-popculture,suffix,ship,connection
-popculture,suffix,dom,realm
-astronomy,prefix,astro,stellar
-astronomy,prefix,cosmo,cosmic
-astronomy,prefix,galacto,galactic
-astronomy,prefix,star,starry
-astronomy,prefix,lun,lunar
-astronomy,prefix,sol,solar
-astronomy,prefix,neb,nebulous
-astronomy,prefix,orb,orbital
-astronomy,prefix,nova,explosive
-astronomy,prefix,helio,sun-related
-astronomy,prefix,un,negation
-astronomy,prefix,anti,opposition
-astronomy,prefix,inter,connection
-astronomy,prefix,in,internal
-astronomy,prefix,ex,external
-astronomy,prefix,sub,support
-astronomy,prefix,pre,prior
-astronomy,prefix,post,subsequent
-astronomy,prefix,over,excess
-astronomy,prefix,under,deficiency
-astronomy,root,star,stars
-astronomy,root,plan,planet
-astronomy,root,neb,nebula
-astronomy,root,galax,galaxy
-astronomy,root,orbit,orbiting
-astronomy,root,light,illumination
-astronomy,root,scope,observation
-astronomy,root,spectr,spectrum
-astronomy,root,grav,gravity
-astronomy,root,cosm,cosmos
-astronomy,root,clust,cluster
-astronomy,root,fluct,fluctuation
-astronomy,root,ray,radiation
-astronomy,root,wave,waveform
-astronomy,root,field,field
-astronomy,root,mass,massive
-astronomy,root,burst,eruption
-astronomy,root,shift,displacement
-astronomy,root,core,center
-astronomy,root,sphere,sphere
-astronomy,suffix,oid,resemblance
-astronomy,suffix,ology,study
-astronomy,suffix,ic,style
-astronomy,suffix,al,relation
-astronomy,suffix,ar,association
-astronomy,suffix,ian,origin
-astronomy,suffix,ite,object
-astronomy,suffix,ism,belief
-astronomy,suffix,ize,action
-astronomy,suffix,ify,creation
-astronomy,suffix,ing,process
-astronomy,suffix,ment,development
-astronomy,suffix,ity,quality
-astronomy,suffix,ion,action
-astronomy,suffix,er,agent
-astronomy,suffix,est,extreme
-astronomy,suffix,ive,quality
-astronomy,suffix,able,capability
-astronomy,suffix,ly,manner
-astronomy,suffix,ness,condition
-fantasy,prefix,magi,magical
-fantasy,prefix,elven,elf-related
-fantasy,prefix,draco,dragon-related
-fantasy,prefix,myth,mythical
-fantasy,prefix,arcane,mysterious
-fantasy,prefix,faerie,fairy-related
-fantasy,prefix,shadow,dark
-fantasy,prefix,light,bright
-fantasy,prefix,ether,ethereal
-fantasy,prefix,run,runic
-fantasy,prefix,un,negation
-fantasy,prefix,anti,opposition
-fantasy,prefix,inter,connection
-fantasy,prefix,in,internal
-fantasy,prefix,ex,external
-fantasy,prefix,sub,support
-fantasy,prefix,pre,prior
-fantasy,prefix,post,subsequent
-fantasy,prefix,over,excess
-fantasy,prefix,under,deficiency
-fantasy,root,spell,magic
-fantasy,root,blade,weapon
-fantasy,root,realm,kingdom
-fantasy,root,quest,adventure
-fantasy,root,dragon,beast
-fantasy,root,rune,symbol
-fantasy,root,mana,energy
-fantasy,root,forge,creation
-fantasy,root,shade,shadow
-fantasy,root,flame,fire
-fantasy,root,wind,air
-fantasy,root,stone,earth
-fantasy,root,wave,water
-fantasy,root,light,illumination
-fantasy,root,curse,hex
-fantasy,root,beast,creature
-fantasy,root,knight,warrior
-fantasy,root,wizard,sorcerer
-fantasy,root,fairy,spirit
-fantasy,root,myth,legend
-fantasy,suffix,ic,style
-fantasy,suffix,al,relation
-fantasy,suffix,ar,association
-fantasy,suffix,ian,origin
-fantasy,suffix,ite,object
-fantasy,suffix,ism,belief
-fantasy,suffix,ize,action
-fantasy,suffix,ify,creation
-fantasy,suffix,ing,process
-fantasy,suffix,ment,development
-fantasy,suffix,ity,quality
-fantasy,suffix,ion,action
-fantasy,suffix,er,agent
-fantasy,suffix,est,extreme
-fantasy,suffix,ive,quality
-fantasy,suffix,able,capability
-fantasy,suffix,ly,manner
-fantasy,suffix,ness,condition
-fantasy,suffix,dom,realm
-fantasy,suffix,ship,connection
-Normal,prefix,a-,"without or not"
-Normal,prefix,ab-,away
-Normal,prefix,ad-,"to, forward"
-Normal,prefix,ante-,before
-Normal,prefix,anti-,against
-Normal,prefix,auto-,self
-Normal,prefix,circum-,"round, around"
-Normal,prefix,com-,"with, together"
-Normal,prefix,co-,"with, together"
-Normal,prefix,con-,"with, together"
-Normal,prefix,contra-,against
-Normal,prefix,counter-,against
-Normal,prefix,de-,"down, off, reversed"
-Normal,prefix,dia-,through
-Normal,prefix,dis-,not
-Normal,prefix,e-,"out of"
-Normal,prefix,en-,"put into, cover"
-Normal,prefix,ex-,"out of, from"
-Normal,prefix,equi-,equal
-Normal,prefix,extra-,"above, outside"
-Normal,prefix,hetero-,different
-Normal,prefix,homo-,same
-Normal,prefix,hyper-,over
-Normal,prefix,il-,not
-Normal,prefix,im-,not
-Normal,prefix,in-,"in or not"
-Normal,prefix,intra-,within
-Normal,prefix,inter-,"between or among"
-Normal,prefix,ir-,not
-Normal,prefix,magni-,large
-Normal,prefix,micro-,small
-Normal,prefix,mis-,wrong
-Normal,prefix,mono-,one
-Normal,prefix,multi-,many
-Normal,prefix,neo-,new
-Normal,prefix,non-,not
-Normal,prefix,ob-,against
-Normal,prefix,over-,"too much"
-Normal,prefix,pan-,all
-Normal,prefix,per-,through
-Normal,prefix,peri-,around
-Normal,prefix,poly-,many
-Normal,prefix,post-,after
-Normal,prefix,pre-,before
-Normal,prefix,pro-,forward
-Normal,prefix,pseudo-,false
-Normal,prefix,re-,"again or back"
-Normal,prefix,retro-,backward
-Normal,prefix,sub-,under
-Normal,prefix,super-,over
-Normal,prefix,sym-,"with or together"
-Normal,prefix,syn-,"with or together"
-Normal,prefix,trans-,across
-Normal,prefix,un-,not
-Normal,root,act,do
-Normal,root,aud,hear
-Normal,root,bene,good
-Normal,root,bio,life
-Normal,root,chron,time
-Normal,root,cred,believe
-Normal,root,dict,say
-Normal,root,duc,lead
-Normal,root,fac,make
-Normal,root,form,shape
-Normal,root,graph,write
-Normal,root,ject,throw
-Normal,root,log,word
-Normal,root,mit,send
-Normal,root,mot,move
-Normal,root,ped,foot
-Normal,root,phon,sound
-Normal,root,port,carry
-Normal,root,rupt,break
-Normal,root,scrib,write
-Normal,root,spec,see
-Normal,root,struct,build
-Normal,root,terr,earth
-Normal,root,therm,heat
-Normal,root,tract,pull
-Normal,root,vac,empty
-Normal,root,vid,see
-Normal,root,vis,see
-Normal,root,voc,call
-Normal,suffix,-able,"capable of"
-Normal,suffix,-ible,"capable of"
-Normal,suffix,-al,"relating to"
-Normal,suffix,-ial,"relating to"
-Normal,suffix,-an,"relating to"
-Normal,suffix,-ian,"relating to"
-Normal,suffix,-ant,performing
-Normal,suffix,-ent,performing
-Normal,suffix,-ary,"relating to"
-Normal,suffix,-ory,"relating to"
-Normal,suffix,-ate,make
-Normal,suffix,-cy,"state of being"
-Normal,suffix,-dom,"state of being"
-Normal,suffix,-en,make
-Normal,suffix,-ence,"state of being"
-Normal,suffix,-ance,"state of being"
-Normal,suffix,-er,"one who"
-Normal,suffix,-or,"one who"
-Normal,suffix,-escent,becoming
-Normal,suffix,-fy,make
-Normal,suffix,-hood,"state of being"
-Normal,suffix,-ic,"relating to"
-Normal,suffix,-ify,make
-Normal,suffix,-ion,"act of"
-Normal,suffix,-tion,"act of"
-Normal,suffix,-sion,"act of"
-Normal,suffix,-ish,resembling
-Normal,suffix,-ism,"belief in"
-Normal,suffix,-ist,"one who practices"
-Normal,suffix,-ity,"state of being"
-Normal,suffix,-ty,"state of being"
-Normal,suffix,-ive,"relating to"
-Normal,suffix,-ize,make
-Normal,suffix,-less,without
-Normal,suffix,-logy,"study of"
-Normal,suffix,-ly,"in the manner of"
-Normal,suffix,-ment,"action or process"
-Normal,suffix,-ness,"state of being"
-Normal,suffix,-ous,"full of"
-Normal,suffix,-eous,"full of"
-Normal,suffix,-ious,"full of"
-Normal,suffix,-ship,"state of being"
-Normal,suffix,-some,like
-Normal,suffix,-tude,"state of being"
-Normal,suffix,-ward,"in the direction of"
-Normal,suffix,-y,"full of"
-Math,prefix,uni-,one
-Math,prefix,mono-,one
-Math,prefix,solo-,one
-Math,prefix,bi-,two
-Math,prefix,duo-,two
-Math,prefix,tri-,three
-Math,prefix,quadr-,four
-Math,prefix,tetra-,four
-Math,prefix,penta-,five
-Math,prefix,hexa-,six
-Math,prefix,hepta-,seven
-Math,prefix,octo-,eight
-Math,prefix,nona-,nine
-Math,prefix,deca-,ten
-Math,prefix,centi-,hundredth
-Math,prefix,milli-,thousandth
-Math,prefix,kilo-,thousand
-Math,prefix,mega-,million
-Math,prefix,giga-,billion
-Math,prefix,tera-,trillion
-Math,prefix,micro-,millionth
-Math,prefix,nano-,billionth
-Math,prefix,pico-,trillionth
-Math,prefix,femto-,quadrillionth
-Math,suffix,-gon,"shape with angles"
-Math,suffix,-metry,"measurement of"
-Math,suffix,-tion,"process of"
-Math,suffix,-hedron,"solid figure with faces"
-Math,root,equi,equal
-Math,root,fract,break
-Math,root,geo,"earth (geometry)"
-Math,root,graph,"write (graphing)"
-Math,root,log,"reason (logic)"
-Math,root,numer,number
-Math,root,poly,many
-Math,root,stat,"stand (statistics)"
-Math,root,calc,"stone (calculate)"
-Math,root,alg,"pain (algebra - originally setting bones)"
-Math,root,arithm,number
-Math,root,prob,"prove (probability)"
-Math,root,vect,"carry (vector)"
-Geography,root,iso,"equal: isobar; isotherm; isocline"
-Geography,root,nimb,"rain: nimbus; cumulonimbus"
-Geography,root,therm,"heat: thermal; geothermal; thermometer"
-Geography,root,circ,"ring, around: circumference; circular; circulate"
-Geography,root,eco,"environment: ecology; ecosystem; ecocline"
-Geography,root,halo,"salt: halite; halogens; halocline"
-Geography,prefix,micro,"small: microclimate; microwave"
-Geography,prefix,trans,"across: transfer; transpiration"
-Geography,root,crust,"shell: crust; encrusted; crustal"
-Geography,prefix,epi,"upon, above: epicenter; epicycle"
-Geography,root,flu,"flowing: fluid; fluctuate; magnetic flux"
-Geography,root,fluc,"flowing: fluid; fluctuate; magnetic flux"
-Geography,root,glaci,"ice: glacier; glacial; glaze"
-Geography,root,grav,"heavy: gravity; gravitate"
-Geography,root,ign,"fire: igneous; ignite; ignition"
-Geography,root,litho,"stone: lithosphere; lithify; lithograph"
-Geography,root,lum,"light: illuminate; luminous; bioluminescence"
-Geography,root,magn,"great: magnitude; magnify"
-Geography,root,meta,"change: metamorphic; metabolism; metamorphosis"
-Geography,root,morph,"form: morphology; metamorphic; polymorph"
-Geography,root,ob,"against: oblique; obscure; obtuse"
-Geography,root,petr,"rock: petrify; petroleum; petrology"
-Geography,root,seismo,"earthquake: seismology; seismograph; seismic wave"
-Geography,root,strati,"layer: stratify; stratosphere; stratum"
-Geography,root,sub,"under: subduction; submarine; subterranean"
-Geography,root,tecto,"building: tectonic; architect"
-Geography,root,terr,"land: terrain; territory; terrestrial"
-Geography,root,volv,"roll: revolve; involve; evolve"
-Geography,root,zo,"animal: zoology; zoogeography; zootoxin"
+type,part,term,definition,pos
+normal,prefix,super,additional,""
+normal,prefix,un,negation,""
+normal,prefix,anti,opposition,""
+normal,prefix,inter,connection,""
+normal,prefix,in,internal,""
+normal,prefix,ex,external,""
+normal,prefix,sub,support,""
+normal,prefix,pre,prior,""
+normal,prefix,post,subsequent,""
+normal,prefix,over,excess,""
+normal,prefix,under,deficiency,""
+normal,prefix,mid,center,""
+normal,prefix,auto,self,""
+normal,prefix,contra,difference,""
+normal,prefix,co,inclusion,""
+normal,prefix,trans,movement,""
+normal,prefix,sub,subordination,""
+normal,prefix,hyper,superiority,""
+normal,prefix,hypo,inferiority,""
+normal,prefix,equi,equality,""
+normal,root,vid,seeing,verb
+normal,root,aud,hearing,verb
+normal,root,fract,breaking,verb
+normal,root,struct,building,verb
+normal,root,form,shape,noun
+normal,root,port,carrying,verb
+normal,root,tract,pulling,verb
+normal,root,scrib,writing,verb
+normal,root,dict,speaking,verb
+normal,root,spec,looking,verb
+normal,root,therm,heat,noun
+normal,root,hydr,water,noun
+normal,root,phon,sound,noun
+normal,root,graph,writing,noun
+normal,root,chron,time,noun
+normal,root,terr,land,noun
+normal,root,flor,flower,noun
+normal,root,lun,moon,noun
+normal,root,sol,sun,noun
+normal,root,aqua,water,noun
+normal,suffix,ology,study,""
+normal,suffix,phobia,fear,""
+normal,suffix,philia,affection,""
+normal,suffix,ist,expert,""
+normal,suffix,ly,manner,""
+normal,suffix,able,capability,""
+normal,suffix,ful,abundance,""
+normal,suffix,ness,quality,""
+normal,suffix,ify,creation,""
+normal,suffix,ize,process,""
+normal,suffix,ing,action,""
+normal,suffix,ment,condition,""
+normal,suffix,ity,quality,""
+normal,suffix,ion,action,""
+normal,suffix,er,agent,""
+normal,suffix,est,extreme,""
+normal,suffix,al,relation,""
+normal,suffix,an,association,""
+normal,suffix,ic,style,""
+normal,suffix,ous,possession,""
+technical,prefix,cyber,digital,""
+technical,prefix,micro,microscopic,""
+technical,prefix,bio,biological,""
+technical,prefix,techno,technological,""
+technical,prefix,info,informational,""
+technical,prefix,electro,electrical,""
+technical,prefix,mecha,mechanical,""
+technical,prefix,auto,automatic,""
+technical,prefix,data,data-related,""
+technical,prefix,quant,quantitative,""
+technical,prefix,algo,algorithmic,""
+technical,prefix,neura,neural,""
+technical,prefix,opto,optical,""
+technical,prefix,therm,thermal,""
+technical,prefix,geo,geographic,""
+technical,prefix,meta,metadata,""
+technical,prefix,infra,infrastructural,""
+technical,prefix,macro,macroscopic,""
+technical,prefix,nano,nanoscale,""
+technical,prefix,virtu,virtual,""
+technical,root,comp,computation,noun
+technical,root,sys,system,noun
+technical,root,net,network,noun
+technical,root,code,coding,noun
+technical,root,algo,algorithm,noun
+technical,root,dat,data,noun
+technical,root,mod,model,noun
+technical,root,sim,simulation,noun
+technical,root,opt,optimization,noun
+technical,root,graph,graphics,noun
+technical,root,proc,processing,noun
+technical,root,trans,transmission,noun
+technical,root,sec,security,noun
+technical,root,vir,virtuality,noun
+technical,root,auto,automation,noun
+technical,root,stat,statistics,noun
+technical,root,log,logic,noun
+technical,root,quant,quantification,noun
+technical,root,oper,operation,noun
+technical,root,form,formation,noun
+technical,suffix,ics,science,""
+technical,suffix,ism,belief,""
+technical,suffix,ize,action,""
+technical,suffix,ify,creation,""
+technical,suffix,ing,process,""
+technical,suffix,ment,development,""
+technical,suffix,ity,quality,""
+technical,suffix,ion,action,""
+technical,suffix,er,agent,""
+technical,suffix,al,relation,""
+technical,suffix,ic,style,""
+technical,suffix,ous,possession,""
+technical,suffix,ive,quality,""
+technical,suffix,able,capability,""
+technical,suffix,ly,manner,""
+technical,suffix,ist,expert,""
+technical,suffix,ness,condition,""
+technical,suffix,ance,performance,""
+technical,suffix,ence,experience,""
+technical,suffix,or,operator,""
+shakespearian,prefix,oer,over,""
+shakespearian,prefix,yon,distant,""
+shakespearian,prefix,for,away,""
+shakespearian,prefix,en,covered,""
+shakespearian,prefix,mis,wrong,""
+shakespearian,prefix,hence,distant,""
+shakespearian,prefix,fore,toward,""
+shakespearian,prefix,afore,before,""
+shakespearian,prefix,twixt,between,""
+shakespearian,prefix,be,together,""
+shakespearian,prefix,beseech,apart,""
+shakespearian,prefix,un,negation,""
+shakespearian,prefix,with,connection,""
+shakespearian,prefix,anti,opposition,""
+shakespearian,prefix,ex,external,""
+shakespearian,prefix,mid,center,""
+shakespearian,prefix,co,inclusion,""
+shakespearian,prefix,trans,movement,""
+shakespearian,prefix,sub,subordination,""
+shakespearian,prefix,hyper,superiority,""
+shakespearian,root,mirth,merriment,noun
+shakespearian,root,wit,cleverness,noun
+shakespearian,root,fain,willingness,noun
+shakespearian,root,woe,sorrow,noun
+shakespearian,root,gall,bravery,noun
+shakespearian,root,quoth,speaking,verb
+shakespearian,root,thine,possession,noun
+shakespearian,root,hath,holding,verb
+shakespearian,root,doth,doing,verb
+shakespearian,root,valor,courage,noun
+shakespearian,root,shrew,temper,noun
+shakespearian,root,bard,poetry,noun
+shakespearian,root,knave,deceit,noun
+shakespearian,root,fool,jester,noun
+shakespearian,root,quest,journey,noun
+shakespearian,root,glee,joy,noun
+shakespearian,root,scorn,disdain,noun
+shakespearian,root,plight,hardship,noun
+shakespearian,root,merry,cheerfulness,noun
+shakespearian,root,fray,battle,noun
+shakespearian,suffix,ful,fullness,""
+shakespearian,suffix,est,extreme,""
+shakespearian,suffix,eth,action,""
+shakespearian,suffix,ard,character,""
+shakespearian,suffix,ly,manner,""
+shakespearian,suffix,ness,quality,""
+shakespearian,suffix,ing,action,""
+shakespearian,suffix,ment,condition,""
+shakespearian,suffix,ion,action,""
+shakespearian,suffix,er,agent,""
+shakespearian,suffix,al,relation,""
+shakespearian,suffix,ic,style,""
+shakespearian,suffix,ous,possession,""
+shakespearian,suffix,ive,quality,""
+shakespearian,suffix,able,capability,""
+shakespearian,suffix,ist,expert,""
+shakespearian,suffix,ance,performance,""
+shakespearian,suffix,ence,experience,""
+shakespearian,suffix,th,outcome,""
+shakespearian,suffix,ty,nature,""
+popculture,prefix,mega,massive,""
+popculture,prefix,ultra,extreme,""
+popculture,prefix,neo,new,""
+popculture,prefix,retro,nostalgic,""
+popculture,prefix,pop,popular,""
+popculture,prefix,trend,fashionable,""
+popculture,prefix,viral,spreading,""
+popculture,prefix,meme,humorous,""
+popculture,prefix,fan,fanatic,""
+popculture,prefix,super,additional,""
+popculture,prefix,un,negation,""
+popculture,prefix,anti,opposition,""
+popculture,prefix,inter,connection,""
+popculture,prefix,in,internal,""
+popculture,prefix,ex,external,""
+popculture,prefix,sub,support,""
+popculture,prefix,pre,prior,""
+popculture,prefix,post,subsequent,""
+popculture,prefix,over,excess,""
+popculture,prefix,under,deficiency,""
+popculture,root,star,celebrity,noun
+popculture,root,vibe,feeling,noun
+popculture,root,hype,excitement,noun
+popculture,root,trend,fashion,noun
+popculture,root,icon,symbol,noun
+popculture,root,ship,relationship,noun
+popculture,root,fan,enthusiast,noun
+popculture,root,beat,rhythm,noun
+popculture,root,stream,media,noun
+popculture,root,chat,discussion,noun
+popculture,root,game,competition,noun
+popculture,root,score,achievement,noun
+popculture,root,flex,boast,verb
+popculture,root,click,attention,noun
+popculture,root,share,distribution,verb
+popculture,root,buzz,interest,noun
+popculture,root,clip,moment,noun
+popculture,root,post,sharing,noun
+popculture,root,like,approval,noun
+popculture,root,flick,movie,noun
+popculture,suffix,ify,creation,""
+popculture,suffix,ize,action,""
+popculture,suffix,er,agent,""
+popculture,suffix,ing,action,""
+popculture,suffix,ment,condition,""
+popculture,suffix,ion,action,""
+popculture,suffix,al,relation,""
+popculture,suffix,ic,style,""
+popculture,suffix,ous,possession,""
+popculture,suffix,ive,quality,""
+popculture,suffix,able,capability,""
+popculture,suffix,ly,manner,""
+popculture,suffix,ist,expert,""
+popculture,suffix,ness,condition,""
+popculture,suffix,ance,performance,""
+popculture,suffix,ence,experience,""
+popculture,suffix,ty,nature,""
+popculture,suffix,ism,belief,""
+popculture,suffix,ship,connection,""
+popculture,suffix,dom,realm,""
+astronomy,prefix,astro,stellar,""
+astronomy,prefix,cosmo,cosmic,""
+astronomy,prefix,galacto,galactic,""
+astronomy,prefix,star,starry,""
+astronomy,prefix,lun,lunar,""
+astronomy,prefix,sol,solar,""
+astronomy,prefix,neb,nebulous,""
+astronomy,prefix,orb,orbital,""
+astronomy,prefix,nova,explosive,""
+astronomy,prefix,helio,sun-related,""
+astronomy,prefix,un,negation,""
+astronomy,prefix,anti,opposition,""
+astronomy,prefix,inter,connection,""
+astronomy,prefix,in,internal,""
+astronomy,prefix,ex,external,""
+astronomy,prefix,sub,support,""
+astronomy,prefix,pre,prior,""
+astronomy,prefix,post,subsequent,""
+astronomy,prefix,over,excess,""
+astronomy,prefix,under,deficiency,""
+astronomy,root,star,stars,noun
+astronomy,root,plan,planet,noun
+astronomy,root,neb,nebula,noun
+astronomy,root,galax,galaxy,noun
+astronomy,root,orbit,orbiting,noun
+astronomy,root,light,illumination,noun
+astronomy,root,scope,observation,noun
+astronomy,root,spectr,spectrum,noun
+astronomy,root,grav,gravity,noun
+astronomy,root,cosm,cosmos,noun
+astronomy,root,clust,cluster,noun
+astronomy,root,fluct,fluctuation,noun
+astronomy,root,ray,radiation,noun
+astronomy,root,wave,waveform,noun
+astronomy,root,field,field,noun
+astronomy,root,mass,massive,noun
+astronomy,root,burst,eruption,noun
+astronomy,root,shift,displacement,noun
+astronomy,root,core,center,noun
+astronomy,root,sphere,sphere,noun
+astronomy,suffix,oid,resemblance,""
+astronomy,suffix,ology,study,""
+astronomy,suffix,ic,style,""
+astronomy,suffix,al,relation,""
+astronomy,suffix,ar,association,""
+astronomy,suffix,ian,origin,""
+astronomy,suffix,ite,object,""
+astronomy,suffix,ism,belief,""
+astronomy,suffix,ize,action,""
+astronomy,suffix,ify,creation,""
+astronomy,suffix,ing,process,""
+astronomy,suffix,ment,development,""
+astronomy,suffix,ity,quality,""
+astronomy,suffix,ion,action,""
+astronomy,suffix,er,agent,""
+astronomy,suffix,est,extreme,""
+astronomy,suffix,ive,quality,""
+astronomy,suffix,able,capability,""
+astronomy,suffix,ly,manner,""
+astronomy,suffix,ness,condition,""
+fantasy,prefix,magi,magical,""
+fantasy,prefix,elven,elf-related,""
+fantasy,prefix,draco,dragon-related,""
+fantasy,prefix,myth,mythical,""
+fantasy,prefix,arcane,mysterious,""
+fantasy,prefix,faerie,fairy-related,""
+fantasy,prefix,shadow,dark,""
+fantasy,prefix,light,bright,""
+fantasy,prefix,ether,ethereal,""
+fantasy,prefix,run,runic,""
+fantasy,prefix,un,negation,""
+fantasy,prefix,anti,opposition,""
+fantasy,prefix,inter,connection,""
+fantasy,prefix,in,internal,""
+fantasy,prefix,ex,external,""
+fantasy,prefix,sub,support,""
+fantasy,prefix,pre,prior,""
+fantasy,prefix,post,subsequent,""
+fantasy,prefix,over,excess,""
+fantasy,prefix,under,deficiency,""
+fantasy,root,spell,magic,noun
+fantasy,root,blade,weapon,noun
+fantasy,root,realm,kingdom,noun
+fantasy,root,quest,adventure,noun
+fantasy,root,dragon,beast,noun
+fantasy,root,rune,symbol,noun
+fantasy,root,mana,energy,noun
+fantasy,root,forge,creation,noun
+fantasy,root,shade,shadow,noun
+fantasy,root,flame,fire,noun
+fantasy,root,wind,air,noun
+fantasy,root,stone,earth,noun
+fantasy,root,wave,water,noun
+fantasy,root,light,illumination,noun
+fantasy,root,curse,hex,noun
+fantasy,root,beast,creature,noun
+fantasy,root,knight,warrior,noun
+fantasy,root,wizard,sorcerer,noun
+fantasy,root,fairy,spirit,noun
+fantasy,root,myth,legend,noun
+fantasy,suffix,ic,style,""
+fantasy,suffix,al,relation,""
+fantasy,suffix,ar,association,""
+fantasy,suffix,ian,origin,""
+fantasy,suffix,ite,object,""
+fantasy,suffix,ism,belief,""
+fantasy,suffix,ize,action,""
+fantasy,suffix,ify,creation,""
+fantasy,suffix,ing,process,""
+fantasy,suffix,ment,development,""
+fantasy,suffix,ity,quality,""
+fantasy,suffix,ion,action,""
+fantasy,suffix,er,agent,""
+fantasy,suffix,est,extreme,""
+fantasy,suffix,ive,quality,""
+fantasy,suffix,able,capability,""
+fantasy,suffix,ly,manner,""
+fantasy,suffix,ness,condition,""
+fantasy,suffix,dom,realm,""
+fantasy,suffix,ship,connection,""
+Normal,prefix,a-,"without or not",""
+Normal,prefix,ab-,away,""
+Normal,prefix,ad-,"to, forward",""
+Normal,prefix,ante-,before,""
+Normal,prefix,anti-,against,""
+Normal,prefix,auto-,self,""
+Normal,prefix,circum-,"round, around",""
+Normal,prefix,com-,"with, together",""
+Normal,prefix,co-,"with, together",""
+Normal,prefix,con-,"with, together",""
+Normal,prefix,contra-,against,""
+Normal,prefix,counter-,against,""
+Normal,prefix,de-,"down, off, reversed",""
+Normal,prefix,dia-,through,""
+Normal,prefix,dis-,not,""
+Normal,prefix,e-,"out of",""
+Normal,prefix,en-,"put into, cover",""
+Normal,prefix,ex-,"out of, from",""
+Normal,prefix,equi-,equal,""
+Normal,prefix,extra-,"above, outside",""
+Normal,prefix,hetero-,different,""
+Normal,prefix,homo-,same,""
+Normal,prefix,hyper-,over,""
+Normal,prefix,il-,not,""
+Normal,prefix,im-,not,""
+Normal,prefix,in-,"in or not",""
+Normal,prefix,intra-,within,""
+Normal,prefix,inter-,"between or among",""
+Normal,prefix,ir-,not,""
+Normal,prefix,magni-,large,""
+Normal,prefix,micro-,small,""
+Normal,prefix,mis-,wrong,""
+Normal,prefix,mono-,one,""
+Normal,prefix,multi-,many,""
+Normal,prefix,neo-,new,""
+Normal,prefix,non-,not,""
+Normal,prefix,ob-,against,""
+Normal,prefix,over-,"too much",""
+Normal,prefix,pan-,all,""
+Normal,prefix,per-,through,""
+Normal,prefix,peri-,around,""
+Normal,prefix,poly-,many,""
+Normal,prefix,post-,after,""
+Normal,prefix,pre-,before,""
+Normal,prefix,pro-,forward,""
+Normal,prefix,pseudo-,false,""
+Normal,prefix,re-,"again or back",""
+Normal,prefix,retro-,backward,""
+Normal,prefix,sub-,under,""
+Normal,prefix,super-,over,""
+Normal,prefix,sym-,"with or together",""
+Normal,prefix,syn-,"with or together",""
+Normal,prefix,trans-,across,""
+Normal,prefix,un-,not,""
+Normal,root,act,do,verb
+Normal,root,aud,hear,verb
+Normal,root,bene,good,adjective
+Normal,root,bio,life,noun
+Normal,root,chron,time,noun
+Normal,root,cred,believe,verb
+Normal,root,dict,say,verb
+Normal,root,duc,lead,verb
+Normal,root,fac,make,verb
+Normal,root,form,shape,noun
+Normal,root,graph,write,noun
+Normal,root,ject,throw,verb
+Normal,root,log,word,noun
+Normal,root,mit,send,verb
+Normal,root,mot,move,verb
+Normal,root,ped,foot,noun
+Normal,root,phon,sound,noun
+Normal,root,port,carry,verb
+Normal,root,rupt,break,verb
+Normal,root,scrib,write,verb
+Normal,root,spec,see,verb
+Normal,root,struct,build,verb
+Normal,root,terr,earth,noun
+Normal,root,therm,heat,noun
+Normal,root,tract,pull,verb
+Normal,root,vac,empty,adjective
+Normal,root,vid,see,verb
+Normal,root,vis,see,verb
+Normal,root,voc,call,verb
+Normal,suffix,-able,"capable of",""
+Normal,suffix,-ible,"capable of",""
+Normal,suffix,-al,"relating to",""
+Normal,suffix,-ial,"relating to",""
+Normal,suffix,-an,"relating to",""
+Normal,suffix,-ian,"relating to",""
+Normal,suffix,-ant,performing,""
+Normal,suffix,-ent,performing,""
+Normal,suffix,-ary,"relating to",""
+Normal,suffix,-ory,"relating to",""
+Normal,suffix,-ate,make,""
+Normal,suffix,-cy,"state of being",""
+Normal,suffix,-dom,"state of being",""
+Normal,suffix,-en,make,""
+Normal,suffix,-ence,"state of being",""
+Normal,suffix,-ance,"state of being",""
+Normal,suffix,-er,"one who",""
+Normal,suffix,-or,"one who",""
+Normal,suffix,-escent,becoming,""
+Normal,suffix,-fy,make,""
+Normal,suffix,-hood,"state of being",""
+Normal,suffix,-ic,"relating to",""
+Normal,suffix,-ify,make,""
+Normal,suffix,-ion,"act of",""
+Normal,suffix,-tion,"act of",""
+Normal,suffix,-sion,"act of",""
+Normal,suffix,-ish,resembling,""
+Normal,suffix,-ism,"belief in",""
+Normal,suffix,-ist,"one who practices",""
+Normal,suffix,-ity,"state of being",""
+Normal,suffix,-ty,"state of being",""
+Normal,suffix,-ive,"relating to",""
+Normal,suffix,-ize,make,""
+Normal,suffix,-less,without,""
+Normal,suffix,-logy,"study of",""
+Normal,suffix,-ly,"in the manner of",""
+Normal,suffix,-ment,"action or process",""
+Normal,suffix,-ness,"state of being",""
+Normal,suffix,-ous,"full of",""
+Normal,suffix,-eous,"full of",""
+Normal,suffix,-ious,"full of",""
+Normal,suffix,-ship,"state of being",""
+Normal,suffix,-some,like,""
+Normal,suffix,-tude,"state of being",""
+Normal,suffix,-ward,"in the direction of",""
+Normal,suffix,-y,"full of",""
+Math,prefix,uni-,one,""
+Math,prefix,mono-,one,""
+Math,prefix,solo-,one,""
+Math,prefix,bi-,two,""
+Math,prefix,duo-,two,""
+Math,prefix,tri-,three,""
+Math,prefix,quadr-,four,""
+Math,prefix,tetra-,four,""
+Math,prefix,penta-,five,""
+Math,prefix,hexa-,six,""
+Math,prefix,hepta-,seven,""
+Math,prefix,octo-,eight,""
+Math,prefix,nona-,nine,""
+Math,prefix,deca-,ten,""
+Math,prefix,centi-,hundredth,""
+Math,prefix,milli-,thousandth,""
+Math,prefix,kilo-,thousand,""
+Math,prefix,mega-,million,""
+Math,prefix,giga-,billion,""
+Math,prefix,tera-,trillion,""
+Math,prefix,micro-,millionth,""
+Math,prefix,nano-,billionth,""
+Math,prefix,pico-,trillionth,""
+Math,prefix,femto-,quadrillionth,""
+Math,suffix,-gon,"shape with angles",""
+Math,suffix,-metry,"measurement of",""
+Math,suffix,-tion,"process of",""
+Math,suffix,-hedron,"solid figure with faces",""
+Math,root,equi,equal,adjective
+Math,root,fract,break,verb
+Math,root,geo,"earth (geometry)",noun
+Math,root,graph,"write (graphing)",noun
+Math,root,log,"reason (logic)",noun
+Math,root,numer,number,noun
+Math,root,poly,many,adjective
+Math,root,stat,"stand (statistics)",noun
+Math,root,calc,"stone (calculate)",verb
+Math,root,alg,"pain (algebra - originally setting bones)",noun
+Math,root,arithm,number,noun
+Math,root,prob,"prove (probability)",noun
+Math,root,vect,"carry (vector)",noun
+Geography,root,iso,"equal: isobar; isotherm; isocline",adjective
+Geography,root,nimb,"rain: nimbus; cumulonimbus",noun
+Geography,root,therm,"heat: thermal; geothermal; thermometer",noun
+Geography,root,circ,"ring, around: circumference; circular; circulate",noun
+Geography,root,eco,"environment: ecology; ecosystem; ecocline",noun
+Geography,root,halo,"salt: halite; halogens; halocline",noun
+Geography,prefix,micro,"small: microclimate; microwave",""
+Geography,prefix,trans,"across: transfer; transpiration",""
+Geography,root,crust,"shell: crust; encrusted; crustal",noun
+Geography,prefix,epi,"upon, above: epicenter; epicycle",""
+Geography,root,flu,"flowing: fluid; fluctuate; magnetic flux",verb
+Geography,root,fluc,"flowing: fluid; fluctuate; magnetic flux",verb
+Geography,root,glaci,"ice: glacier; glacial; glaze",noun
+Geography,root,grav,"heavy: gravity; gravitate",noun
+Geography,root,ign,"fire: igneous; ignite; ignition",noun
+Geography,root,litho,"stone: lithosphere; lithify; lithograph",noun
+Geography,root,lum,"light: illuminate; luminous; bioluminescence",noun
+Geography,root,magn,"great: magnitude; magnify",adjective
+Geography,root,meta,"change: metamorphic; metabolism; metamorphosis",noun
+Geography,root,morph,"form: morphology; metamorphic; polymorph",noun
+Geography,root,ob,"against: oblique; obscure; obtuse",verb
+Geography,root,petr,"rock: petrify; petroleum; petrology",noun
+Geography,root,seismo,"earthquake: seismology; seismograph; seismic wave",noun
+Geography,root,strati,"layer: stratify; stratosphere; stratum",noun
+Geography,root,sub,"under: subduction; submarine; subterranean",adjective
+Geography,root,tecto,"building: tectonic; architect",noun
+Geography,root,terr,"land: terrain; territory; terrestrial",noun
+Geography,root,volv,"roll: revolve; involve; evolve",verb
+Geography,root,zo,"animal: zoology; zoogeography; zootoxin",noun
