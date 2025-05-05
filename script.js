@@ -42,7 +42,6 @@ function parseCSV(csvText) {
             headers.forEach((header, index) => {
                 const value = columns[index];
                 if ((header === "type" || header === "part" || header === "term") && !value) {
-                    // console.warn(`Warning: Missing required value for header '${header}' on line ${i + 1}: "${currentLine}". Skipping entry.`);
                     validEntry = false;
                 }
                 entry[header] = value;
@@ -51,18 +50,15 @@ function parseCSV(csvText) {
             if (validEntry && entry.type) {
                  entry.type = entry.type.toLowerCase();
                  if (!entry.type) {
-                    // console.warn(`Warning: Empty 'type' after processing line ${i + 1}: "${currentLine}". Skipping entry.`);
-                    validEntry = false;
+                     validEntry = false;
                  }
             } else if (validEntry && !entry.type) {
-                 // console.warn(`Warning: Missing 'type' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
                  validEntry = false;
             }
 
             if (validEntry) {
                 const validParts = ["prefix", "root", "suffix"];
                 if (!entry.part || !validParts.includes(entry.part.toLowerCase())) {
-                     // console.warn(`Warning: Invalid or missing 'part' value ('${entry.part}') on line ${i + 1}: "${currentLine}". Skipping entry.`);
                      validEntry = false;
                 } else {
                     entry.part = entry.part.toLowerCase();
@@ -71,8 +67,7 @@ function parseCSV(csvText) {
 
             if (validEntry) {
                  if (!entry.term) {
-                    // console.warn(`Warning: Missing 'term' value on line ${i + 1}: "${currentLine}". Skipping entry.`);
-                    validEntry = false;
+                     validEntry = false;
                  }
             }
 
@@ -80,9 +75,7 @@ function parseCSV(csvText) {
                 result.push(entry);
             }
         } else {
-             // Only log warning if the line wasn't just whitespace and not empty
              if (currentLine.trim()) {
-                // console.warn(`Warning: Incorrect number of columns (${columns.length} instead of ${expectedColumns}) on line ${i + 1}: "${currentLine}". Skipping line.`);
              }
         }
     }
@@ -96,13 +89,11 @@ let themesLoadedPromise = null; // Promise to track theme loading
 
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
-    // If already loading or loaded, return the existing promise/result
     if (themesLoadedPromise) {
         console.log("Theme loading already in progress or completed.");
         return themesLoadedPromise;
     }
 
-    // Create a promise that resolves when themes are loaded
     themesLoadedPromise = new Promise(async (resolve, reject) => {
         const loadingElement = document.getElementById("loading");
         if (loadingElement) loadingElement.classList.remove("hidden");
@@ -118,12 +109,10 @@ async function loadWordParts() {
             const data = parseCSV(csvText);
             console.log(`Parsed ${data.length} valid entries from CSV.`);
 
-            // Clear themes object before populating
             for (const key in themes) {
                 delete themes[key];
             }
 
-            // Populate themes based on type and part
             data.forEach(({ type, part, term, definition }) => {
                 if (!themes[type]) {
                     themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], suffixes: [], suffixDefs: [] };
@@ -151,7 +140,6 @@ async function loadWordParts() {
             console.log("Populated themes:", Object.keys(themes));
             Object.keys(themes).forEach(theme => {
                 const themeData = themes[theme];
-                // console.log(`Theme '${theme}':`, { prefixes: themeData.prefixes.length, roots: themeData.roots.length, suffixes: themeData.suffixes.length });
                 if (!themeData.prefixes.length || !themeData.roots.length || !themeData.suffixes.length) {
                     console.warn(`Theme '${theme}' is missing some word parts (prefixes, roots, or suffixes). Word generation for this theme might fail.`);
                 }
@@ -221,7 +209,7 @@ function getRandomElement(arr) {
 }
 
 // Generate word and definition based on selected types
-function generateWordAndDefinition(wordType, themeKey) {
+function generateWordAndDefinition(wordType, themeKey, options = { removeHyphens: false }) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
     let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
@@ -295,18 +283,22 @@ function generateWordAndDefinition(wordType, themeKey) {
     }
 
     const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
-    let word = parts.join('-');
-    // Basic double hyphen check
-    word = word.replace(/--+/g, '-');
+    let word = options.removeHyphens ? parts.join('') : parts.join('-');
+    if (!options.removeHyphens) {
+        word = word.replace(/--+/g, '-'); // Clean up double hyphens only if hyphenated
+    }
 
     const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, suffixIndex, themeKey === 'all' ? 'normal' : themeKey);
-    const pronunciation = generatePronunciation(word);
+    const pronunciation = generatePronunciation(word, options.removeHyphens);
 
     return { word, definition, pronunciation };
 }
 
 // Simplified pronunciation generator
-function generatePronunciation(word) {
+function generatePronunciation(word, removeHyphens = false) {
+    if (removeHyphens) {
+        return `/${word}/`; // Simplified pronunciation for unhyphenated words
+    }
     return `/${word.replace(/-/g, ' / ')}/`;
 }
 
@@ -367,7 +359,6 @@ function updateDisplay() {
 
     // Ensure elements exist before proceeding (only run if on index.html)
     if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl) {
-        // console.warn("Missing display elements on index.html, cannot update.");
         return;
     }
 
@@ -453,4 +444,3 @@ document.addEventListener("DOMContentLoaded", async () => {
         // No need to explicitly check for game.html here, as game.js handles its own setup.
     }
 });
-

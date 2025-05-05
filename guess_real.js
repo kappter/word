@@ -70,10 +70,10 @@ function generateQuestions(theme) {
         let distractorAttempts = 0;
         const maxDistractorAttempts = 30;
 
-        // Generate three unique distractors
+        // Generate three unique distractors without hyphens
         while (options.length < 4 && distractorAttempts < maxDistractorAttempts) {
             distractorAttempts++;
-            const { word: distractorWord } = generateWordAndDefinition(wordType, theme);
+            const { word: distractorWord } = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
             if (distractorWord !== "Error" && !options.includes(distractorWord) && !rareWords.some(rw => rw.word === distractorWord)) {
                 options.push(distractorWord);
             }
