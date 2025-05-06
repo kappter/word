@@ -95,55 +95,55 @@ function parseCSV(csvText) {
 const themes = {};
 let themesLoadedPromise = null;
 
-// Definition templates by theme and POS
+// Definition templates by theme and POS (adjusted to avoid ending with prepositions)
 const definitionTemplates = {
     normal: {
-        noun: "A thing characterized by [prefixDef] [rootDef1] [rootDef2] [suffixDef].",
-        verb: "To [rootDef1] in a [prefixDef] manner [suffixDef].",
-        adjective: "Capable of [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "In a manner that [prefixDef] [rootDef1] [suffixDef]."
+        noun: "A thing characterized by [prefixDef] [rootDef1] [rootDef2] [suffixDef] that exists.",
+        verb: "To [rootDef1] in a [prefixDef] manner [suffixDef] with purpose.",
+        adjective: "Capable of [prefixDef] [rootDef1] [suffixDef] in nature.",
+        adverb: "In a manner that [prefixDef] [rootDef1] [suffixDef] occurs."
     },
     fantasy: {
-        noun: "A mythical [object] imbued with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To magically [rootDef1] with a [prefixDef] essence [suffixDef].",
-        adjective: "Having the magical property of [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "With a mystical [prefixDef] [rootDef1] quality [suffixDef]."
+        noun: "A mythical [object] imbued with [prefixDef] [rootDef1] [suffixDef] of power.",
+        verb: "To magically [rootDef1] with a [prefixDef] essence [suffixDef] through magic.",
+        adjective: "Having the magical property of [prefixDef] [rootDef1] [suffixDef] within.",
+        adverb: "With a mystical [prefixDef] [rootDef1] quality [suffixDef] present."
     },
     astronomy: {
-        noun: "A celestial entity defined by [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] across the cosmos in a [prefixDef] way [suffixDef].",
-        adjective: "Pertaining to a [prefixDef] [rootDef1] phenomenon [suffixDef].",
-        adverb: "In a [prefixDef] [rootDef1] cosmic manner [suffixDef]."
+        noun: "A celestial entity defined by [prefixDef] [rootDef1] [suffixDef] in space.",
+        verb: "To [rootDef1] across the cosmos in a [prefixDef] way [suffixDef] above.",
+        adjective: "Pertaining to a [prefixDef] [rootDef1] phenomenon [suffixDef] observed.",
+        adverb: "In a [prefixDef] [rootDef1] cosmic manner [suffixDef] beyond."
     },
     shakespearian: {
-        noun: "A noble [object] of [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] with [prefixDef] intent [suffixDef].",
-        adjective: "Marked by [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "In a [prefixDef] [rootDef1] fashion [suffixDef]."
+        noun: "A noble [object] of [prefixDef] [rootDef1] [suffixDef] in honor.",
+        verb: "To [rootDef1] with [prefixDef] intent [suffixDef] through action.",
+        adjective: "Marked by [prefixDef] [rootDef1] [suffixDef] with grace.",
+        adverb: "In a [prefixDef] [rootDef1] fashion [suffixDef] displayed."
     },
     popculture: {
-        noun: "A trendy [object] with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] in a [prefixDef] viral way [suffixDef].",
-        adjective: "Known for [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "With a [prefixDef] [rootDef1] flair [suffixDef]."
+        noun: "A trendy [object] with [prefixDef] [rootDef1] [suffixDef] in style.",
+        verb: "To [rootDef1] in a [prefixDef] viral way [suffixDef] among fans.",
+        adjective: "Known for [prefixDef] [rootDef1] [suffixDef] in culture.",
+        adverb: "With a [prefixDef] [rootDef1] flair [suffixDef] shown."
     },
     technical: {
-        noun: "A system involving [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] using [prefixDef] technology [suffixDef].",
-        adjective: "Related to [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "In a [prefixDef] [rootDef1] technical manner [suffixDef]."
+        noun: "A system involving [prefixDef] [rootDef1] [suffixDef] in operation.",
+        verb: "To [rootDef1] using [prefixDef] technology [suffixDef] efficiently.",
+        adjective: "Related to [prefixDef] [rootDef1] [suffixDef] in design.",
+        adverb: "In a [prefixDef] [rootDef1] technical manner [suffixDef] applied."
     },
     math: {
-        noun: "A mathematical concept of [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] with [prefixDef] precision [suffixDef].",
-        adjective: "Describing [prefixDef] [rootDef1] [suffixDef].",
-        adverb: "In a [prefixDef] [rootDef1] mathematical way [suffixDef]."
+        noun: "A mathematical concept of [prefixDef] [rootDef1] [suffixDef] in theory.",
+        verb: "To [rootDef1] with [prefixDef] precision [suffixDef] accurately.",
+        adjective: "Describing [prefixDef] [rootDef1] [suffixDef] in practice.",
+        adverb: "In a [prefixDef] [rootDef1] mathematical way [suffixDef] calculated."
     },
     geography: {
-        noun: "A geographical feature with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] across [prefixDef] landscapes [suffixDef].",
-        adjective: "Pertaining to [prefixDef] [rootDef1] regions [suffixDef].",
-        adverb: "In a [prefixDef] [rootDef1] geographical manner [suffixDef]."
+        noun: "A geographical feature with [prefixDef] [rootDef1] [suffixDef] in region.",
+        verb: "To [rootDef1] across [prefixDef] landscapes [suffixDef] naturally.",
+        adjective: "Pertaining to [prefixDef] [rootDef1] regions [suffixDef] around.",
+        adverb: "In a [prefixDef] [rootDef1] geographical manner [suffixDef] evident."
     }
 };
 
@@ -488,7 +488,7 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     } else {
         // Use the appropriate template based on theme and POS
         let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-        if (!template) template = "A generated word with [prefixDef] [rootDef1] [rootDef2] [suffixDef].";
+        if (!template) template = "A generated word with [prefixDef] [rootDef1] [rootDef2] [suffixDef] that exists.";
 
         // Fill in the template
         let filledTemplate = template
@@ -500,6 +500,14 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
 
         // Clean up any leftover placeholders or extra spaces
         filledTemplate = filledTemplate.replace(/\s+/g, ' ').trim();
+
+        // Remove trailing prepositions (e.g., with, to, for, in, on)
+        const trailingPrepositions = ['with', 'to', 'for', 'in', 'on'];
+        let lastWord = filledTemplate.split(' ').pop().toLowerCase();
+        while (trailingPrepositions.includes(lastWord)) {
+            filledTemplate = filledTemplate.replace(new RegExp(`\\s+${lastWord}\\s*$`, 'i'), '');
+            lastWord = filledTemplate.split(' ').pop().toLowerCase();
+        }
 
         definition += filledTemplate;
     }
@@ -551,7 +559,7 @@ function generateOtherForms(word, parts, type, theme) {
 function generateAmalgamations(parts) {
     if (!parts || parts.length < 2) {
         console.warn("Not enough parts to generate amalgamations:", parts);
-        return ["No combinations available"]; // Return a default message
+        return ["No combinations available"];
     }
     const amalgamations = [];
     for (let i = 0; i < parts.length; i++) {
@@ -561,7 +569,7 @@ function generateAmalgamations(parts) {
             }
         }
     }
-    const uniqueAmalgamations = [...new Set(amalgamations)].slice(0, 5); // Limit to 5 unique combinations
+    const uniqueAmalgamations = [...new Set(amalgamations)].slice(0, 5);
     console.log("Generated amalgamations:", uniqueAmalgamations);
     return uniqueAmalgamations.length > 0 ? uniqueAmalgamations : ["No combinations available"];
 }
@@ -671,13 +679,13 @@ function toggleLike(event) {
 function updateLikes() {
     const buttons = document.querySelectorAll('.like-btn');
     if (buttons.length === 0) {
-        console.log("No like buttons found to update."); // Changed to log instead of warn
-        return; // Exit early if no buttons
+        console.log("No like buttons found to update.");
+        return;
     }
     buttons.forEach(button => {
         const word = button.getAttribute('data-word');
         button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-        button.removeEventListener('click', toggleLike); // Prevent duplicate listeners
+        button.removeEventListener('click', toggleLike);
         button.addEventListener('click', toggleLike);
     });
 }
