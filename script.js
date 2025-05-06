@@ -1355,7 +1355,9 @@ async function loadWordParts() {
 document.addEventListener("DOMContentLoaded", async () => {
     await loadWordParts();
     populateThemeDropdown();
-    themeType = document.getElementById("themeType");
+    const themeType = document.getElementById("themeType");
     const permutationType = document.getElementById("permutationType");
     const generateButton = document.getElementById("generateButton");
-    const copyButton =
+    const copyButton = document.getElementById("copyButton");
+    const shuffleButton = document.getElementById("shuffleButton");
+    const clearLikesButton = document.getElementById("
