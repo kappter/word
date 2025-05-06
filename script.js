@@ -147,57 +147,119 @@ const definitionTemplates = {
     }
 };
 
-// Example sentence templates by theme and POS
+// Example sentence templates by theme and POS with replacements for [word]
 const exampleTemplates = {
     normal: {
-        noun: "The [word] was essential for the project’s success.",
-        verb: "They [word] the resources to ensure fairness.",
-        adjective: "The [word] tool made the task easier.",
-        adverb: "She completed the task [word]."
+        noun: "Example: The [word] was essential for the project’s success.",
+        verb: "Example: They [word] the resources to ensure fairness.",
+        adjective: "Example: The [word] tool made the task easier.",
+        adverb: "Example: She completed the task [word]."
     },
     fantasy: {
-        noun: "The wizard used the [word] to cast a powerful spell.",
-        verb: "The elves [word] their magic to protect the forest.",
-        adjective: "The [word] artifact glowed with ancient power.",
-        adverb: "The dragon flew [word] through the enchanted sky."
+        noun: "Example: The wizard used the [word] to cast a powerful spell.",
+        verb: "Example: The elves [word] their magic to protect the forest.",
+        adjective: "Example: The [word] artifact glowed with ancient power.",
+        adverb: "Example: The dragon flew [word] through the enchanted sky."
     },
     astronomy: {
-        noun: "The [word] was discovered in a distant galaxy.",
-        verb: "Scientists [word] the signals from the star system.",
-        adjective: "The [word] telescope captured stunning images.",
-        adverb: "The probe transmitted data [word] from deep space."
+        noun: "Example: The [word] was discovered in a distant galaxy.",
+        verb: "Example: Scientists [word] the signals from the star system.",
+        adjective: "Example: The [word] telescope captured stunning images.",
+        adverb: "Example: The probe transmitted data [word] from deep space."
     },
     shakespearian: {
-        noun: "The bard crafted a [word] for the king’s court.",
-        verb: "They [word] their sorrow in the great hall.",
-        adjective: "The [word] knight stood boldly before the queen.",
-        adverb: "She spoke [word] of her love for the prince."
+        noun: "Example: The bard crafted a [word] for the king’s court.",
+        verb: "Example: They [word] their sorrow in the great hall.",
+        adjective: "Example: The [word] knight stood boldly before the queen.",
+        adverb: "Example: She spoke [word] of her love for the prince."
     },
     popculture: {
-        noun: "The [word] went viral on social media.",
-        verb: "They [word] their latest dance move online.",
-        adjective: "The [word] influencer gained millions of followers.",
-        adverb: "The song spread [word] across streaming platforms."
+        noun: "Example: The [word] went viral on social media.",
+        verb: "Example: They [word] their latest dance move online.",
+        adjective: "Example: The [word] influencer gained millions of followers.",
+        adverb: "Example: The song spread [word] across streaming platforms."
     },
     technical: {
-        noun: "The [word] improved the system’s efficiency.",
-        verb: "Engineers [word] the data to optimize performance.",
-        adjective: "The [word] algorithm processed the input quickly.",
-        adverb: "The software operated [word] during the test."
+        noun: "Example: The [word] improved the system’s efficiency.",
+        verb: "Example: Engineers [word] the data to optimize performance.",
+        adjective: "Example: The [word] algorithm processed the input quickly.",
+        adverb: "Example: The software operated [word] during the test."
     },
     math: {
-        noun: "The [word] was key to solving the equation.",
-        verb: "They [word] the values to find the solution.",
-        adjective: "The [word] method simplified the calculation.",
-        adverb: "The problem was solved [word] using geometry."
+        noun: "Example: The [word] was key to solving the equation.",
+        verb: "Example: They [word] the values to find the solution.",
+        adjective: "Example: The [word] method simplified the calculation.",
+        adverb: "Example: The problem was solved [word] using geometry."
     },
     geography: {
-        noun: "The [word] shaped the region’s climate.",
-        verb: "Rivers [word] the terrain over centuries.",
-        adjective: "The [word] landscape attracted many explorers.",
-        adverb: "The volcano erupted [word] in the valley."
+        noun: "Example: The [word] shaped the region’s climate.",
+        verb: "Example: Rivers [word] the terrain over centuries.",
+        adjective: "Example: The [word] landscape attracted many explorers.",
+        adverb: "Example: The volcano erupted [word] in the valley."
     }
 };
+
+// Replacement terms to hide the generated word in examples
+function generateExampleSentence(word, pos, theme) {
+    let template = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
+    if (!template) template = "Example: The [word] was used.";
+
+    // Define replacement terms based on POS and theme
+    const replacements = {
+        normal: {
+            noun: "the entity",
+            verb: "it",
+            adjective: "something",
+            adverb: "in that way"
+        },
+        fantasy: {
+            noun: "the artifact",
+            verb: "the magic",
+            adjective: "the enchantment",
+            adverb: "with mystical grace"
+        },
+        astronomy: {
+            noun: "the phenomenon",
+            verb: "the observation",
+            adjective: "the celestial body",
+            adverb: "across the cosmos"
+        },
+        shakespearian: {
+            noun: "the tale",
+            verb: "the act",
+            adjective: "the character",
+            adverb: "with noble flair"
+        },
+        popculture: {
+            noun: "the trend",
+            verb: "the hype",
+            adjective: "the vibe",
+            adverb: "virally"
+        },
+        technical: {
+            noun: "the system",
+            verb: "the process",
+            adjective: "the technology",
+            adverb: "technically"
+        },
+        math: {
+            noun: "the equation",
+            verb: "the calculation",
+            adjective: "the method",
+            adverb: "mathematically"
+        },
+        geography: {
+            noun: "the landscape",
+            verb: "the flow",
+            adjective: "the region",
+            adverb: "geographically"
+        }
+    };
+
+    // Use theme-specific replacement if available, otherwise fall back to normal
+    const replacement = replacements[theme]?.[pos] || replacements.normal[pos] || "it";
+    return template.replace('[word]', replacement);
+}
 
 // Function to load and organize data from word_parts.csv
 async function loadWordParts() {
@@ -279,7 +341,7 @@ function populateThemeDropdown() {
 
 function getRandomElement(arr) {
     if (!arr || arr.length === 0) return { element: null, index: -1 };
-    const index = Math.floor(Math.random() * arr.length);
+    const index = Math.floor(Math.random * arr.length);
     return { element: arr[index], index: index };
 }
 
@@ -444,13 +506,6 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     }
 
     return definition;
-}
-
-function generateExampleSentence(word, pos, theme) {
-    let template = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
-    if (!template) template = "Example: The [word] was used.";
-
-    return template.replace('[word]', word);
 }
 
 function generateOtherForms(word, parts, type, theme) {
