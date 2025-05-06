@@ -1351,6 +1351,8 @@ async function loadWordParts() {
     return themesLoadedPromise;
 }
 
+// [Previous content up to '// Event listener for DOM content loaded' remains unchanged]
+
 // Event listener for DOM content loaded
 document.addEventListener("DOMContentLoaded", async () => {
     await loadWordParts();
@@ -1360,4 +1362,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     const generateButton = document.getElementById("generateButton");
     const copyButton = document.getElementById("copyButton");
     const shuffleButton = document.getElementById("shuffleButton");
-    const clearLikesButton = document.getElementById("
+    const clearLikesButton = document.getElementById("clearLikesButton");
+
+    if (themeType) {
+        themeType.addEventListener("change", updateDisplay);
+    }
+    if (permutationType) {
+        permutationType.addEventListener("change", updateDisplay);
+    }
+    if (generateButton) {
+        generateButton.addEventListener("click", updateDisplay);
+    }
+    if (copyButton) {
+        copyButton.addEventListener("click", copyToClipboard);
+    }
+    if (shuffleButton) {
+        shuffleButton.addEventListener("click", shuffleAmalgamations);
+    }
+    if (clearLikesButton) {
+        clearLikesButton.addEventListener("click", clearLikes);
+    }
+    updateDisplay();
+    addPermutationClickHandlers();
+    addLikedWordClickHandlers();
+});
+
+// Function to initialize game
+function initializeGame() {
+    loadWordParts().then(() => {
+        updateDisplay();
+        document.getElementById("gameContainer").classList.remove("hidden");
+        document.getElementById("loading-game").classList.add("hidden");
+    }).catch(error => {
+        console.error("Game initialization failed:", error);
+        document.getElementById("gameContainer").classList.add("hidden");
+        document.getElementById("loading-game").textContent = "Failed to load game. Check console.";
+    });
+}
+
+// Start the game when the page loads
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeGame);
+} else {
+    initializeGame();
+}
