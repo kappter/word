@@ -303,6 +303,7 @@ async function loadWordParts() {
                 }
             });
 
+            console.log("Themes loaded:", themes);
             document.dispatchEvent(new CustomEvent('themesLoaded'));
             resolve(themes);
         } catch (error) {
@@ -341,7 +342,7 @@ function populateThemeDropdown() {
 
 function getRandomElement(arr) {
     if (!arr || arr.length === 0) return { element: null, index: -1 };
-    const index = Math.floor(Math.random * arr.length);
+    const index = Math.floor(Math.random() * arr.length);
     return { element: arr[index], index: index };
 }
 
@@ -370,6 +371,8 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
             themeKey = 'normal';
         }
     }
+
+    console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themes[themeKey]?.prefixes, roots: themes[themeKey]?.roots, suffixes: themes[themeKey]?.suffixes });
 
     const getParts = (partType) => {
         const source = themeKey === 'all' ? { 
@@ -417,20 +420,22 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     }
 
     const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
-    let word = parts.join('-').replace(/--+/g, '-');
-    if (options.removeHyphens) {
+    let word = parts.length > 0 ? parts.join('-').replace(/--+/g, '-') : '';
+    if (options.removeHyphens && word) {
         word = word.replace(/-/g, '');
     }
     const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
     const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, themeKey === 'all' ? 'normal' : themeKey);
     const example = generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
-    const pronunciation = generatePronunciation(word);
+    const pronunciation = word ? generatePronunciation(word) : '';
+
+    console.log(`Generated word: ${word}, parts: ${parts}, pos: ${pos}`);
 
     return { word, definition: `${definition} ${example}`, pronunciation, parts, pos };
 }
 
 function generatePronunciation(word) {
-    return `/${word.replace(/-/g, ' / ')}/`;
+    return word ? `/${word.replace(/-/g, ' / ')}/` : '';
 }
 
 function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
@@ -546,7 +551,7 @@ function generateOtherForms(word, parts, type, theme) {
 function generateAmalgamations(parts) {
     if (!parts || parts.length < 2) {
         console.warn("Not enough parts to generate amalgamations:", parts);
-        return [];
+        return ["No combinations available"]; // Return a default message
     }
     const amalgamations = [];
     for (let i = 0; i < parts.length; i++) {
@@ -558,7 +563,7 @@ function generateAmalgamations(parts) {
     }
     const uniqueAmalgamations = [...new Set(amalgamations)].slice(0, 5); // Limit to 5 unique combinations
     console.log("Generated amalgamations:", uniqueAmalgamations);
-    return uniqueAmalgamations;
+    return uniqueAmalgamations.length > 0 ? uniqueAmalgamations : ["No combinations available"];
 }
 
 function updateDisplay() {
@@ -583,14 +588,14 @@ function updateDisplay() {
         pronunciationEl.textContent = "";
         wordDefinitionEl.textContent = "Please wait for data to load.";
         otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = "";
+        amalgamationsEl.innerHTML = "<li>Loading...</li>";
         return;
     }
 
     const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
-    generatedWordEl.textContent = word;
+    generatedWordEl.textContent = word || "No word generated";
     pronunciationEl.textContent = pronunciation;
-    wordDefinitionEl.textContent = definition;
+    wordDefinitionEl.textContent = definition || "No definition available.";
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
         .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
     amalgamationsEl.innerHTML = generateAmalgamations(parts)
@@ -627,21 +632,21 @@ function shuffleAmalgamations() {
     }
 
     const wordText = generatedWordEl.textContent;
-    if (!wordText) {
+    if (!wordText || wordText === "No word generated") {
         console.warn("No generated word available to shuffle.");
         amalgamationsEl.innerHTML = '<li>No word parts available to shuffle.</li>';
         return;
     }
 
     const parts = wordText.split('-');
-    if (parts.length < 2) {
+    if (parts.length < 2 || parts[0] === "") {
         console.warn("Not enough parts to shuffle:", parts);
         amalgamationsEl.innerHTML = '<li>Not enough parts to shuffle.</li>';
         return;
     }
 
     const newAmalgamations = generateAmalgamations(parts);
-    if (newAmalgamations.length === 0) {
+    if (newAmalgamations.length === 0 || newAmalgamations[0] === "No combinations available") {
         amalgamationsEl.innerHTML = '<li>No amalgamations generated.</li>';
     } else {
         amalgamationsEl.innerHTML = newAmalgamations
@@ -666,7 +671,8 @@ function toggleLike(event) {
 function updateLikes() {
     const buttons = document.querySelectorAll('.like-btn');
     if (buttons.length === 0) {
-        console.warn("No like buttons found to update.");
+        console.log("No like buttons found to update."); // Changed to log instead of warn
+        return; // Exit early if no buttons
     }
     buttons.forEach(button => {
         const word = button.getAttribute('data-word');
