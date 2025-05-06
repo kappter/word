@@ -6,10 +6,10 @@
 }
 
 body {
-    font-family: 'Arial', Helvetica, sans-serif; /* Kept Arial; adjust to match index.html (e.g., 'Open Sans') */
+    font-family: 'Arial', Helvetica, sans-serif; /* Matches the clean sans-serif look; adjust if index.html uses a different font (e.g., 'Open Sans') */
     line-height: 1.6;
-    background-color: #e6f0fa; /* Light blue background for a playful feel; adjust to match index.html (e.g., #fff) */
-    color: #1a1a1a; /* Darker text for contrast */
+    background-color: #f5e8c7; /* Light beige from the image; adjust if different */
+    color: #333333; /* Dark gray for body text */
     padding: 20px;
 }
 
@@ -18,17 +18,26 @@ body {
     max-width: 900px;
     margin: 0 auto;
     padding: 25px;
-    background-color: #ffffff; /* White container for contrast */
+    background-color: #ffffff; /* White card background */
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 /* Headings */
 h1 {
     font-size: 2.2rem;
-    color: #2b2b2b; /* Darker gray for headings */
+    color: #8B4513; /* Brown from the image for "Word Creator" */
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
+}
+
+/* Subheadings or secondary text */
+h2 {
+    font-size: 1.2rem;
+    color: #8B4513; /* Match heading color for consistency */
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 /* Navigation links */
@@ -38,7 +47,7 @@ h1 {
 }
 
 .nav-link {
-    color: #ff6f61; /* Coral for links; adjust to match index.html (e.g., #1e90ff for a different blue) */
+    color: #1E90FF; /* Dodger blue for links; adjust if different in index.html */
     text-decoration: none;
     font-weight: 500;
     margin: 0 15px;
@@ -46,7 +55,7 @@ h1 {
 }
 
 .nav-link:hover {
-    color: #e65b50; /* Darker coral on hover */
+    color: #1C86EE; /* Darker blue on hover */
 }
 
 /* Controls section (dropdowns and buttons) */
@@ -61,22 +70,22 @@ h1 {
 
 .controls label {
     font-weight: 500;
-    color: #2b2b2b;
+    color: #333333;
     margin-right: 8px;
 }
 
 .dropdown {
     padding: 10px 15px;
     font-size: 1rem;
-    border: 1px solid #b0c4de; /* Light steel blue border */
+    border: 1px solid #ddd; /* Light gray border */
     border-radius: 5px;
     background-color: #fff;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dropdown:focus {
-    border-color: #ff6f61; /* Match link color for focus */
-    box-shadow: 0 0 5px rgba(255, 111, 97, 0.3);
+    border-color: #FFA500; /* Match primary button color */
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
     outline: none;
 }
 
@@ -102,21 +111,39 @@ h1 {
 }
 
 .btn-primary {
-    background-color: #ff6f61; /* Coral for primary buttons; adjust to match index.html (e.g., #1e90ff) */
+    background-color: #FFA500; /* Orange from "Generate New Word"; adjust if different */
     color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #e65b50; /* Darker coral on hover */
+    background-color: #FF8C00; /* Darker orange on hover */
 }
 
 .btn-secondary {
-    background-color: #6c757d; /* Gray for secondary; adjust if different */
+    background-color: #5C4033; /* Brown for "Copy Word"; adjust if different */
     color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
+    background-color: #4A3528; /* Darker brown on hover */
+}
+
+.btn-success {
+    background-color: #228B22; /* Forest green for "Play Game"; adjust if different */
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #1A661A; /* Darker green on hover */
+}
+
+.btn-danger {
+    background-color: #FF4040; /* Red for "Clear Likes"; adjust if different */
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #E60000; /* Darker red on hover */
 }
 
 /* Loading indicator */
@@ -136,22 +163,22 @@ h1 {
 .game-area {
     margin-top: 20px;
     padding: 20px;
-    border: 1px solid #e6f0fa; /* Match body background */
+    border: 1px solid #f5e8c7; /* Match body background */
     border-radius: 8px;
-    background-color: #f0f8ff; /* Very light blue for game area */
+    background-color: #fff;
 }
 
 .score {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #2b2b2b;
+    color: #333333;
     margin-bottom: 15px;
     text-align: center;
 }
 
 .question {
     font-size: 1.1rem;
-    color: #1a1a1a;
+    color: #333333;
     margin-bottom: 20px;
     line-height: 1.5;
     text-align: center;
@@ -172,30 +199,30 @@ h1 {
     width: 100%;
     padding: 12px;
     font-size: 1rem;
-    border: 1px solid #b0c4de;
+    border: 1px solid #ddd;
     border-radius: 5px;
     background-color: #ffffff;
-    color: #1a1a1a;
+    color: #333333;
     cursor: pointer;
     transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
 }
 
 .answer-btn:hover {
-    background-color: #e6f0fa; /* Light blue on hover */
-    border-color: #ff6f61; /* Match primary button color */
+    background-color: #f5e8c7; /* Match body background on hover */
+    border-color: #FFA500; /* Match primary button color */
     transform: translateY(-1px);
 }
 
 .answer-btn.correct {
-    background-color: #00cc00; /* Brighter green for correct; adjust to match index.html (e.g., #32cd32) */
+    background-color: #228B22; /* Green for correct; match "Play Game" button */
     color: #fff;
-    border-color: #00cc00;
+    border-color: #228B22;
 }
 
 .answer-btn.incorrect {
-    background-color: #ff3333; /* Brighter red for incorrect; adjust to match index.html (e.g., #ff4500) */
+    background-color: #FF4040; /* Red for incorrect; match "Clear Likes" button */
     color: #fff;
-    border-color: #ff3333;
+    border-color: #FF4040;
 }
 
 .answer-btn:disabled {
@@ -211,18 +238,18 @@ h1 {
 }
 
 .feedback.correct {
-    color: #00cc00; /* Match correct answer button */
+    color: #228B22; /* Match correct answer button */
 }
 
 .feedback.incorrect {
-    color: #ff3333; /* Match incorrect answer button */
+    color: #FF4040; /* Match incorrect answer button */
 }
 
 /* Main page (index.html) specific styles */
 #generatedWord {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #2b2b2b;
+    color: #333333;
     text-align: center;
     margin-bottom: 15px;
 }
@@ -237,7 +264,7 @@ h1 {
 
 #wordDefinition {
     font-size: 1rem;
-    color: #1a1a1a;
+    color: #333333;
     margin-bottom: 20px;
     line-height: 1.5;
 }
@@ -255,20 +282,20 @@ h1 {
 #likedWords li {
     margin: 8px 0;
     padding: 5px;
-    border-left: 3px solid #e6f0fa;
+    border-left: 3px solid #f5e8c7;
     padding-left: 10px;
 }
 
 .permutation,
 .liked-word {
     cursor: pointer;
-    color: #ff6f61; /* Match nav links */
+    color: #1E90FF; /* Match nav links */
     text-decoration: underline;
 }
 
 .permutation:hover,
 .liked-word:hover {
-    color: #e65b50;
+    color: #1C86EE;
 }
 
 .like-btn {
@@ -291,30 +318,30 @@ h1 {
     width: 100%;
     padding: 12px;
     font-size: 1rem;
-    border: 1px solid #b0c4de;
+    border: 1px solid #ddd;
     border-radius: 5px;
     background-color: #ffffff;
-    color: #1a1a1a;
+    color: #333333;
     cursor: pointer;
     transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
 }
 
 .real-word-btn:hover {
-    background-color: #e6f0fa;
-    border-color: #ff6f61;
+    background-color: #f5e8c7;
+    border-color: #FFA500;
     transform: translateY(-1px);
 }
 
 .real-word-btn.correct {
-    background-color: #00cc00;
+    background-color: #228B22;
     color: #fff;
-    border-color: #00cc00;
+    border-color: #228B22;
 }
 
 .real-word-btn.incorrect {
-    background-color: #ff3333;
+    background-color: #FF4040;
     color: #fff;
-    border-color: #ff3333;
+    border-color: #FF4040;
 }
 
 .real-word-btn:disabled {
