@@ -97,55 +97,207 @@ let themesLoadedPromise = null;
 // Possible endings for noun definitions to add variety
 const nounEndings = ["traits", "properties", "attributes", "features", "essence", "characteristics", "nature"];
 
-// Definition templates by theme and POS - Using [nounEnding] for noun definitions
+// Noun subjects based on suffix for more meaningful definitions
+const nounSubjects = {
+    default: "thing",
+    ist: "person who specializes in",
+    ism: "belief or practice of",
+    ity: "state or quality of",
+    ment: "result or process of",
+    ness: "quality or condition of",
+    ion: "action or process of",
+    tion: "act or result of",
+    sion: "state or act of",
+    ship: "status or role of",
+    dom: "realm or condition of",
+    hood: "state or group of",
+    er: "person or thing that",
+    or: "person or thing that",
+    ant: "person or thing that",
+    ent: "person or thing that",
+    ard: "person characterized by",
+    ry: "practice or place of",
+    cy: "state or quality of",
+    tude: "condition or attitude of"
+};
+
+// Definition templates by theme and POS with multiple options for variety
 const definitionTemplates = {
     normal: {
-        noun: "A thing that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] while [suffixDef] affecting outcomes.",
-        adjective: "Being [prefixDef] [rootDef1] and [suffixDef] in essence.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] manner."
+        noun: [
+            "A [nounSubject] [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A [nounSubject] embodying [prefixDef] [rootDef1] [rootDef2] through [suffixDef] [nounEnding].",
+            "A [nounSubject] that [prefixDef] [rootDef1] [rootDef2], marked by [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] while [suffixDef] affecting outcomes.",
+            "To [prefixDef] [rootDef1] with [suffixDef] influence.",
+            "To [rootDef1] in a [prefixDef] way, causing [suffixDef] effects."
+        ],
+        adjective: [
+            "Being [prefixDef] [rootDef1] and [suffixDef] in essence.",
+            "Characterized by [prefixDef] [rootDef1] with [suffixDef] qualities.",
+            "Having a [prefixDef] [rootDef1] nature with [suffixDef] traits."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] manner.",
+            "[prefixDef] [rootDef1] with [suffixDef] precision.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] way."
+        ]
     },
     fantasy: {
-        noun: "A mythical entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] using [suffixDef] enchantments.",
-        adjective: "Possessing [prefixDef] [rootDef1] and [suffixDef] magical traits.",
-        adverb: "[prefixDef] [rootDef1] with a [suffixDef] mystical flair."
+        noun: [
+            "A mythical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A magical [nounSubject] known for [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
+            "An enchanted [nounSubject] that [prefixDef] [rootDef1] [rootDef2], imbued with [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] using [suffixDef] enchantments.",
+            "To [prefixDef] [rootDef1] with [suffixDef] mystical power.",
+            "To [rootDef1] [prefixDef] through [suffixDef] sorcery."
+        ],
+        adjective: [
+            "Possessing [prefixDef] [rootDef1] and [suffixDef] magical traits.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] enchanted qualities.",
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] arcane features."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] with a [suffixDef] mystical flair.",
+            "[prefixDef] [rootDef1] in a [suffixDef] magical fashion.",
+            "Performing [rootDef1] [prefixDef] with [suffixDef] enchantment."
+        ]
     },
     astronomy: {
-        noun: "A celestial body that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] across [suffixDef] cosmic expanses.",
-        adjective: "Exhibiting [prefixDef] [rootDef1] and [suffixDef] stellar properties.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] cosmic pattern."
+        noun: [
+            "A celestial [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A cosmic [nounSubject] defined by [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
+            "A stellar [nounSubject] that [prefixDef] [rootDef1] [rootDef2], showing [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] across [suffixDef] cosmic expanses.",
+            "To [prefixDef] [rootDef1] with [suffixDef] astronomical impact.",
+            "To [rootDef1] [prefixDef] through [suffixDef] celestial forces."
+        ],
+        adjective: [
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] stellar properties.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] cosmic traits.",
+            "Characterized by [prefixDef] [rootDef1] and [suffixDef] astral qualities."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] cosmic pattern.",
+            "[prefixDef] [rootDef1] with [suffixDef] celestial rhythm.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] stellar way."
+        ]
     },
     shakespearian: {
-        noun: "A noble entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] with [suffixDef] noble intent.",
-        adjective: "Displaying [prefixDef] [rootDef1] and [suffixDef] courtly charm.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] noble style."
+        noun: [
+            "A noble [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A courtly [nounSubject] known for [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
+            "A regal [nounSubject] that [prefixDef] [rootDef1] [rootDef2], graced with [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] with [suffixDef] noble intent.",
+            "To [prefixDef] [rootDef1] through [suffixDef] chivalric purpose.",
+            "To [rootDef1] [prefixDef] with [suffixDef] courtly grace."
+        ],
+        adjective: [
+            "Displaying [prefixDef] [rootDef1] and [suffixDef] courtly charm.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] noble elegance.",
+            "Possessing [prefixDef] [rootDef1] and [suffixDef] regal traits."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] noble style.",
+            "[prefixDef] [rootDef1] with [suffixDef] courtly flair.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] regal manner."
+        ]
     },
     popculture: {
-        noun: "A trendy item that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] with [suffixDef] viral appeal.",
-        adjective: "Featuring [prefixDef] [rootDef1] and [suffixDef] trendy vibes.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] viral way."
+        noun: [
+            "A trendy [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A viral [nounSubject] showcasing [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
+            "A popular [nounSubject] that [prefixDef] [rootDef1] [rootDef2], defined by [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] with [suffixDef] viral appeal.",
+            "To [prefixDef] [rootDef1] through [suffixDef] trendy influence.",
+            "To [rootDef1] [prefixDef] with [suffixDef] social media impact."
+        ],
+        adjective: [
+            "Featuring [prefixDef] [rootDef1] and [suffixDef] trendy vibes.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] popular appeal.",
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] modern flair."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] viral way.",
+            "[prefixDef] [rootDef1] with [suffixDef] trendy flair.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] popular style."
+        ]
     },
     technical: {
-        noun: "A system that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] using [suffixDef] technology.",
-        adjective: "Incorporating [prefixDef] [rootDef1] and [suffixDef] technical design.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] technical process."
+        noun: [
+            "A technical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A systematic [nounSubject] designed for [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "An engineered [nounSubject] that [prefixDef] [rootDef1] [rootDef2], featuring [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] using [suffixDef] technology.",
+            "To [prefixDef] [rootDef1] with [suffixDef] technical precision.",
+            "To [rootDef1] [prefixDef] through [suffixDef] engineering methods."
+        ],
+        adjective: [
+            "Incorporating [prefixDef] [rootDef1] and [suffixDef] technical design.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] systematic features.",
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] engineered traits."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] technical process.",
+            "[prefixDef] [rootDef1] with [suffixDef] engineering accuracy.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] systematic way."
+        ]
     },
     math: {
-        noun: "A concept that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] with [suffixDef] mathematical accuracy.",
-        adjective: "Reflecting [prefixDef] [rootDef1] and [suffixDef] mathematical principles.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] mathematical approach."
+        noun: [
+            "A mathematical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "An abstract [nounSubject] used for [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A computational [nounSubject] that [prefixDef] [rootDef1] [rootDef2], defined by [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] with [suffixDef] mathematical accuracy.",
+            "To [prefixDef] [rootDef1] using [suffixDef] computational methods.",
+            "To [rootDef1] [prefixDef] through [suffixDef] algebraic processes."
+        ],
+        adjective: [
+            "Reflecting [prefixDef] [rootDef1] and [suffixDef] mathematical principles.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] computational traits.",
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] analytical features."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] mathematical approach.",
+            "[prefixDef] [rootDef1] with [suffixDef] computational precision.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] analytical way."
+        ]
     },
     geography: {
-        noun: "A feature that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-        verb: "To [rootDef1] [prefixDef] across [suffixDef] landscapes.",
-        adjective: "Showcasing [prefixDef] [rootDef1] and [suffixDef] geographical forms.",
-        adverb: "[prefixDef] [rootDef1] in a [suffixDef] geographical context."
+        noun: [
+            "A geographical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
+            "A natural [nounSubject] shaped by [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
+            "A regional [nounSubject] that [prefixDef] [rootDef1] [rootDef2], featuring [suffixDef] [nounEnding]."
+        ],
+        verb: [
+            "To [rootDef1] [prefixDef] across [suffixDef] landscapes.",
+            "To [prefixDef] [rootDef1] with [suffixDef] geographical impact.",
+            "To [rootDef1] [prefixDef] through [suffixDef] natural processes."
+        ],
+        adjective: [
+            "Showcasing [prefixDef] [rootDef1] and [suffixDef] geographical forms.",
+            "Being [prefixDef] [rootDef1] with [suffixDef] natural traits.",
+            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] environmental features."
+        ],
+        adverb: [
+            "[prefixDef] [rootDef1] in a [suffixDef] geographical context.",
+            "[prefixDef] [rootDef1] with [suffixDef] natural flow.",
+            "Performing [rootDef1] [prefixDef] in a [suffixDef] environmental way."
+        ]
     }
 };
 
@@ -333,7 +485,6 @@ const exampleTemplates = {
 function generateExampleSentence(word, pos, theme) {
     let templates = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
     if (!templates) templates = ["Example: The [word] was used."];
-    // Randomly select a template from the array
     const template = templates[Math.floor(Math.random() * templates.length)];
     return template.replace('[word]', word);
 }
@@ -494,7 +645,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         word = word.replace(/-/g, '');
     }
     const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
-    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, themeKey === 'all' ? 'normal' : themeKey);
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, themeKey === 'all' ? 'normal' : themeKey);
     const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = word ? generatePronunciation(word) : '';
 
@@ -543,18 +694,28 @@ function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
     return pos;
 }
 
-function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, theme) {
+function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, suffix, theme) {
     let definition = `(${pos}) `;
-    const partsDefs = { prefixDef: preDef || 'notable', rootDef1: rootDef1 || 'core', rootDef2: rootDef2 || '', suffixDef: sufDef || 'distinct' };
+    const partsDefs = {
+        prefixDef: preDef || (pos === 'noun' ? 'prominent' : pos === 'verb' ? 'actively' : pos === 'adjective' ? 'notably' : 'distinctly'),
+        rootDef1: rootDef1 || 'central',
+        rootDef2: rootDef2 || '',
+        suffixDef: sufDef || (pos === 'noun' ? 'distinctive' : pos === 'verb' ? 'effectively' : pos === 'adjective' ? 'characteristic' : 'uniquely')
+    };
 
-    let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-    if (!template) template = "A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] [nounEnding].";
+    let templates = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
+    if (!templates) templates = ["A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] [nounEnding]."];
+    const template = templates[Math.floor(Math.random() * templates.length)];
+
+    // Determine the noun subject based on the suffix
+    const nounSubject = pos === 'noun' ? (nounSubjects[suffix] || nounSubjects.default) : '';
 
     // Randomly select a noun ending if the template includes [nounEnding]
     const nounEnding = pos === 'noun' ? nounEndings[Math.floor(Math.random() * nounEndings.length)] : '';
 
     // Replace placeholders, ensuring grammatical coherence
     let filledTemplate = template
+        .replace('[nounSubject]', nounSubject)
         .replace('[prefixDef]', partsDefs.prefixDef)
         .replace('[rootDef1]', partsDefs.rootDef1)
         .replace('[rootDef2]', partsDefs.rootDef2 || '')
@@ -810,11 +971,9 @@ function loadLikedWord(event) {
         likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
         pronunciationEl.textContent = generatePronunciation(word);
 
-        // Assume pre-root-suf as default word type for simplicity (can be refined if needed)
         const selectedWordType = 'pre-root-suf';
         const selectedTheme = themeType.value;
 
-        // Split the word into parts to generate a proper definition
         const parts = word.split('-');
         let prefix = '', root1 = '', root2 = '', suffix = '';
         let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
@@ -827,7 +986,7 @@ function loadLikedWord(event) {
         if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
 
         const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, selectedTheme);
         const example = generateExampleSentence(word, pos, selectedTheme);
         wordDefinitionEl.textContent = `${definition} ${example}`;
 
@@ -864,11 +1023,9 @@ function loadPermutation(event) {
         likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
         pronunciationEl.textContent = generatePronunciation(word);
 
-        // Determine the word type and theme based on the original context
-        const selectedWordType = permutationType.value; // Assumes pre-root-suf as default for simplicity
+        const selectedWordType = permutationType.value;
         const selectedTheme = themeType.value;
 
-        // Split the word into parts to generate a proper definition
         const parts = word.split('-');
         let prefix = '', root1 = '', root2 = '', suffix = '';
         let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
@@ -881,7 +1038,7 @@ function loadPermutation(event) {
         if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
 
         const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, selectedTheme);
         const example = generateExampleSentence(word, pos, selectedTheme);
         wordDefinitionEl.textContent = `${definition} ${example}`;
 
@@ -897,7 +1054,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadWordParts();
     populateThemeDropdown();
 
-    // Only initialize index.html-specific elements if on index.html
     if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
         const generateButton = document.getElementById("generateButton");
         const copyButton = document.getElementById("copyButton");
