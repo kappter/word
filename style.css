@@ -10,7 +10,7 @@
 }
 
 body {
-    background-color: #f5f0e1;
+    background-color: #f5e8c7;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -28,14 +28,19 @@ h1 {
 }
 
 .container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.game-area {
     animation: fadeIn 0.5s ease-in;
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 0.75rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 500px;
-    margin: 1rem auto;
+    width: 100%;
+    margin: 1rem 0;
 }
 
 @keyframes fadeIn {
@@ -68,6 +73,8 @@ h1 {
     color: var(--brown-500);
     font-size: 1.1rem;
     width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .controls label {
@@ -83,20 +90,6 @@ h1 {
     font-family: 'Merriweather', serif;
     cursor: pointer;
     width: 100%;
-}
-
-.game-area {
-    background-color: var(--cream-100);
-    border: 2px solid var(--brown-300);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(var(--brown-500), 0.2);
-    text-align: left;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .score {
@@ -146,12 +139,12 @@ h1 {
 }
 
 .answer-btn.correct {
-    background-color: #28a745;
+    background-color: #228b22;
     color: white;
 }
 
 .answer-btn.incorrect {
-    background-color: #dc3545;
+    background-color: #ff4040;
     color: white;
 }
 
@@ -162,11 +155,11 @@ h1 {
 }
 
 .feedback.correct {
-    color: #28a745;
+    color: #228b22;
 }
 
 .feedback.incorrect {
-    color: #dc3545;
+    color: #ff4040;
 }
 
 .loading {
@@ -186,6 +179,8 @@ h1 {
     gap: 1rem;
     margin-top: 1rem;
     flex-wrap: wrap;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .btn {
@@ -215,6 +210,24 @@ h1 {
 
 .btn-secondary:hover {
     background-color: var(--brown-600);
+    transform: scale(1.05);
+}
+
+.btn-success {
+    background-color: #228b22;
+}
+
+.btn-success:hover {
+    background-color: #1a661a;
+    transform: scale(1.05);
+}
+
+.btn-danger {
+    background-color: #ff4040;
+}
+
+.btn-danger:hover {
+    background-color: #e60000;
     transform: scale(1.05);
 }
 
@@ -265,13 +278,13 @@ h1 {
 .permutation,
 .liked-word {
     cursor: pointer;
-    color: #1E90FF;
+    color: #1e90ff;
     text-decoration: underline;
 }
 
 .permutation:hover,
 .liked-word:hover {
-    color: #1C86EE;
+    color: #1c86ee;
 }
 
 .like-btn {
@@ -320,12 +333,12 @@ h1 {
 }
 
 .real-word-btn.correct {
-    background-color: #28a745;
+    background-color: #228b22;
     color: white;
 }
 
 .real-word-btn.incorrect {
-    background-color: #dc3545;
+    background-color: #ff4040;
     color: white;
 }
 
@@ -340,7 +353,7 @@ h1 {
         font-size: 2rem;
     }
     .container {
-        padding: 1.5rem;
+        padding: 1rem;
     }
     .controls {
         font-size: 1rem;
