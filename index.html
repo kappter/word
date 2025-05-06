@@ -42,246 +42,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Creator</title>
-    <link rel="icon" href="data:,">
-    <!-- Link to Merriweather font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Link to custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <title>Word Amalgamator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .hidden { display: none; }
+        button { padding: 8px 16px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        select { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        .permutation, .liked-word { cursor: pointer; color: #007bff; }
+        .permutation:hover, .liked-word:hover { text-decoration: underline; }
+        #generatedWord { font-size: 1.5em; font-weight: bold; color: #333; }
+        #pronunciation { font-style: italic; color: #666; }
+        #wordDefinition { margin: 10px 0; color: #444; }
+    </style>
 </head>
 <body>
-    <h1>Word Creator</h1>
-
-    <div id="loading-game" class="loading-indicator">Loading word parts...</div>
-
-    <main>
-        <div id="game-setup" class="controls">
-            <h2>Select Options and Generate</h2>
-            <div class="option-group">
-                <label for="permutationType">Select Word Type:</label>
+    <div class="container">
+        <h1>Word Amalgamator</h1>
+        <div id="loading-game">Loading game...</div>
+        <div id="gameContainer" class="hidden">
+            <div>
+                <label for="themeType">Theme:</label>
+                <select id="themeType"></select>
+                <label for="permutationType">Structure:</label>
                 <select id="permutationType">
                     <option value="pre-root-suf">Prefix-Root-Suffix</option>
-                    <option value="root-suf">Root-Suffix</option>
                     <option value="pre-root">Prefix-Root</option>
+                    <option value="root-suf">Root-Suffix</option>
+                    <option value="root-root">Root-Root</option>
+                    <option value="pre-root-root-suf">Prefix-Root-Root-Suffix</option>
                     <option value="pre-root-root">Prefix-Root-Root</option>
-                    <option value="root">Root Only</option>
                 </select>
             </div>
-            <div class="option-group">
-                <label for="themeType">Select Theme:</label>
-                <select id="themeType">
-                    <option value="all">All</option>
-                    <option value="normal">Normal</option>
-                    <option value="technical">Technical</option>
-                    <option value="shakespearian">Shakespearian</option>
-                    <option value="popculture">Pop Culture</option>
-                    <option value="astronomy">Astronomy</option>
-                    <option value="fantasy">Fantasy</option>
-                </select>
+            <div>
+                <button id="generateButton">Generate New Word</button>
+                <button id="copyButton">Copy Word</button>
+                <button id="shuffleButton">Shuffle Amalgamations</button>
+                <button id="clearLikesButton">Clear Likes</button>
             </div>
-            <div class="buttons">
-                <button id="generateButton" class="btn btn-generate">Generate New Word</button>
+            <div>
+                <span id="generatedWord"></span>
+                <button id="likeMainWordButton" data-word="">🤍</button>
             </div>
-        </div>
-
-        <div id="word-container" class="word-container">
-            <div class="word-header">
-                <p id="generatedWord" class="text-2xl font-semibold"></p>
-                <button id="likeMainWordButton" class="like-btn" data-word="">🤍</button>
-            </div>
-            <p id="pronunciation" class="italic"></p>
-            <p id="wordDefinition"></p>
-            <div class="mt-2">
-                <h3>Other Forms:</h3>
-                <ul id="otherForms" class="list-disc list-inside"></ul>
-            </div>
-            <div class="mt-2">
-                <h3>Playful Amalgamations:</h3>
-                <button id="shuffleButton" class="btn btn-generate">Shuffle Parts</button>
-                <ul id="amalgamations" class="list-disc list-inside mt-2"></ul>
-            </div>
-        </div>
-
-        <div class="buttons">
-            <button id="copyButton" class="btn btn-copy">Copy Word</button>
-            <a href="game.html"><button class="btn btn-play">Play Game</button></a>
-            <a href="guess_real.html"><button class="btn btn-generate">Guess the Real Word</button></a>
-            <button id="clearLikesButton" class="btn btn-clear">Clear Likes</button>
-        </div>
-
-        <div class="mt-4">
+            <div id="pronunciation"></div>
+            <div id="wordDefinition"></div>
+            <h3>Other Forms:</h3>
+            <ul id="otherForms"></ul>
+            <h3>Amalgamations:</h3>
+            <ul id="amalgamations"></ul>
             <h3>Liked Words:</h3>
-            <ul id="likedWords" class="list-disc list-inside"></ul>
+            <ul id="likedWords"></ul>
         </div>
-    </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="fixed-footer">
-        <div class="footer-content">
-            <span>© 2025 Ken Kapptie. All rights reserved.</span>
-            <div class="social-icons">
-                <a href="https://www.facebook.com/kappter/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://x.com/kappter" target="_blank" aria-label="X"><i class="fab fa-x-twitter"></i></a>
-                <a href="https://www.instagram.com/kappter/?hl=en" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://github.com/kappter" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                <a href="https://www.linkedin.com/in/ken-kapptie-0b19665" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-            </div>
-            <div class="donation-links">
-                <a href="https://buymeacoffee.com/kappterw" target="_blank">Buy Me a Coffee</a>
-            </div>
-        </div>
-    </footer>
+    <!-- Load the new modular scripts -->
+    <script type="module" src="dataParser.js"></script>
+    <script type="module" src="wordGenerator.js"></script>
+    <script type="module" src="uiHandler.js"></script>
 
-    <style>
-        main {
-            padding-bottom: 80px;
+    <!-- Inline script to initialize the game -->
+    <script type="module">
+        import { loadWordParts } from './dataParser.js';
+        import { populateThemeDropdown, updateDisplay, addPermutationClickHandlers, addLikedWordClickHandlers } from './uiHandler.js';
+
+        // Function to initialize game
+        function initializeGame() {
+            loadWordParts().then(() => {
+                updateDisplay();
+                document.getElementById("gameContainer").classList.remove("hidden");
+                document.getElementById("loading-game").classList.add("hidden");
+            }).catch(error => {
+                console.error("Game initialization failed:", error);
+                document.getElementById("gameContainer").classList.add("hidden");
+                document.getElementById("loading-game").textContent = "Failed to load game. Check console.";
+            });
         }
 
-        .fixed-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #1a1a1a;
-            color: #ccc;
-            padding: 8px 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-            min-height: 50px;
-        }
+        // Event listener for DOM content loaded
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadWordParts();
+            populateThemeDropdown();
+            const themeType = document.getElementById("themeType");
+            const permutationType = document.getElementById("permutationType");
+            const generateButton = document.getElementById("generateButton");
+            const copyButton = document.getElementById("copyButton");
+            const shuffleButton = document.getElementById("shuffleButton");
+            const clearLikesButton = document.getElementById("clearLikesButton");
 
-        .footer-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 1200px;
-            gap: 10px;
-        }
-
-        .social-icons {
-            display: flex;
-            align-items: center;
-        }
-
-        .social-icons a {
-            color: #ccc;
-            margin: 0 5px;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .social-icons a:hover {
-            color: #fff;
-        }
-
-        .footer-links {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: #ccc;
-            margin: 0 8px;
-            text-decoration: none;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .footer-links a:hover {
-            color: #fff;
-        }
-
-        .fab {
-            font-family: "Font Awesome 5 Brands", sans-serif;
-        }
-
-        @media (max-width: 600px) {
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
+            if (themeType) {
+                themeType.addEventListener("change", updateDisplay);
             }
-
-            .footer-links {
-                margin-top: 5px;
+            if (permutationType) {
+                permutationType.addEventListener("change", updateDisplay);
             }
-
-            .social-icons {
-                margin-top: 5px;
+            if (generateButton) {
+                generateButton.addEventListener("click", updateDisplay);
             }
-        }
-
-        .btn-clear {
-            background-color: #e74c3c;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .btn-clear:hover {
-            background-color: #c0392b;
-        }
-
-        .word-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-    </style>
-
-    <!-- Include Font Awesome for social icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-            return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-                try {
-                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                    var firstSheetName = workbook.SheetNames[0];
-                    var worksheet = workbook.Sheets[firstSheetName];
-
-                    // Convert sheet to JSON to filter blank rows
-                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                    // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                    var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                    // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                    var headerRowIndex = filteredData.findIndex((row, index) =>
-                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                    );
-                    // Fallback
-                    if (headerRowIndex === -1 || headerRowIndex > 25) {
-                        headerRowIndex = 0;
-                    }
-
-                    // Convert filtered JSON back to CSV
-                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                    return csv;
-                } catch (e) {
-                    console.error(e);
-                    return "";
-                }
+            if (copyButton) {
+                copyButton.addEventListener("click", copyToClipboard);
             }
-            return gk_fileData[filename] || "";
+            if (shuffleButton) {
+                shuffleButton.addEventListener("click", shuffleAmalgamations);
+            }
+            if (clearLikesButton) {
+                clearLikesButton.addEventListener("click", clearLikes);
+            }
+            updateDisplay();
+            addPermutationClickHandlers();
+            addLikedWordClickHandlers();
+        });
+
+        // Start the game when the page loads
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeGame);
+        } else {
+            initializeGame();
         }
     </script>
-    <script src="script.js"></script>
 </body>
 </html>

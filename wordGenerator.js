@@ -1,3 +1,5 @@
+import { themes, loadWordParts } from './dataParser.js';
+
 // Possible endings for noun definitions to add variety
 const nounEndings = ["traits", "properties", "attributes", "features", "essence", "characteristics", "nature"];
 
