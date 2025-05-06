@@ -492,12 +492,12 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     }
     const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
     const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, themeKey === 'all' ? 'normal' : themeKey);
-    const example = generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
+    const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
     const pronunciation = word ? generatePronunciation(word) : '';
 
     console.log(`Generated word: ${word}, parts: ${parts}, pos: ${pos}`);
 
-    return { word, definition: `${definition} ${example}`, pronunciation, parts, pos };
+    return { word, definition: example ? `${definition} ${example}` : definition, pronunciation, parts, pos };
 }
 
 function generatePronunciation(word) {

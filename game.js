@@ -1,286 +1,161 @@
-// Game state variables
-let score = 0;
-let misses = 0;
-const maxMisses = 3;
-let currentQuestionIndex = 0;
-const questionsPerRound = 5;
-let currentQuestions = []; // { word: '...', definition: '...', options: ['...', ...], answer: '...' }
-let selectedGameTheme = 'all';
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadWordParts();
+    populateThemeDropdown();
 
-// DOM Elements
-let gameThemeSelect, startGameButton, gamePlayArea, gameDefinition, choicesArea, feedbackText, scoreSpan, missesSpan, questionNumberSpan, gameOverDiv, finalScoreSpan, playAgainButton, nextQuestionButton, gameSetupArea;
+    const startButton = document.getElementById("startGameButton");
+    const submitButton = document.getElementById("submitAnswerButton");
+    const nextButton = document.getElementById("nextQuestionButton");
+    const gameArea = document.getElementById("gameArea");
+    const scoreDisplay = document.getElementById("score");
+    const questionDisplay = document.getElementById("question");
+    const answersList = document.getElementById("answers");
+    const feedbackDisplay = document.getElementById("feedback");
+    const gameThemeType = document.getElementById("gameThemeType");
+    const gamePermutationType = document.getElementById("gamePermutationType");
 
-// Function to get DOM elements
-function getGameDOMElements() {
-    gameThemeSelect = document.getElementById("gameThemeType");
-    startGameButton = document.getElementById("startGameButton");
-    gamePlayArea = document.getElementById("game-play"); // Corrected ID
-    gameDefinition = document.getElementById("gameDefinition"); // Corrected ID
-    choicesArea = document.getElementById("choices-area"); // Corrected ID
-    feedbackText = document.getElementById("feedbackText");
-    scoreSpan = document.getElementById("score"); // Corrected ID
-    missesSpan = document.getElementById("misses"); // Corrected ID
-    questionNumberSpan = document.getElementById("questionNumber"); // Corrected ID
-    gameOverDiv = document.getElementById("game-over"); // Corrected ID
-    finalScoreSpan = document.getElementById("finalScore"); // Corrected ID
-    playAgainButton = document.getElementById("playAgainButton");
-    nextQuestionButton = document.getElementById("nextQuestionButton");
-    gameSetupArea = document.getElementById("game-setup"); // Corrected ID
-
-    // Check all potentially null elements
-    if (!gameThemeSelect || !startGameButton || !gamePlayArea || !gameDefinition || !choicesArea || !feedbackText || !scoreSpan || !missesSpan || !questionNumberSpan || !gameOverDiv || !finalScoreSpan || !playAgainButton || !nextQuestionButton || !gameSetupArea) {
-        console.error("One or more game elements are missing! Check HTML IDs.");
-        // Log which elements are missing
-        console.log({ gameThemeSelect, startGameButton, gamePlayArea, gameDefinition, choicesArea, feedbackText, scoreSpan, missesSpan, questionNumberSpan, gameOverDiv, finalScoreSpan, playAgainButton, nextQuestionButton, gameSetupArea });
-        return false;
-    }
-    return true;
-}
-
-
-// --- Game Logic Functions ---
-
-// Generate questions for the current round
-function generateQuestions(theme) {
-    console.log(`Generating ${questionsPerRound} questions for theme: ${theme}`);
-    currentQuestions = []; // Clear previous questions
-    const wordType = 'pre-root-suf'; // Using a common structure for simplicity
-
-    if (typeof themes === 'undefined' || Object.keys(themes).length === 0) {
-         console.error("Themes object not available to generate questions.");
-         alert("Error: Word data not loaded. Cannot start game.");
-         return false;
+    if (!startButton || !submitButton || !nextButton || !gameArea || !scoreDisplay || !questionDisplay || !answersList || !feedbackDisplay || !gameThemeType || !gamePermutationType) {
+        console.error("One or more game elements are missing:", { startButton, submitButton, nextButton, gameArea, scoreDisplay, questionDisplay, answersList, feedbackDisplay, gameThemeType, gamePermutationType });
+        return;
     }
 
-    let attempts = 0;
-    const maxAttempts = questionsPerRound * 10; // Increased attempts limit
+    let score = 0;
+    let currentQuestion = null;
+    let answered = false;
 
-    while (currentQuestions.length < questionsPerRound && attempts < maxAttempts) {
-        attempts++;
-        const { word, definition } = generateWordAndDefinition(wordType, theme);
+    startButton.addEventListener("click", () => {
+        console.log("Start game button clicked.");
+        startGame();
+    });
 
-        // Basic validation: ensure word and definition are generated and word hasn't been used yet
-        if (word === "Error" || !definition || currentQuestions.some(q => q.word === word)) {
-            // console.warn(`Skipping invalid or duplicate word generation attempt: ${word}`);
-            continue; // Skip this attempt if generation failed or word is duplicate
+    submitButton.addEventListener("click", () => {
+        console.log("Submit answer button clicked.");
+        submitAnswer();
+    });
+
+    nextButton.addEventListener("click", () => {
+        console.log("Next question button clicked.");
+        generateQuestion();
+    });
+
+    gameThemeType.addEventListener("change", () => {
+        if (currentQuestion) generateQuestion();
+    });
+
+    gamePermutationType.addEventListener("change", () => {
+        if (currentQuestion) generateQuestion();
+    });
+
+    function startGame() {
+        score = 0;
+        scoreDisplay.textContent = `Score: ${score}`;
+        gameArea.classList.remove("hidden");
+        startButton.classList.add("hidden");
+        generateQuestion();
+    }
+
+    function generateQuestion() {
+        console.log("Generating new question...");
+        const selectedTheme = gameThemeType.value;
+        const selectedWordType = gamePermutationType.value;
+
+        if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
+            questionDisplay.textContent = "Please wait for data to load.";
+            answersList.innerHTML = "";
+            return;
         }
 
-        // Generate distractors (simple approach: generate more words of the same theme)
-        const options = [word];
-        let distractorAttempts = 0;
-        const maxDistractorAttempts = 30; // Increased attempts
-        while (options.length < 4 && distractorAttempts < maxDistractorAttempts) {
-            distractorAttempts++;
-            const { word: distractorWord } = generateWordAndDefinition(wordType, theme);
-            if (distractorWord !== "Error" && !options.includes(distractorWord)) {
-                options.push(distractorWord);
+        // Generate the correct answer
+        const correctAnswer = generateWordAndDefinition(selectedWordType, selectedTheme, { excludeExample: true });
+        currentQuestion = {
+            definition: correctAnswer.definition,
+            correctWord: correctAnswer.word,
+            pos: correctAnswer.pos,
+            answers: [correctAnswer.word]
+        };
+
+        // Generate 3 incorrect answers
+        while (currentQuestion.answers.length < 4) {
+            const wrongAnswer = generateWordAndDefinition(selectedWordType, selectedTheme, { excludeExample: true });
+            if (wrongAnswer.word && wrongAnswer.word !== currentQuestion.correctWord && !currentQuestion.answers.includes(wrongAnswer.word)) {
+                currentQuestion.answers.push(wrongAnswer.word);
             }
         }
 
-        // If we couldn't generate enough distractors, skip this question
-        if (options.length < 4) {
-            console.warn(`Could not generate enough distractors for word: ${word}. Skipping question.`);
-            continue;
-        }
+        // Shuffle answers
+        currentQuestion.answers = currentQuestion.answers.sort(() => Math.random() - 0.5);
 
-        shuffleArray(options); // Randomize option order
+        // Display question and answers
+        questionDisplay.textContent = currentQuestion.definition || "No definition available.";
+        answersList.innerHTML = currentQuestion.answers
+            .map(answer => `<li><button class="answer-btn" data-answer="${answer}">${answer}</button></li>`)
+            .join('');
 
-        currentQuestions.push({
-            word: word,
-            definition: definition,
-            options: options,
-            answer: word
+        feedbackDisplay.textContent = "";
+        submitButton.classList.remove("hidden");
+        nextButton.classList.add("hidden");
+        answered = false;
+
+        // Add event listeners to answer buttons
+        const answerButtons = document.querySelectorAll(".answer-btn");
+        answerButtons.forEach(button => {
+            button.removeEventListener("click", selectAnswer);
+            button.addEventListener("click", selectAnswer);
         });
+
+        console.log("Question generated:", currentQuestion);
     }
 
-    if (currentQuestions.length < questionsPerRound) {
-        console.error(`Failed to generate enough unique questions (${currentQuestions.length}/${questionsPerRound}) for theme '${theme}'.`);
-        alert(`Could only generate ${currentQuestions.length} unique questions for this theme. Please try another theme or 'All'.`);
-        return false;
+    function selectAnswer(event) {
+        if (answered) return;
+        const selectedAnswer = event.target.getAttribute("data-answer");
+        const answerButtons = document.querySelectorAll(".answer-btn");
+        answerButtons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.getAttribute("data-answer") === currentQuestion.correctWord) {
+                btn.classList.add("correct");
+            }
+            if (btn.getAttribute("data-answer") === selectedAnswer && selectedAnswer !== currentQuestion.correctWord) {
+                btn.classList.add("incorrect");
+            }
+        });
+        answered = true;
+        submitButton.classList.add("hidden");
+        nextButton.classList.remove("hidden");
     }
 
-     console.log("Generated questions:", currentQuestions);
-     return true;
-}
-
-// Display the current question
-function displayQuestion() {
-    if (currentQuestionIndex >= currentQuestions.length) {
-        console.log("Attempted to display question beyond round limit.");
-        showGameOver("round_complete");
-        return;
-    }
-    const q = currentQuestions[currentQuestionIndex];
-    gameDefinition.textContent = q.definition; // Use corrected variable
-    choicesArea.innerHTML = ''; // Clear previous options using corrected variable
-    q.options.forEach(option => {
-        const li = document.createElement('li');
-        const button = document.createElement('button');
-        button.textContent = option;
-        button.onclick = () => handleAnswer(option, button);
-        li.appendChild(button);
-        choicesArea.appendChild(li); // Use corrected variable
-    });
-    feedbackText.textContent = '';
-    feedbackText.parentElement.classList.add('hidden'); // Hide feedback area initially
-    nextQuestionButton.style.display = 'none'; // Hide next button until answer is given
-    gamePlayArea.classList.remove('hidden'); // Show game area using corrected variable
-    updateScoreboard();
-}
-
-// Handle the user's answer selection
-function handleAnswer(selectedOption, selectedButton) {
-    const correctAnswer = currentQuestions[currentQuestionIndex].answer;
-    const buttons = choicesArea.querySelectorAll('button'); // Use corrected variable
-    buttons.forEach(button => {
-        button.disabled = true; // Disable all options
-        if (button.textContent === correctAnswer) {
-            button.classList.add('correct');
+    function submitAnswer() {
+        if (answered) return;
+        const selectedButton = document.querySelector(".answer-btn.selected");
+        if (!selectedButton) {
+            feedbackDisplay.textContent = "Please select an answer.";
+            return;
         }
-    });
 
-    feedbackText.parentElement.classList.remove('hidden'); // Show feedback area
+        const selectedAnswer = selectedButton.getAttribute("data-answer");
+        answered = true;
 
-    if (selectedOption === correctAnswer) {
-        score++;
-        feedbackText.textContent = "Correct!";
-        feedbackText.style.color = 'green';
-    } else {
-        misses++;
-        feedbackText.textContent = `Incorrect. The answer was: ${correctAnswer}`;
-        feedbackText.style.color = 'red';
-        if (selectedButton) {
-            selectedButton.classList.add('incorrect'); // Highlight the wrong selection
-        }
-    }
-    updateScoreboard();
-
-    if (misses >= maxMisses) {
-        showGameOver("too_many_misses");
-    } else if (currentQuestionIndex >= questionsPerRound - 1) {
-        // Last question of the round answered (correctly or incorrectly)
-        showGameOver("round_complete");
-    } else {
-         nextQuestionButton.style.display = 'block'; // Show next button
-    }
-}
-
-// Update the score and misses display
-function updateScoreboard() {
-    scoreSpan.textContent = score; // Use corrected variable
-    missesSpan.textContent = maxMisses - misses; // Use corrected variable
-    const displayIndex = Math.min(currentQuestionIndex + 1, questionsPerRound);
-    questionNumberSpan.textContent = `${displayIndex}`; // Use corrected variable (just the number)
-}
-
-// Show the game over screen
-function showGameOver(reason) {
-     console.log("Game Over. Reason:", reason);
-     gamePlayArea.classList.add('hidden'); // Use corrected variable
-     gameOverDiv.classList.remove('hidden'); // Use corrected variable
-     finalScoreSpan.textContent = score; // Use corrected variable
-     nextQuestionButton.style.display = 'none';
-}
-
-// Reset the game state and UI for a new game
-function resetGame() {
-    score = 0;
-    misses = 0;
-    currentQuestionIndex = 0;
-    currentQuestions = [];
-    gameOverDiv.classList.add('hidden'); // Use corrected variable
-    gamePlayArea.classList.add('hidden'); // Use corrected variable
-    gameSetupArea.classList.remove('hidden'); // Show theme selection again using corrected variable
-    feedbackText.textContent = '';
-    feedbackText.parentElement.classList.add('hidden');
-    if (gameThemeSelect) gameThemeSelect.value = 'all'; // Reset dropdown selection
-    updateScoreboard();
-}
-
-// Start a new game round
-function startGame() {
-    if (!gameThemeSelect) {
-        console.error("Game theme select element not found!");
-        return;
-    }
-    selectedGameTheme = gameThemeSelect.value;
-    console.log(`Starting game with theme: ${selectedGameTheme}`);
-    gameSetupArea.classList.add('hidden'); // Hide theme selection using corrected variable
-    gameOverDiv.classList.add('hidden'); // Hide game over area using corrected variable
-
-    score = 0;
-    misses = 0;
-    currentQuestionIndex = 0;
-
-    if (generateQuestions(selectedGameTheme)) {
-        gamePlayArea.classList.remove('hidden'); // Show question area only if questions generated, use corrected variable
-        displayQuestion();
-    } else {
-        // Handle error if questions couldn't be generated
-        // Alert was shown in generateQuestions
-        resetGame(); // Go back to theme selection
-    }
-}
-
-// Utility to shuffle array (Fisher-Yates)
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
-
-
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Game page DOM fully loaded.");
-
-    if (!getGameDOMElements()) {
-        console.error("Failed to get all required game DOM elements. Game cannot start.");
-        document.body.innerHTML = "<h1>Error: Failed to load game elements. Check console.</h1>";
-        return;
-    }
-
-    // Initial UI state
-    gamePlayArea.classList.add('hidden');
-    gameOverDiv.classList.add('hidden');
-    nextQuestionButton.style.display = 'none';
-    gameSetupArea.classList.remove('hidden');
-    feedbackText.parentElement.classList.add('hidden');
-
-    // Add event listeners
-    startGameButton.addEventListener('click', startGame);
-    playAgainButton.addEventListener('click', resetGame);
-    nextQuestionButton.addEventListener('click', () => {
-         currentQuestionIndex++;
-         displayQuestion();
-    });
-
-    // Wait for themes to be loaded by script.js
-    console.log("Game page waiting for 'themesLoaded' event...");
-    document.addEventListener('themesLoaded', () => {
-        console.log("'themesLoaded' event received on game page.");
-        if (typeof populateThemeDropdown === "function") {
-             console.log("Populating game theme dropdown...");
-             populateThemeDropdown(); // Call the function from script.js
+        if (selectedAnswer === currentQuestion.correctWord) {
+            score += 10;
+            feedbackDisplay.textContent = "Correct!";
+            feedbackDisplay.className = "feedback correct";
+            scoreDisplay.textContent = `Score: ${score}`;
         } else {
-             console.error("populateThemeDropdown function is not available!");
-             if(gameThemeSelect) gameThemeSelect.innerHTML = '<option value="error">Error loading themes</option>';
+            feedbackDisplay.textContent = `Incorrect. The correct answer was "${currentQuestion.correctWord}".`;
+            feedbackDisplay.className = "feedback incorrect";
         }
-    }, { once: true }); // Run only once
 
-     // Check if themes might already be loaded before this listener is added
-     if (typeof themes !== 'undefined' && Object.keys(themes).length > 0) {
-         console.log("Themes seem to be already loaded, attempting to populate dropdown immediately.");
-         if (typeof populateThemeDropdown === "function") {
-             populateThemeDropdown();
-         } else {
-             console.error("populateThemeDropdown function is not available even though themes are loaded!");
-              if(gameThemeSelect) gameThemeSelect.innerHTML = '<option value="error">Error loading themes</option>';
-         }
-     } else {
-         console.log("Themes not yet loaded, waiting for event.");
-     }
+        const answerButtons = document.querySelectorAll(".answer-btn");
+        answerButtons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.getAttribute("data-answer") === currentQuestion.correctWord) {
+                btn.classList.add("correct");
+            }
+            if (btn.getAttribute("data-answer") === selectedAnswer && selectedAnswer !== currentQuestion.correctWord) {
+                btn.classList.add("incorrect");
+            }
+        });
 
+        submitButton.classList.add("hidden");
+        nextButton.classList.remove("hidden");
+    }
 });
-
