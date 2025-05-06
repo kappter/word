@@ -94,52 +94,55 @@ function parseCSV(csvText) {
 const themes = {};
 let themesLoadedPromise = null;
 
-// Definition templates by theme and POS - Updated for subject-predicate structure
+// Possible endings for noun definitions to add variety
+const nounEndings = ["traits", "properties", "attributes", "features", "essence", "characteristics", "nature"];
+
+// Definition templates by theme and POS - Using [nounEnding] for noun definitions
 const definitionTemplates = {
     normal: {
-        noun: "A thing that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] qualities.",
+        noun: "A thing that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] while [suffixDef] affecting outcomes.",
         adjective: "Being [prefixDef] [rootDef1] and [suffixDef] in essence.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] manner."
     },
     fantasy: {
-        noun: "A mythical entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] powers.",
+        noun: "A mythical entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] using [suffixDef] enchantments.",
         adjective: "Possessing [prefixDef] [rootDef1] and [suffixDef] magical traits.",
         adverb: "[prefixDef] [rootDef1] with a [suffixDef] mystical flair."
     },
     astronomy: {
-        noun: "A celestial body that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] cosmic traits.",
+        noun: "A celestial body that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] across [suffixDef] cosmic expanses.",
         adjective: "Exhibiting [prefixDef] [rootDef1] and [suffixDef] stellar properties.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] cosmic pattern."
     },
     shakespearian: {
-        noun: "A noble entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] grace.",
+        noun: "A noble entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] with [suffixDef] noble intent.",
         adjective: "Displaying [prefixDef] [rootDef1] and [suffixDef] courtly charm.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] noble style."
     },
     popculture: {
-        noun: "A trendy item that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] flair.",
+        noun: "A trendy item that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] with [suffixDef] viral appeal.",
         adjective: "Featuring [prefixDef] [rootDef1] and [suffixDef] trendy vibes.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] viral way."
     },
     technical: {
-        noun: "A system that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] efficiency.",
+        noun: "A system that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] using [suffixDef] technology.",
         adjective: "Incorporating [prefixDef] [rootDef1] and [suffixDef] technical design.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] technical process."
     },
     math: {
-        noun: "A concept that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] precision.",
+        noun: "A concept that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] with [suffixDef] mathematical accuracy.",
         adjective: "Reflecting [prefixDef] [rootDef1] and [suffixDef] mathematical principles.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] mathematical approach."
     },
     geography: {
-        noun: "A feature that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] natural traits.",
+        noun: "A feature that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
         verb: "To [rootDef1] [prefixDef] across [suffixDef] landscapes.",
         adjective: "Showcasing [prefixDef] [rootDef1] and [suffixDef] geographical forms.",
         adverb: "[prefixDef] [rootDef1] in a [suffixDef] geographical context."
@@ -545,7 +548,10 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     const partsDefs = { prefixDef: preDef || 'notable', rootDef1: rootDef1 || 'core', rootDef2: rootDef2 || '', suffixDef: sufDef || 'distinct' };
 
     let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-    if (!template) template = "A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] traits.";
+    if (!template) template = "A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] [nounEnding].";
+
+    // Randomly select a noun ending if the template includes [nounEnding]
+    const nounEnding = pos === 'noun' ? nounEndings[Math.floor(Math.random() * nounEndings.length)] : '';
 
     // Replace placeholders, ensuring grammatical coherence
     let filledTemplate = template
@@ -553,6 +559,7 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
         .replace('[rootDef1]', partsDefs.rootDef1)
         .replace('[rootDef2]', partsDefs.rootDef2 || '')
         .replace('[suffixDef]', partsDefs.suffixDef)
+        .replace('[nounEnding]', nounEnding)
         .replace(/\s+/g, ' ')
         .trim();
 
