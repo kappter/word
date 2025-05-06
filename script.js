@@ -519,6 +519,7 @@ function generateAmalgamations(parts, originalWord) {
 
 function updateDisplay() {
     const generatedWordEl = document.getElementById('generatedWord');
+    const likeMainWordButton = document.getElementById('likeMainWordButton');
     const pronunciationEl = document.getElementById('pronunciation');
     const wordDefinitionEl = document.getElementById('wordDefinition');
     const otherFormsEl = document.getElementById('otherForms');
@@ -526,8 +527,8 @@ function updateDisplay() {
     const permutationType = document.getElementById('permutationType');
     const themeType = document.getElementById('themeType');
 
-    if (!permutationType || !themeType || !generatedWordEl || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
-        console.error("One or more required elements are missing:", { generatedWordEl, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
+    if (!permutationType || !themeType || !generatedWordEl || !likeMainWordButton || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
+        console.error("One or more required elements are missing:", { generatedWordEl, likeMainWordButton, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
         return;
     }
 
@@ -536,6 +537,8 @@ function updateDisplay() {
 
     if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
         generatedWordEl.textContent = "Loading...";
+        likeMainWordButton.setAttribute('data-word', '');
+        likeMainWordButton.textContent = '🤍';
         pronunciationEl.textContent = "";
         wordDefinitionEl.textContent = "Please wait for data to load.";
         otherFormsEl.innerHTML = "";
@@ -545,6 +548,8 @@ function updateDisplay() {
 
     const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
     generatedWordEl.textContent = word || "No word generated";
+    likeMainWordButton.setAttribute('data-word', word || '');
+    likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
     pronunciationEl.textContent = pronunciation;
     wordDefinitionEl.textContent = definition || "No definition available.";
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
@@ -673,13 +678,16 @@ function addPermutationClickHandlers() {
 function loadPermutation(event) {
     const word = event.target.getAttribute('data-word');
     const generatedWordEl = document.getElementById('generatedWord');
+    const likeMainWordButton = document.getElementById('likeMainWordButton');
     const pronunciationEl = document.getElementById('pronunciation');
     const wordDefinitionEl = document.getElementById('wordDefinition');
     const otherFormsEl = document.getElementById('otherForms');
     const amalgamationsEl = document.getElementById('amalgamations');
 
-    if (generatedWordEl && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl) {
+    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl) {
         generatedWordEl.textContent = word;
+        likeMainWordButton.setAttribute('data-word', word);
+        likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
         pronunciationEl.textContent = generatePronunciation(word);
         wordDefinitionEl.textContent = `(${getPartOfSpeech('pre-root-suf', -1, -1, -1, 'normal')}) A permuted word.`;
         otherFormsEl.innerHTML = "";
@@ -698,11 +706,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const copyButton = document.getElementById("copyButton");
     const shuffleButton = document.getElementById("shuffleButton");
     const clearLikesButton = document.getElementById("clearLikesButton");
+    const likeMainWordButton = document.getElementById("likeMainWordButton");
     const permutationType = document.getElementById("permutationType");
     const themeType = document.getElementById("themeType");
 
-    if (!generateButton || !copyButton || !shuffleButton || !clearLikesButton || !permutationType || !themeType) {
-        console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, clearLikesButton, permutationType, themeType });
+    if (!generateButton || !copyButton || !shuffleButton || !clearLikesButton || !likeMainWordButton || !permutationType || !themeType) {
+        console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, clearLikesButton, likeMainWordButton, permutationType, themeType });
         return;
     }
 
@@ -716,6 +725,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Clear likes button clicked.");
         clearLikes();
     });
+    likeMainWordButton.addEventListener("click", toggleLike);
     permutationType.addEventListener("change", updateDisplay);
     themeType.addEventListener("change", updateDisplay);
     updateDisplay();

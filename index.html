@@ -87,7 +87,10 @@
         </div>
 
         <div id="word-container" class="word-container">
-            <p id="generatedWord" class="text-2xl font-semibold"></p>
+            <div class="word-header">
+                <p id="generatedWord" class="text-2xl font-semibold"></p>
+                <button id="likeMainWordButton" class="like-btn" data-word="">🤍</button>
+            </div>
             <p id="pronunciation" class="italic"></p>
             <p id="wordDefinition"></p>
             <div class="mt-2">
@@ -228,6 +231,12 @@
 
         .btn-clear:hover {
             background-color: #c0392b;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 
