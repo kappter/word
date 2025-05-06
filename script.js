@@ -123,8 +123,6 @@ const nounSubjects = {
 
 // Semantic categories for roots to adjust definitions
 const rootSemanticCategories = {
-    // Mapping of root definitions to categories (action, concept, entity)
-    // Simplified for common roots in word_parts.csv
     "lumen": { category: "action", actionForm: "illuminating", entityForm: "light" },
     "geo": { category: "concept", actionForm: "shaping", entityForm: "earth" },
     "form": { category: "action", actionForm: "shaping", entityForm: "structure" },
@@ -832,7 +830,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themeKey === 'all' ? allPrefixes : themes[themeKey]?.prefixes, roots: themeKey === 'all' ? allRoots : themes[themeKey]?.roots, suffixes: themeKey === 'all' ? allSuffixes : themes[themeKey]?.suffixes });
 
     const getParts = (partType) => {
-        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, rootPos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
+        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, pos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
         switch (partType) {
             case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
             case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.rootPos };
@@ -939,8 +937,21 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     const root2CategoryInfo = rootSemanticCategories[root2] || rootSemanticCategories.default;
     const rootAction1 = root1CategoryInfo.actionForm;
     const rootAction2 = root2CategoryInfo.actionForm;
-    const rootEntity1 = root1CategoryInfo.entityForm;
-    const rootEntity2 = root2CategoryInfo.entityForm;
+    let rootEntity1 = root1CategoryInfo.entityForm;
+    let rootEntity2 = root2CategoryInfo.entityForm;
+
+    // Prevent entity duplication
+    const usedEntities = new Set();
+    if (rootEntity1) usedEntities.add(rootEntity1);
+    if (rootEntity2 && !usedEntities.has(rootEntity2)) {
+        usedEntities.add(rootEntity2);
+    } else if (rootEntity2 && usedEntities.has(rootEntity2)) {
+        // Find a different entity if root2 matches root1
+        const availableEntities = Object.values(rootSemanticCategories)
+            .filter(cat => cat.entityForm && !usedEntities.has(cat.entityForm))
+            .map(cat => cat.entityForm);
+        rootEntity2 = availableEntities.length > 0 ? availableEntities[Math.floor(Math.random() * availableEntities.length)] : "object";
+    }
 
     // Select templates based on POS and root category
     let templates = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
@@ -977,13 +988,12 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     // Remove redundant spaces and ensure proper sentence structure
     filledTemplate = filledTemplate.replace(/\s{2,}/g, ' ').trim();
 
-    // Capitalize the first letter after the POS tag
-    const firstCharIndex = definition.indexOf(')') + 2;
-    if (firstCharIndex < filledTemplate.length) {
-        filledTemplate = filledTemplate.substring(0, firstCharIndex) + filledTemplate.charAt(firstCharIndex).toUpperCase() + filledTemplate.slice(firstCharIndex + 1);
+    // Capitalize only the first letter of the sentence after the POS tag
+    if (filledTemplate.length > 0) {
+        definition += filledTemplate.charAt(0).toUpperCase() + filledTemplate.slice(1);
+    } else {
+        definition += filledTemplate;
     }
-
-    definition += filledTemplate;
 
     return definition;
 }
