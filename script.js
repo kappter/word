@@ -1277,6 +1277,8 @@ function addPermutationClickHandlers() {
     });
 }
 
+// [Previous content remains unchanged until loadPermutation function...]
+
 function loadPermutation(event) {
     const word = event.target.getAttribute('data-word');
     const generatedWordEl = document.getElementById('generatedWord');
@@ -1327,3 +1329,30 @@ function loadPermutation(event) {
         otherFormsEl.innerHTML = "";
         amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
             .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        updateLikes();
+        updateLikedWordsDisplay();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadWordParts();
+    populateThemeDropdown();
+    themeType = document.getElementById("themeType");
+    const permutationType = document.getElementById("permutationType");
+    const generateButton = document.getElementById("generateButton");
+    const copyButton = document.getElementById("copyButton");
+    const shuffleButton = document.getElementById("shuffleButton");
+    const clearLikesButton = document.getElementById("clearLikesButton");
+
+    if (generateButton) generateButton.addEventListener("click", updateDisplay);
+    if (copyButton) copyButton.addEventListener("click", copyToClipboard);
+    if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
+    if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
+    if (permutationType) permutationType.addEventListener("change", updateDisplay);
+    if (themeType) themeType.addEventListener("change", updateDisplay);
+
+    updateDisplay();
+    addPermutationClickHandlers();
+    updateLikes();
+    updateLikedWordsDisplay();
+});
