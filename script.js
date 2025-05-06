@@ -833,7 +833,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, pos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
         switch (partType) {
             case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
-            case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.rootPos };
+            case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.pos };
             case 'suffix': return { elements: source.suffixes, defs: source.suffixDefs };
             default: return { elements: [], defs: [], pos: [] };
         }
@@ -844,22 +844,22 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         const result = getRandomElement(elements);
         prefix = result.element;
         prefixIndex = result.index;
-        prefixDef = defs[prefixIndex] || '';
+        prefixDef = themeKey === 'all' ? allPrefixDefs[prefixIndex] || '' : defs[prefixIndex] || '';
     }
     if (wordType.includes('root')) {
         const { elements, defs, pos } = getParts('root');
         const result1 = getRandomElement(elements);
         root1 = result1.element;
         root1Index = result1.index;
-        rootDef1 = defs[root1Index] || '';
-        rootPos1 = pos[root1Index] || 'noun';
+        rootDef1 = themeKey === 'all' ? allRootDefs[root1Index] || '' : defs[root1Index] || '';
+        rootPos1 = themeKey === 'all' ? allRootPos[root1Index] || 'noun' : pos[root1Index] || 'noun';
 
         if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
             const result2 = getRandomElement(elements);
             root2 = result2.element;
             root2Index = result2.index;
-            rootDef2 = defs[root2Index] || '';
-            rootPos2 = pos[root2Index] || 'noun';
+            rootDef2 = themeKey === 'all' ? allRootDefs[root2Index] || '' : defs[root2Index] || '';
+            rootPos2 = themeKey === 'all' ? allRootPos[root2Index] || 'noun' : pos[root2Index] || 'noun';
         }
     }
     if (wordType.endsWith('suf')) {
@@ -867,7 +867,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         const result = getRandomElement(elements);
         suffix = result.element;
         suffixIndex = result.index;
-        suffixDef = defs[suffixIndex] || '';
+        suffixDef = themeKey === 'all' ? allSuffixDefs[suffixIndex] || '' : defs[suffixIndex] || '';
     }
 
     const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
@@ -1341,28 +1341,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         const copyButton = document.getElementById("copyButton");
         const shuffleButton = document.getElementById("shuffleButton");
         const clearLikesButton = document.getElementById("clearLikesButton");
-        const likeMainWordButton = document.getElementById("likeMainWordButton");
-        const permutationType = document.getElementById("permutationType");
-        const themeType = document.getElementById("themeType");
-
-        if (!generateButton || !copyButton || !shuffleButton || !clearLikesButton || !likeMainWordButton || !permutationType || !themeType) {
-            console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, clearLikesButton, likeMainWordButton, permutationType, themeType });
-            return;
-        }
-
-        generateButton.addEventListener("click", updateDisplay);
-        copyButton.addEventListener("click", copyToClipboard);
-        shuffleButton.addEventListener("click", () => {
-            console.log("Shuffle button clicked.");
-            shuffleAmalgamations();
-        });
-        clearLikesButton.addEventListener("click", () => {
-            console.log("Clear likes button clicked.");
-            clearLikes();
-        });
-        likeMainWordButton.addEventListener("click", toggleLike);
-        permutationType.addEventListener("change", updateDisplay);
-        themeType.addEventListener("change", updateDisplay);
-        updateDisplay();
-    }
-});
+        const likeMainWordButton = document.getElementById("like
