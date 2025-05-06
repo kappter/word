@@ -94,55 +94,55 @@ function parseCSV(csvText) {
 const themes = {};
 let themesLoadedPromise = null;
 
-// Definition templates by theme and POS
+// Definition templates by theme and POS - Updated for subject-predicate structure
 const definitionTemplates = {
     normal: {
-        noun: "A thing characterized by [prefixDef] [rootDef1] [rootDef2] [suffixDef].",
-        verb: "To [rootDef1] in a [prefixDef] manner [suffixDef] with purpose.",
-        adjective: "Capable of [prefixDef] [rootDef1] [suffixDef] in nature.",
-        adverb: "In a manner that [prefixDef] [rootDef1] [suffixDef] occurs."
+        noun: "A thing that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] qualities.",
+        verb: "To [rootDef1] [prefixDef] while [suffixDef] affecting outcomes.",
+        adjective: "Being [prefixDef] [rootDef1] and [suffixDef] in essence.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] manner."
     },
     fantasy: {
-        noun: "A mythical [object] imbued with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To magically [rootDef1] with a [prefixDef] essence [suffixDef] through magic.",
-        adjective: "Having the magical property of [prefixDef] [rootDef1] [suffixDef] within.",
-        adverb: "With a mystical [prefixDef] [rootDef1] quality [suffixDef] present."
+        noun: "A mythical entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] powers.",
+        verb: "To [rootDef1] [prefixDef] using [suffixDef] enchantments.",
+        adjective: "Possessing [prefixDef] [rootDef1] and [suffixDef] magical traits.",
+        adverb: "[prefixDef] [rootDef1] with a [suffixDef] mystical flair."
     },
     astronomy: {
-        noun: "A celestial entity defined by [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] across the cosmos in a [prefixDef] way [suffixDef] above.",
-        adjective: "Pertaining to a [prefixDef] [rootDef1] phenomenon [suffixDef] observed.",
-        adverb: "In a [prefixDef] [rootDef1] cosmic manner [suffixDef] beyond."
+        noun: "A celestial body that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] cosmic traits.",
+        verb: "To [rootDef1] [prefixDef] across [suffixDef] cosmic expanses.",
+        adjective: "Exhibiting [prefixDef] [rootDef1] and [suffixDef] stellar properties.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] cosmic pattern."
     },
     shakespearian: {
-        noun: "A noble [object] of [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] with [prefixDef] intent [suffixDef] through action.",
-        adjective: "Marked by [prefixDef] [rootDef1] [suffixDef] with grace.",
-        adverb: "In a [prefixDef] [rootDef1] fashion [suffixDef] displayed."
+        noun: "A noble entity that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] grace.",
+        verb: "To [rootDef1] [prefixDef] with [suffixDef] noble intent.",
+        adjective: "Displaying [prefixDef] [rootDef1] and [suffixDef] courtly charm.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] noble style."
     },
     popculture: {
-        noun: "A trendy [object] with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] in a [prefixDef] viral way [suffixDef] among fans.",
-        adjective: "Known for [prefixDef] [rootDef1] [suffixDef] in culture.",
-        adverb: "With a [prefixDef] [rootDef1] flair [suffixDef] shown."
+        noun: "A trendy item that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] flair.",
+        verb: "To [rootDef1] [prefixDef] with [suffixDef] viral appeal.",
+        adjective: "Featuring [prefixDef] [rootDef1] and [suffixDef] trendy vibes.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] viral way."
     },
     technical: {
-        noun: "A system involving [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] using [prefixDef] technology [suffixDef] efficiently.",
-        adjective: "Related to [prefixDef] [rootDef1] [suffixDef] in design.",
-        adverb: "In a [prefixDef] [rootDef1] technical manner [suffixDef] applied."
+        noun: "A system that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] efficiency.",
+        verb: "To [rootDef1] [prefixDef] using [suffixDef] technology.",
+        adjective: "Incorporating [prefixDef] [rootDef1] and [suffixDef] technical design.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] technical process."
     },
     math: {
-        noun: "A mathematical concept of [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] with [prefixDef] precision [suffixDef] accurately.",
-        adjective: "Describing [prefixDef] [rootDef1] [suffixDef] in practice.",
-        adverb: "In a [prefixDef] [rootDef1] mathematical way [suffixDef] calculated."
+        noun: "A concept that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] precision.",
+        verb: "To [rootDef1] [prefixDef] with [suffixDef] mathematical accuracy.",
+        adjective: "Reflecting [prefixDef] [rootDef1] and [suffixDef] mathematical principles.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] mathematical approach."
     },
     geography: {
-        noun: "A geographical feature with [prefixDef] [rootDef1] [suffixDef].",
-        verb: "To [rootDef1] across [prefixDef] landscapes [suffixDef] naturally.",
-        adjective: "Pertaining to [prefixDef] [rootDef1] regions [suffixDef] around.",
-        adverb: "In a [prefixDef] [rootDef1] geographical manner [suffixDef] evident."
+        noun: "A feature that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] natural traits.",
+        verb: "To [rootDef1] [prefixDef] across [suffixDef] landscapes.",
+        adjective: "Showcasing [prefixDef] [rootDef1] and [suffixDef] geographical forms.",
+        adverb: "[prefixDef] [rootDef1] in a [suffixDef] geographical context."
     }
 };
 
@@ -542,37 +542,30 @@ function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
 
 function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, theme) {
     let definition = `(${pos}) `;
-    const partsDefs = [preDef, rootDef1, rootDef2, sufDef].filter(def => def && def.trim() !== '');
+    const partsDefs = { prefixDef: preDef || 'notable', rootDef1: rootDef1 || 'core', rootDef2: rootDef2 || '', suffixDef: sufDef || 'distinct' };
 
-    if (partsDefs.length === 0) {
-        definition += "A generated word.";
-    } else {
-        let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-        if (!template) template = "A generated word with [prefixDef] [rootDef1] [rootDef2] [suffixDef].";
+    let template = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
+    if (!template) template = "A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] traits.";
 
-        let filledTemplate = template
-            .replace('[prefixDef]', preDef || '')
-            .replace('[rootDef1]', rootDef1 || '')
-            .replace('[rootDef2]', rootDef2 || '')
-            .replace('[suffixDef]', sufDef || '')
-            .replace('[object]', pos === 'noun' ? 'entity' : '');
+    // Replace placeholders, ensuring grammatical coherence
+    let filledTemplate = template
+        .replace('[prefixDef]', partsDefs.prefixDef)
+        .replace('[rootDef1]', partsDefs.rootDef1)
+        .replace('[rootDef2]', partsDefs.rootDef2 || '')
+        .replace('[suffixDef]', partsDefs.suffixDef)
+        .replace(/\s+/g, ' ')
+        .trim();
 
-        filledTemplate = filledTemplate.replace(/\s+/g, ' ').trim();
+    // Remove redundant spaces and ensure proper sentence structure
+    filledTemplate = filledTemplate.replace(/\s{2,}/g, ' ').trim();
 
-        const trailingPrepositions = ['with', 'to', 'for', 'in', 'on'];
-        let lastWord = filledTemplate.split(' ').pop().toLowerCase();
-        while (trailingPrepositions.includes(lastWord)) {
-            filledTemplate = filledTemplate.replace(new RegExp(`\\s+${lastWord}\\s*$`, 'i'), '');
-            lastWord = filledTemplate.split(' ').pop().toLowerCase();
-        }
-
-        definition += filledTemplate;
-    }
-
+    // Capitalize the first letter after the POS tag
     const firstCharIndex = definition.indexOf(')') + 2;
-    if (firstCharIndex < definition.length) {
-        definition = definition.substring(0, firstCharIndex) + definition.charAt(firstCharIndex).toUpperCase() + definition.slice(firstCharIndex + 1);
+    if (firstCharIndex < filledTemplate.length) {
+        filledTemplate = filledTemplate.substring(0, firstCharIndex) + filledTemplate.charAt(firstCharIndex).toUpperCase() + filledTemplate.slice(firstCharIndex + 1);
     }
+
+    definition += filledTemplate;
 
     return definition;
 }
