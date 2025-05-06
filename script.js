@@ -198,24 +198,13 @@ const exampleTemplates = {
     }
 };
 
-// Replacement terms to hide the generated word in examples
+// Replacement terms to hide the generated word in examples (optional fallback)
 function generateExampleSentence(word, pos, theme) {
     let template = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
     if (!template) template = "Example: The [word] was used.";
 
-    const replacements = {
-        normal: { noun: "the entity", verb: "it", adjective: "something", adverb: "in that way" },
-        fantasy: { noun: "the artifact", verb: "the magic", adjective: "the enchantment", adverb: "with mystical grace" },
-        astronomy: { noun: "the phenomenon", verb: "the observation", adjective: "the celestial body", adverb: "across the cosmos" },
-        shakespearian: { noun: "the tale", verb: "the act", adjective: "the character", adverb: "with noble flair" },
-        popculture: { noun: "the trend", verb: "the hype", adjective: "the vibe", adverb: "virally" },
-        technical: { noun: "the system", verb: "the process", adjective: "the technology", adverb: "technically" },
-        math: { noun: "the equation", verb: "the calculation", adjective: "the method", adverb: "mathematically" },
-        geography: { noun: "the landscape", verb: "the flow", adjective: "the region", adverb: "geographically" }
-    };
-
-    const replacement = replacements[theme]?.[pos] || replacements.normal[pos] || "it";
-    return template.replace('[word]', replacement);
+    // Use the word directly in the example
+    return template.replace('[word]', word);
 }
 
 // Function to load and organize data from word_parts.csv
@@ -683,15 +672,38 @@ function loadPermutation(event) {
     const wordDefinitionEl = document.getElementById('wordDefinition');
     const otherFormsEl = document.getElementById('otherForms');
     const amalgamationsEl = document.getElementById('amalgamations');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById('themeType');
 
-    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl) {
+    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl && permutationType && themeType) {
         generatedWordEl.textContent = word;
         likeMainWordButton.setAttribute('data-word', word);
         likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
         pronunciationEl.textContent = generatePronunciation(word);
-        wordDefinitionEl.textContent = `(${getPartOfSpeech('pre-root-suf', -1, -1, -1, 'normal')}) A permuted word.`;
+
+        // Determine the word type and theme based on the original context
+        const selectedWordType = permutationType.value; // Assumes pre-root-suf as default for simplicity
+        const selectedTheme = themeType.value;
+
+        // Split the word into parts to generate a proper definition
+        const parts = word.split('-');
+        let prefix = '', root1 = '', root2 = '', suffix = '';
+        let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
+        let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+
+        const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
+        if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
+        if (parts.length >= 2) root1 = parts[1] || '', rootDef1 = themeData.rootDefs[themeData.roots.indexOf(root1)] || '';
+        if (parts.length >= 3) root2 = parts[2] || '', rootDef2 = themeData.rootDefs[themeData.roots.indexOf(root2)] || '';
+        if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
+
+        const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, selectedTheme);
+        const example = generateExampleSentence(word, pos, selectedTheme);
+        wordDefinitionEl.textContent = `${definition} ${example}`;
+
         otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = generateAmalgamations(word.split('-'), word)
+        amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
             .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
         updateLikes();
         updateLikedWordsDisplay();
