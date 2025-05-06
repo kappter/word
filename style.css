@@ -1,4 +1,4 @@
-/* Reset default styles for consistency */
+/* Reset default styles for consistency across all pages */
 * {
     margin: 0;
     padding: 0;
@@ -6,29 +6,29 @@
 }
 
 body {
-    font-family: 'Roboto', Arial, sans-serif;
+    font-family: 'Arial', Helvetica, sans-serif; /* Adjusted to Arial for a more common look; change to match index.html (e.g., 'Open Sans', 'Roboto') */
     line-height: 1.6;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: #f8f9fa; /* Light gray background; adjust if index.html uses a different color (e.g., #fff for white) */
+    color: #212529; /* Dark gray text; adjust if different */
     padding: 20px;
 }
 
-/* Container for all pages */
+/* Container for all pages (index.html, game.html, guess_real.html) */
 .container {
-    max-width: 800px;
+    max-width: 900px; /* Slightly wider for better readability; adjust if index.html uses a different width (e.g., 800px) */
     margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    background-color: #ffffff; /* White background for the card effect */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 /* Headings */
 h1 {
-    font-size: 2rem;
-    color: #2c3e50;
+    font-size: 2.2rem; /* Slightly larger for emphasis; adjust if index.html uses a different size */
+    color: #343a40; /* Darker gray for headings */
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 /* Navigation links */
@@ -38,15 +38,15 @@ h1 {
 }
 
 .nav-link {
-    color: #3498db;
+    color: #007bff; /* Blue links to match buttons; adjust if index.html uses a different color (e.g., #17a2b8) */
     text-decoration: none;
     font-weight: 500;
-    margin: 0 10px;
-    transition: color 0.3s;
+    margin: 0 15px; /* Increased spacing between links */
+    transition: color 0.3s ease;
 }
 
 .nav-link:hover {
-    color: #2980b9;
+    color: #0056b3; /* Darker blue on hover; adjust to match index.html */
 }
 
 /* Controls section (dropdowns and buttons) */
@@ -55,69 +55,77 @@ h1 {
     flex-wrap: wrap;
     gap: 15px;
     align-items: center;
-    margin-bottom: 20px;
+    justify-content: center; /* Center the controls for a balanced look */
+    margin-bottom: 25px;
 }
 
 .controls label {
     font-weight: 500;
-    color: #2c3e50;
+    color: #343a40; /* Match heading color */
+    margin-right: 8px;
 }
 
 .dropdown {
-    padding: 8px;
+    padding: 10px 15px; /* Increased padding for better touch targets */
     font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #ced4da; /* Light gray border */
+    border-radius: 5px;
     background-color: #fff;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dropdown:focus {
-    border-color: #3498db;
+    border-color: #007bff; /* Match button color */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3); /* Subtle glow on focus */
     outline: none;
 }
 
-/* Button styles */
+/* Button styles (used across all pages) */
 .btn {
     padding: 10px 20px;
     font-size: 1rem;
+    font-weight: 500;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
 }
 
 .btn:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px); /* Slight lift on hover */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Subtle shadow on hover */
 }
 
 .btn:active {
     transform: translateY(0);
+    box-shadow: none;
 }
 
 .btn-primary {
-    background-color: #3498db;
+    background-color: #007bff; /* Blue for primary actions; adjust if index.html uses a different color (e.g., #28a745 for green) */
     color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #2980b9;
+    background-color: #0056b3; /* Darker blue on hover */
 }
 
 .btn-secondary {
-    background-color: #7f8c8d;
+    background-color: #6c757d; /* Gray for secondary actions; adjust if different */
     color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #6c7a89;
+    background-color: #5a6268; /* Darker gray on hover */
 }
 
 /* Loading indicator */
 .loading {
     text-align: center;
-    color: #7f8c8d;
+    color: #6c757d; /* Gray text */
     font-style: italic;
+    font-size: 1rem;
+    margin-bottom: 20px;
 }
 
 .hidden {
@@ -127,174 +135,191 @@ h1 {
 /* Game area (game.html) */
 .game-area {
     margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #e9ecef; /* Light border for definition */
+    border-radius: 8px;
+    background-color: #f8f9fa; /* Very light gray background */
 }
 
 .score {
     font-size: 1.2rem;
-    font-weight: 500;
-    color: #2c3e50;
-    margin-bottom: 10px;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 .question {
     font-size: 1.1rem;
-    color: #333;
-    margin-bottom: 15px;
-    line-height: 1.4;
+    color: #212529;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    text-align: center;
+    font-style: italic; /* To distinguish the definition */
 }
 
-.answers {
+.answer-list {
     list-style: none;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    padding: 0;
 }
 
-.answers li {
-    margin: 5px 0;
+.answer-list li {
+    margin: 8px 0;
 }
 
 .answer-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    color: #333;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #212529;
     cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
 }
 
 .answer-btn:hover {
-    background-color: #e0e0e0;
-    border-color: #3498db;
+    background-color: #e9ecef; /* Light gray on hover */
+    border-color: #007bff; /* Match primary button color */
+    transform: translateY(-1px);
 }
 
 .answer-btn.correct {
-    background-color: #2ecc71;
+    background-color: #28a745; /* Green for correct; adjust if index.html uses a different green (e.g., #2ecc71) */
     color: #fff;
-    border-color: #27ae60;
+    border-color: #28a745;
 }
 
 .answer-btn.incorrect {
-    background-color: #e74c3c;
+    background-color: #dc3545; /* Red for incorrect; adjust if different (e.g., #e74c3c) */
     color: #fff;
-    border-color: #c0392b;
+    border-color: #dc3545;
 }
 
 .answer-btn:disabled {
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 .feedback {
-    font-size: 1rem;
-    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 20px;
     text-align: center;
 }
 
 .feedback.correct {
-    color: #2ecc71;
-    font-weight: 500;
+    color: #28a745; /* Match correct answer button */
 }
 
 .feedback.incorrect {
-    color: #e74c3c;
-    font-weight: 500;
+    color: #dc3545; /* Match incorrect answer button */
 }
 
 /* Main page (index.html) specific styles */
 #generatedWord {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #343a40;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #pronunciation {
     font-size: 1.1rem;
-    color: #7f8c8d;
+    color: #6c757d;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-style: italic;
 }
 
 #wordDefinition {
     font-size: 1rem;
-    color: #333;
-    margin-bottom: 15px;
+    color: #212529;
+    margin-bottom: 20px;
+    line-height: 1.5;
 }
 
 #otherForms,
 #amalgamations,
 #likedWords {
     list-style: none;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    padding: 0;
 }
 
 #otherForms li,
 #amalgamations li,
 #likedWords li {
-    margin: 5px 0;
+    margin: 8px 0;
+    padding: 5px;
+    border-left: 3px solid #e9ecef;
+    padding-left: 10px;
 }
 
 .permutation,
 .liked-word {
     cursor: pointer;
-    color: #3498db;
+    color: #007bff; /* Match nav links and buttons */
     text-decoration: underline;
 }
 
 .permutation:hover,
 .liked-word:hover {
-    color: #2980b9;
+    color: #0056b3;
 }
 
 .like-btn {
     padding: 5px 10px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     border: none;
     background: none;
     cursor: pointer;
+    vertical-align: middle;
 }
 
 /* Guess the real word (guess_real.html) specific styles */
 .real-word-options {
     list-style: none;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    padding: 0;
 }
 
 .real-word-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    color: #333;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #212529;
     cursor: pointer;
-    transition: background-color 0.3s, border-color 0.3s;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
 }
 
 .real-word-btn:hover {
-    background-color: #e0e0e0;
-    border-color: #3498db;
+    background-color: #e9ecef;
+    border-color: #007bff;
+    transform: translateY(-1px);
 }
 
 .real-word-btn.correct {
-    background-color: #2ecc71;
+    background-color: #28a745;
     color: #fff;
-    border-color: #27ae60;
+    border-color: #28a745;
 }
 
 .real-word-btn.incorrect {
-    background-color: #e74c3c;
+    background-color: #dc3545;
     color: #fff;
-    border-color: #c0392b;
+    border-color: #dc3545;
 }
 
 .real-word-btn:disabled {
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 /* Responsive design */
@@ -304,21 +329,36 @@ h1 {
     }
 
     h1 {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
 
     .controls {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
     }
 
     .dropdown,
-    .btn {
+    .btn,
+    .answer-btn,
+    .real-word-btn {
         width: 100%;
+        font-size: 0.95rem;
+        padding: 10px;
     }
 
     .nav-link {
         display: block;
-        margin: 5px 0;
+        margin: 8px 0;
+    }
+
+    .game-area {
+        padding: 15px;
+    }
+
+    .score,
+    .question,
+    .feedback {
+        font-size: 1rem;
     }
 }
