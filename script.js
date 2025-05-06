@@ -121,194 +121,316 @@ const nounSubjects = {
     tude: "condition or attitude of"
 };
 
-// Definition templates by theme and POS with multiple options for variety
+// Semantic categories for roots to adjust definitions
+const rootSemanticCategories = {
+    // Mapping of root definitions to categories (action, concept, entity)
+    // Simplified for common roots in word_parts.csv
+    "lumen": { category: "action", actionForm: "illuminating", entityForm: "light" },
+    "geo": { category: "concept", actionForm: "shaping", entityForm: "earth" },
+    "form": { category: "action", actionForm: "shaping", entityForm: "structure" },
+    "aqua": { category: "entity", actionForm: "flowing", entityForm: "water" },
+    "chrono": { category: "concept", actionForm: "measuring", entityForm: "time" },
+    "psych": { category: "concept", actionForm: "understanding", entityForm: "mind" },
+    "therm": { category: "concept", actionForm: "heating", entityForm: "heat" },
+    "default": { category: "entity", actionForm: "being", entityForm: "entity" }
+};
+
+// Definition templates by theme, POS, and root category
 const definitionTemplates = {
     normal: {
-        noun: [
-            "A [nounSubject] [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A [nounSubject] embodying [prefixDef] [rootDef1] [rootDef2] through [suffixDef] [nounEnding].",
-            "A [nounSubject] that [prefixDef] [rootDef1] [rootDef2], marked by [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A [nounSubject] [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A [nounSubject] that [prefixDef] engages in [rootAction1] [rootAction2], defined by [suffixDef] [nounEnding].",
+                "A [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A [nounSubject] embodying the [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2] through [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] while [suffixDef] affecting outcomes.",
-            "To [prefixDef] [rootDef1] with [suffixDef] influence.",
-            "To [rootDef1] in a [prefixDef] way, causing [suffixDef] effects."
+            "To [rootAction1] [prefixDef] while [suffixDef] affecting outcomes.",
+            "To [prefixDef] [rootAction1] with [suffixDef] influence.",
+            "To [rootAction1] in a [prefixDef] way, causing [suffixDef] effects."
         ],
         adjective: [
-            "Being [prefixDef] [rootDef1] and [suffixDef] in essence.",
-            "Characterized by [prefixDef] [rootDef1] with [suffixDef] qualities.",
-            "Having a [prefixDef] [rootDef1] nature with [suffixDef] traits."
+            "Being [prefixDef] [rootEntity1] and [suffixDef] in essence.",
+            "Characterized by [prefixDef] [rootEntity1] with [suffixDef] qualities.",
+            "Having a [prefixDef] [rootEntity1] nature with [suffixDef] traits."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] manner.",
-            "[prefixDef] [rootDef1] with [suffixDef] precision.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] way."
+            "[prefixDef] [rootAction1] in a [suffixDef] manner.",
+            "[prefixDef] [rootAction1] with [suffixDef] precision.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] way."
         ]
     },
     fantasy: {
-        noun: [
-            "A mythical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A magical [nounSubject] known for [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
-            "An enchanted [nounSubject] that [prefixDef] [rootDef1] [rootDef2], imbued with [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A mythical [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A magical [nounSubject] known for [prefixDef] [rootAction1] [rootAction2] and [suffixDef] [nounEnding].",
+                "An enchanted [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], imbued with [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A mythical [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A magical [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "An enchanted [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A mythical [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A magical [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "An enchanted [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] using [suffixDef] enchantments.",
-            "To [prefixDef] [rootDef1] with [suffixDef] mystical power.",
-            "To [rootDef1] [prefixDef] through [suffixDef] sorcery."
+            "To [rootAction1] [prefixDef] using [suffixDef] enchantments.",
+            "To [prefixDef] [rootAction1] with [suffixDef] mystical power.",
+            "To [rootAction1] [prefixDef] through [suffixDef] sorcery."
         ],
         adjective: [
-            "Possessing [prefixDef] [rootDef1] and [suffixDef] magical traits.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] enchanted qualities.",
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] arcane features."
+            "Possessing [prefixDef] [rootEntity1] and [suffixDef] magical traits.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] enchanted qualities.",
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] arcane features."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] with a [suffixDef] mystical flair.",
-            "[prefixDef] [rootDef1] in a [suffixDef] magical fashion.",
-            "Performing [rootDef1] [prefixDef] with [suffixDef] enchantment."
+            "[prefixDef] [rootAction1] with a [suffixDef] mystical flair.",
+            "[prefixDef] [rootAction1] in a [suffixDef] magical fashion.",
+            "Performing [rootAction1] [prefixDef] with [suffixDef] enchantment."
         ]
     },
     astronomy: {
-        noun: [
-            "A celestial [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A cosmic [nounSubject] defined by [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
-            "A stellar [nounSubject] that [prefixDef] [rootDef1] [rootDef2], showing [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A celestial [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A cosmic [nounSubject] known for [prefixDef] [rootAction1] [rootAction2] and [suffixDef] [nounEnding].",
+                "A stellar [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], showing [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A celestial [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A cosmic [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A stellar [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A celestial [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A cosmic [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A stellar [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] across [suffixDef] cosmic expanses.",
-            "To [prefixDef] [rootDef1] with [suffixDef] astronomical impact.",
-            "To [rootDef1] [prefixDef] through [suffixDef] celestial forces."
+            "To [rootAction1] [prefixDef] across [suffixDef] cosmic expanses.",
+            "To [prefixDef] [rootAction1] with [suffixDef] astronomical impact.",
+            "To [rootAction1] [prefixDef] through [suffixDef] celestial forces."
         ],
         adjective: [
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] stellar properties.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] cosmic traits.",
-            "Characterized by [prefixDef] [rootDef1] and [suffixDef] astral qualities."
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] stellar properties.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] cosmic traits.",
+            "Characterized by [prefixDef] [rootEntity1] and [suffixDef] astral qualities."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] cosmic pattern.",
-            "[prefixDef] [rootDef1] with [suffixDef] celestial rhythm.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] stellar way."
+            "[prefixDef] [rootAction1] in a [suffixDef] cosmic pattern.",
+            "[prefixDef] [rootAction1] with [suffixDef] celestial rhythm.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] stellar way."
         ]
     },
     shakespearian: {
-        noun: [
-            "A noble [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A courtly [nounSubject] known for [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
-            "A regal [nounSubject] that [prefixDef] [rootDef1] [rootDef2], graced with [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A noble [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A courtly [nounSubject] known for [prefixDef] [rootAction1] [rootAction2] and [suffixDef] [nounEnding].",
+                "A regal [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], graced with [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A noble [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A courtly [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A regal [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A noble [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A courtly [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A regal [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] with [suffixDef] noble intent.",
-            "To [prefixDef] [rootDef1] through [suffixDef] chivalric purpose.",
-            "To [rootDef1] [prefixDef] with [suffixDef] courtly grace."
+            "To [rootAction1] [prefixDef] with [suffixDef] noble intent.",
+            "To [prefixDef] [rootAction1] through [suffixDef] chivalric purpose.",
+            "To [rootAction1] [prefixDef] with [suffixDef] courtly grace."
         ],
         adjective: [
-            "Displaying [prefixDef] [rootDef1] and [suffixDef] courtly charm.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] noble elegance.",
-            "Possessing [prefixDef] [rootDef1] and [suffixDef] regal traits."
+            "Displaying [prefixDef] [rootEntity1] and [suffixDef] courtly charm.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] noble elegance.",
+            "Possessing [prefixDef] [rootEntity1] and [suffixDef] regal traits."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] noble style.",
-            "[prefixDef] [rootDef1] with [suffixDef] courtly flair.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] regal manner."
+            "[prefixDef] [rootAction1] in a [suffixDef] noble style.",
+            "[prefixDef] [rootAction1] with [suffixDef] courtly flair.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] regal manner."
         ]
     },
     popculture: {
-        noun: [
-            "A trendy [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A viral [nounSubject] showcasing [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
-            "A popular [nounSubject] that [prefixDef] [rootDef1] [rootDef2], defined by [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A trendy [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A viral [nounSubject] known for [prefixDef] [rootAction1] [rootAction2] and [suffixDef] [nounEnding].",
+                "A popular [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], defined by [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A trendy [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A viral [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A popular [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A trendy [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A viral [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A popular [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] with [suffixDef] viral appeal.",
-            "To [prefixDef] [rootDef1] through [suffixDef] trendy influence.",
-            "To [rootDef1] [prefixDef] with [suffixDef] social media impact."
+            "To [rootAction1] [prefixDef] with [suffixDef] viral appeal.",
+            "To [prefixDef] [rootAction1] through [suffixDef] trendy influence.",
+            "To [rootAction1] [prefixDef] with [suffixDef] social media impact."
         ],
         adjective: [
-            "Featuring [prefixDef] [rootDef1] and [suffixDef] trendy vibes.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] popular appeal.",
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] modern flair."
+            "Featuring [prefixDef] [rootEntity1] and [suffixDef] trendy vibes.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] popular appeal.",
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] modern flair."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] viral way.",
-            "[prefixDef] [rootDef1] with [suffixDef] trendy flair.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] popular style."
+            "[prefixDef] [rootAction1] in a [suffixDef] viral way.",
+            "[prefixDef] [rootAction1] with [suffixDef] trendy flair.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] popular style."
         ]
     },
     technical: {
-        noun: [
-            "A technical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A systematic [nounSubject] designed for [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "An engineered [nounSubject] that [prefixDef] [rootDef1] [rootDef2], featuring [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A technical [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A systematic [nounSubject] designed for [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "An engineered [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], featuring [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A technical [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A systematic [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "An engineered [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A technical [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A systematic [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "An engineered [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] using [suffixDef] technology.",
-            "To [prefixDef] [rootDef1] with [suffixDef] technical precision.",
-            "To [rootDef1] [prefixDef] through [suffixDef] engineering methods."
+            "To [rootAction1] [prefixDef] using [suffixDef] technology.",
+            "To [prefixDef] [rootAction1] with [suffixDef] technical precision.",
+            "To [rootAction1] [prefixDef] through [suffixDef] engineering methods."
         ],
         adjective: [
-            "Incorporating [prefixDef] [rootDef1] and [suffixDef] technical design.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] systematic features.",
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] engineered traits."
+            "Incorporating [prefixDef] [rootEntity1] and [suffixDef] technical design.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] systematic features.",
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] engineered traits."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] technical process.",
-            "[prefixDef] [rootDef1] with [suffixDef] engineering accuracy.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] systematic way."
+            "[prefixDef] [rootAction1] in a [suffixDef] technical process.",
+            "[prefixDef] [rootAction1] with [suffixDef] engineering accuracy.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] systematic way."
         ]
     },
     math: {
-        noun: [
-            "A mathematical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "An abstract [nounSubject] used for [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A computational [nounSubject] that [prefixDef] [rootDef1] [rootDef2], defined by [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A mathematical [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "An abstract [nounSubject] used for [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A computational [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], defined by [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A mathematical [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "An abstract [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A computational [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A mathematical [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "An abstract [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A computational [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] with [suffixDef] mathematical accuracy.",
-            "To [prefixDef] [rootDef1] using [suffixDef] computational methods.",
-            "To [rootDef1] [prefixDef] through [suffixDef] algebraic processes."
+            "To [rootAction1] [prefixDef] with [suffixDef] mathematical accuracy.",
+            "To [prefixDef] [rootAction1] using [suffixDef] computational methods.",
+            "To [rootAction1] [prefixDef] through [suffixDef] algebraic processes."
         ],
         adjective: [
-            "Reflecting [prefixDef] [rootDef1] and [suffixDef] mathematical principles.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] computational traits.",
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] analytical features."
+            "Reflecting [prefixDef] [rootEntity1] and [suffixDef] mathematical principles.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] computational traits.",
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] analytical features."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] mathematical approach.",
-            "[prefixDef] [rootDef1] with [suffixDef] computational precision.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] analytical way."
+            "[prefixDef] [rootAction1] in a [suffixDef] mathematical approach.",
+            "[prefixDef] [rootAction1] with [suffixDef] computational precision.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] analytical way."
         ]
     },
     geography: {
-        noun: [
-            "A geographical [nounSubject] that [prefixDef] [rootDef1] [rootDef2] with [suffixDef] [nounEnding].",
-            "A natural [nounSubject] shaped by [prefixDef] [rootDef1] [rootDef2] and [suffixDef] [nounEnding].",
-            "A regional [nounSubject] that [prefixDef] [rootDef1] [rootDef2], featuring [suffixDef] [nounEnding]."
-        ],
+        noun: {
+            action: [
+                "A geographical [nounSubject] that [prefixDef] [rootAction1] [rootAction2] with [suffixDef] [nounEnding].",
+                "A natural [nounSubject] shaped by [prefixDef] [rootAction1] [rootAction2] and [suffixDef] [nounEnding].",
+                "A regional [nounSubject] responsible for [prefixDef] [rootAction1] [rootAction2], featuring [suffixDef] [nounEnding]."
+            ],
+            concept: [
+                "A geographical [nounSubject] embodying [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A natural [nounSubject] that defines [prefixDef] [rootEntity1] [rootEntity2], marked by [suffixDef] [nounEnding].",
+                "A regional [nounSubject] representing [prefixDef] [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ],
+            entity: [
+                "A geographical [nounSubject] that [prefixDef] embodies [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding].",
+                "A natural [nounSubject] characterized by [prefixDef] [rootEntity1] [rootEntity2] and [suffixDef] [nounEnding].",
+                "A regional [nounSubject] [prefixDef] representing [rootEntity1] [rootEntity2] with [suffixDef] [nounEnding]."
+            ]
+        },
         verb: [
-            "To [rootDef1] [prefixDef] across [suffixDef] landscapes.",
-            "To [prefixDef] [rootDef1] with [suffixDef] geographical impact.",
-            "To [rootDef1] [prefixDef] through [suffixDef] natural processes."
+            "To [rootAction1] [prefixDef] across [suffixDef] landscapes.",
+            "To [prefixDef] [rootAction1] with [suffixDef] geographical impact.",
+            "To [rootAction1] [prefixDef] through [suffixDef] natural processes."
         ],
         adjective: [
-            "Showcasing [prefixDef] [rootDef1] and [suffixDef] geographical forms.",
-            "Being [prefixDef] [rootDef1] with [suffixDef] natural traits.",
-            "Exhibiting [prefixDef] [rootDef1] and [suffixDef] environmental features."
+            "Showcasing [prefixDef] [rootEntity1] and [suffixDef] geographical forms.",
+            "Being [prefixDef] [rootEntity1] with [suffixDef] natural traits.",
+            "Exhibiting [prefixDef] [rootEntity1] and [suffixDef] environmental features."
         ],
         adverb: [
-            "[prefixDef] [rootDef1] in a [suffixDef] geographical context.",
-            "[prefixDef] [rootDef1] with [suffixDef] natural flow.",
-            "Performing [rootDef1] [prefixDef] in a [suffixDef] environmental way."
+            "[prefixDef] [rootAction1] in a [suffixDef] geographical context.",
+            "[prefixDef] [rootAction1] with [suffixDef] natural flow.",
+            "Performing [rootAction1] [prefixDef] in a [suffixDef] environmental way."
         ]
     }
 };
 
-// Example sentence templates by theme and POS with multiple options
+// Example sentence templates with placeholders for semantic elements
 const exampleTemplates = {
     normal: {
-        noun: [
-            "Example: The [word] was essential for the project’s success.",
-            "Example: They discovered a [word] in the ancient ruins.",
-            "Example: The [word] became a symbol of innovation."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the entire room effectively.",
+                "Example: They relied on the [word] to [prefixDef] [rootAction1] the space.",
+                "Example: The [word] demonstrated its ability by [prefixDef] [rootAction1] everything."
+            ],
+            concept: [
+                "Example: The [word] was central to understanding the [rootEntity1].",
+                "Example: They studied the [word] to explore [prefixDef] [rootEntity1].",
+                "Example: The [word] provided insight into [prefixDef] [rootEntity1] dynamics."
+            ],
+            entity: [
+                "Example: The [word] was a key [rootEntity1] in the project.",
+                "Example: They discovered a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] served as a [prefixDef] [rootEntity1] example."
+            ]
+        },
         verb: [
             "Example: They [word] the resources to ensure fairness.",
             "Example: She [word] the team to achieve their goals.",
@@ -326,11 +448,23 @@ const exampleTemplates = {
         ]
     },
     fantasy: {
-        noun: [
-            "Example: The wizard used the [word] to cast a powerful spell.",
-            "Example: The [word] glowed in the enchanted forest.",
-            "Example: A [word] guarded the ancient kingdom."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the forest with a magical glow.",
+                "Example: The wizard employed the [word] to [prefixDef] [rootAction1] the realm.",
+                "Example: The [word] [prefixDef] [rootAction1] the enchanted castle."
+            ],
+            concept: [
+                "Example: The [word] was key to unlocking the [rootEntity1] of the ancients.",
+                "Example: The sorcerer used the [word] to explore [prefixDef] [rootEntity1].",
+                "Example: The [word] revealed the secrets of [prefixDef] [rootEntity1]."
+            ],
+            entity: [
+                "Example: The [word] was a mystical [rootEntity1] in the kingdom.",
+                "Example: They encountered a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] stood as a [prefixDef] [rootEntity1] guardian."
+            ]
+        },
         verb: [
             "Example: The elves [word] their magic to protect the forest.",
             "Example: She [word] the curse with a mystical chant.",
@@ -348,11 +482,23 @@ const exampleTemplates = {
         ]
     },
     astronomy: {
-        noun: [
-            "Example: The [word] was discovered in a distant galaxy.",
-            "Example: The [word] illuminated the night sky.",
-            "Example: Astronomers studied the [word] for decades."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the galaxy with stunning clarity.",
+                "Example: Astronomers used the [word] to [prefixDef] [rootAction1] the stars.",
+                "Example: The [word] [prefixDef] [rootAction1] the cosmic void."
+            ],
+            concept: [
+                "Example: The [word] helped measure the [rootEntity1] of the universe.",
+                "Example: Scientists studied the [word] to understand [prefixDef] [rootEntity1].",
+                "Example: The [word] mapped [prefixDef] [rootEntity1] across galaxies."
+            ],
+            entity: [
+                "Example: The [word] was a distant [rootEntity1] in the sky.",
+                "Example: They observed a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] appeared as a [prefixDef] [rootEntity1] phenomenon."
+            ]
+        },
         verb: [
             "Example: Scientists [word] the signals from the star system.",
             "Example: The probe [word] the cosmic radiation.",
@@ -370,11 +516,23 @@ const exampleTemplates = {
         ]
     },
     shakespearian: {
-        noun: [
-            "Example: The bard crafted a [word] for the king’s court.",
-            "Example: The [word] was celebrated in the royal feast.",
-            "Example: A [word] adorned the noble’s chamber."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the court with noble grace.",
+                "Example: The bard employed the [word] to [prefixDef] [rootAction1] the feast.",
+                "Example: The [word] [prefixDef] [rootAction1] the royal hall."
+            ],
+            concept: [
+                "Example: The [word] embodied the [rootEntity1] of the kingdom.",
+                "Example: The lady used the [word] to explore [prefixDef] [rootEntity1].",
+                "Example: The [word] revealed [prefixDef] [rootEntity1] to the court."
+            ],
+            entity: [
+                "Example: The [word] was a noble [rootEntity1] in the castle.",
+                "Example: They beheld a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] stood as a [prefixDef] [rootEntity1] treasure."
+            ]
+        },
         verb: [
             "Example: They [word] their sorrow in the great hall.",
             "Example: She [word] her love in a sonnet.",
@@ -392,11 +550,23 @@ const exampleTemplates = {
         ]
     },
     popculture: {
-        noun: [
-            "Example: The [word] went viral on social media.",
-            "Example: The [word] inspired a new fashion trend.",
-            "Example: Fans celebrated the [word] at the convention."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the event with viral fame.",
+                "Example: Influencers used the [word] to [prefixDef] [rootAction1] the crowd.",
+                "Example: The [word] [prefixDef] [rootAction1] the online audience."
+            ],
+            concept: [
+                "Example: The [word] defined the [rootEntity1] of the decade.",
+                "Example: Fans embraced the [word] to explore [prefixDef] [rootEntity1].",
+                "Example: The [word] showcased [prefixDef] [rootEntity1] on social media."
+            ],
+            entity: [
+                "Example: The [word] was a trendy [rootEntity1] at the festival.",
+                "Example: They shared a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] became a [prefixDef] [rootEntity1] icon."
+            ]
+        },
         verb: [
             "Example: They [word] their latest dance move online.",
             "Example: She [word] the meme to millions of followers.",
@@ -414,11 +584,23 @@ const exampleTemplates = {
         ]
     },
     technical: {
-        noun: [
-            "Example: The [word] improved the system’s efficiency.",
-            "Example: The [word] powered the new device.",
-            "Example: Engineers developed the [word] for precision."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the system with precision.",
+                "Example: Engineers used the [word] to [prefixDef] [rootAction1] the network.",
+                "Example: The [word] [prefixDef] [rootAction1] the device."
+            ],
+            concept: [
+                "Example: The [word] was crucial for analyzing [rootEntity1] in the lab.",
+                "Example: The team applied the [word] to study [prefixDef] [rootEntity1].",
+                "Example: The [word] optimized [prefixDef] [rootEntity1] processes."
+            ],
+            entity: [
+                "Example: The [word] was a core [rootEntity1] in the design.",
+                "Example: They developed a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] functioned as a [prefixDef] [rootEntity1] component."
+            ]
+        },
         verb: [
             "Example: Engineers [word] the data to optimize performance.",
             "Example: The system [word] the input seamlessly.",
@@ -436,11 +618,23 @@ const exampleTemplates = {
         ]
     },
     math: {
-        noun: [
-            "Example: The [word] was key to solving the equation.",
-            "Example: The [word] underpinned the theorem’s proof.",
-            "Example: Students analyzed the [word] in class."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the equation perfectly.",
+                "Example: Mathematicians used the [word] to [prefixDef] [rootAction1] the problem.",
+                "Example: The [word] [prefixDef] [rootAction1] the dataset."
+            ],
+            concept: [
+                "Example: The [word] clarified the [rootEntity1] in the theorem.",
+                "Example: Students explored the [word] to understand [prefixDef] [rootEntity1].",
+                "Example: The [word] modeled [prefixDef] [rootEntity1] accurately."
+            ],
+            entity: [
+                "Example: The [word] was a key [rootEntity1] in the formula.",
+                "Example: They analyzed a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] represented a [prefixDef] [rootEntity1] concept."
+            ]
+        },
         verb: [
             "Example: They [word] the values to find the solution.",
             "Example: She [word] the formula with precision.",
@@ -458,11 +652,23 @@ const exampleTemplates = {
         ]
     },
     geography: {
-        noun: [
-            "Example: The [word] shaped the region’s climate.",
-            "Example: The [word] defined the valley’s ecosystem.",
-            "Example: Explorers mapped the [word] in detail."
-        ],
+        noun: {
+            action: [
+                "Example: The [word] [rootAction1] the landscape over centuries.",
+                "Example: Geologists noted the [word] that [prefixDef] [rootAction1] the valley.",
+                "Example: The [word] [prefixDef] [rootAction1] the terrain."
+            ],
+            concept: [
+                "Example: The [word] influenced the [rootEntity1] of the region.",
+                "Example: Explorers mapped the [word] to study [prefixDef] [rootEntity1].",
+                "Example: The [word] shaped [prefixDef] [rootEntity1] patterns."
+            ],
+            entity: [
+                "Example: The [word] was a significant [rootEntity1] in the ecosystem.",
+                "Example: They found a [word] that [prefixDef] embodied [rootEntity1].",
+                "Example: The [word] marked a [prefixDef] [rootEntity1] boundary."
+            ]
+        },
         verb: [
             "Example: Rivers [word] the terrain over centuries.",
             "Example: The wind [word] the desert landscape.",
@@ -481,12 +687,39 @@ const exampleTemplates = {
     }
 };
 
-// Replacement terms to hide the generated word in examples (optional fallback)
-function generateExampleSentence(word, pos, theme) {
+// Function to generate example sentences with semantic placeholders
+function generateExampleSentence(word, pos, theme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2) {
     let templates = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
-    if (!templates) templates = ["Example: The [word] was used."];
-    const template = templates[Math.floor(Math.random() * templates.length)];
-    return template.replace('[word]', word);
+    if (!templates) templates = { default: ["Example: The [word] was used."] };
+
+    // Determine the semantic category of the roots
+    const root1CategoryInfo = rootSemanticCategories[root1] || rootSemanticCategories.default;
+    const root2CategoryInfo = rootSemanticCategories[root2] || rootSemanticCategories.default;
+    const rootAction1 = root1CategoryInfo.actionForm;
+    const rootAction2 = root2CategoryInfo.actionForm;
+    const rootEntity1 = root1CategoryInfo.entityForm;
+    const rootEntity2 = root2CategoryInfo.entityForm;
+
+    // Select the appropriate template based on the root's category (for nouns)
+    let template;
+    if (pos === 'noun') {
+        const category = rootPos1 === 'verb' ? 'action' : (rootPos1 === 'noun' ? 'entity' : 'concept');
+        templates = templates[category] || templates.action || ["Example: The [word] was used."];
+        template = templates[Math.floor(Math.random() * templates.length)];
+    } else {
+        template = templates[Math.floor(Math.random() * templates.length)];
+    }
+
+    // Replace semantic placeholders
+    return template
+        .replace('[word]', word)
+        .replace('[rootAction1]', rootAction1)
+        .replace('[rootAction2]', rootAction2 || '')
+        .replace('[rootEntity1]', rootEntity1)
+        .replace('[rootEntity2]', rootEntity2 || '')
+        .replace('[prefixDef]', prefixDef || 'notably')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 // Function to load and organize data from word_parts.csv
@@ -645,8 +878,8 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         word = word.replace(/-/g, '');
     }
     const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
-    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, themeKey === 'all' ? 'normal' : themeKey);
-    const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey);
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, themeKey === 'all' ? 'normal' : themeKey);
+    const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey === 'all' ? 'normal' : themeKey, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
     const pronunciation = word ? generatePronunciation(word) : '';
 
     console.log(`Generated word: ${word}, parts: ${parts}, pos: ${pos}`);
@@ -694,18 +927,33 @@ function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
     return pos;
 }
 
-function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, suffix, theme) {
+function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, suffix, root1, root2, rootPos1, rootPos2, theme) {
     let definition = `(${pos}) `;
     const partsDefs = {
         prefixDef: preDef || (pos === 'noun' ? 'prominent' : pos === 'verb' ? 'actively' : pos === 'adjective' ? 'notably' : 'distinctly'),
-        rootDef1: rootDef1 || 'central',
-        rootDef2: rootDef2 || '',
         suffixDef: sufDef || (pos === 'noun' ? 'distinctive' : pos === 'verb' ? 'effectively' : pos === 'adjective' ? 'characteristic' : 'uniquely')
     };
 
+    // Determine semantic category of the roots
+    const root1CategoryInfo = rootSemanticCategories[root1] || rootSemanticCategories.default;
+    const root2CategoryInfo = rootSemanticCategories[root2] || rootSemanticCategories.default;
+    const rootAction1 = root1CategoryInfo.actionForm;
+    const rootAction2 = root2CategoryInfo.actionForm;
+    const rootEntity1 = root1CategoryInfo.entityForm;
+    const rootEntity2 = root2CategoryInfo.entityForm;
+
+    // Select templates based on POS and root category
     let templates = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-    if (!templates) templates = ["A generated entity with [prefixDef] [rootDef1] [rootDef2] [suffixDef] [nounEnding]."];
-    const template = templates[Math.floor(Math.random() * templates.length)];
+    if (!templates) templates = { action: ["A generated entity with [prefixDef] [rootAction1] [rootAction2] [suffixDef] [nounEnding]."] };
+
+    let template;
+    if (pos === 'noun') {
+        const category = rootPos1 === 'verb' ? 'action' : (rootPos1 === 'noun' ? 'entity' : 'concept');
+        templates = templates[category] || templates.action;
+        template = templates[Math.floor(Math.random() * templates.length)];
+    } else {
+        template = templates[Math.floor(Math.random() * templates.length)];
+    }
 
     // Determine the noun subject based on the suffix
     const nounSubject = pos === 'noun' ? (nounSubjects[suffix] || nounSubjects.default) : '';
@@ -717,8 +965,10 @@ function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, po
     let filledTemplate = template
         .replace('[nounSubject]', nounSubject)
         .replace('[prefixDef]', partsDefs.prefixDef)
-        .replace('[rootDef1]', partsDefs.rootDef1)
-        .replace('[rootDef2]', partsDefs.rootDef2 || '')
+        .replace('[rootAction1]', rootAction1)
+        .replace('[rootAction2]', rootAction2 || '')
+        .replace('[rootEntity1]', rootEntity1)
+        .replace('[rootEntity2]', rootEntity2 || '')
         .replace('[suffixDef]', partsDefs.suffixDef)
         .replace('[nounEnding]', nounEnding)
         .replace(/\s+/g, ' ')
@@ -978,16 +1228,27 @@ function loadLikedWord(event) {
         let prefix = '', root1 = '', root2 = '', suffix = '';
         let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
         let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+        let rootPos1 = 'noun', rootPos2 = 'noun';
 
         const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
         if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
-        if (parts.length >= 2) root1 = parts[1] || '', rootDef1 = themeData.rootDefs[themeData.roots.indexOf(root1)] || '';
-        if (parts.length >= 3) root2 = parts[2] || '', rootDef2 = themeData.rootDefs[themeData.roots.indexOf(root2)] || '';
+        if (parts.length >= 2) {
+            root1 = parts[1] || '';
+            root1Index = themeData.roots.indexOf(root1);
+            rootDef1 = themeData.rootDefs[root1Index] || '';
+            rootPos1 = themeData.rootPos[root1Index] || 'noun';
+        }
+        if (parts.length >= 3) {
+            root2 = parts[2] || '';
+            root2Index = themeData.roots.indexOf(root2);
+            rootDef2 = themeData.rootDefs[root2Index] || '';
+            rootPos2 = themeData.rootPos[root2Index] || 'noun';
+        }
         if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
 
         const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, selectedTheme);
-        const example = generateExampleSentence(word, pos, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
+        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
         wordDefinitionEl.textContent = `${definition} ${example}`;
 
         otherFormsEl.innerHTML = "";
@@ -1030,16 +1291,27 @@ function loadPermutation(event) {
         let prefix = '', root1 = '', root2 = '', suffix = '';
         let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
         let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+        let rootPos1 = 'noun', rootPos2 = 'noun';
 
         const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
         if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
-        if (parts.length >= 2) root1 = parts[1] || '', rootDef1 = themeData.rootDefs[themeData.roots.indexOf(root1)] || '';
-        if (parts.length >= 3) root2 = parts[2] || '', rootDef2 = themeData.rootDefs[themeData.roots.indexOf(root2)] || '';
+        if (parts.length >= 2) {
+            root1 = parts[1] || '';
+            root1Index = themeData.roots.indexOf(root1);
+            rootDef1 = themeData.rootDefs[root1Index] || '';
+            rootPos1 = themeData.rootPos[root1Index] || 'noun';
+        }
+        if (parts.length >= 3) {
+            root2 = parts[2] || '';
+            root2Index = themeData.roots.indexOf(root2);
+            rootDef2 = themeData.rootDefs[root2Index] || '';
+            rootPos2 = themeData.rootPos[root2Index] || 'noun';
+        }
         if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
 
         const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, selectedTheme);
-        const example = generateExampleSentence(word, pos, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
+        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
         wordDefinitionEl.textContent = `${definition} ${example}`;
 
         otherFormsEl.innerHTML = "";
