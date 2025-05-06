@@ -925,78 +925,7 @@ function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
     return pos;
 }
 
-function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, suffix, root1, root2, rootPos1, rootPos2, theme) {
-    let definition = `(${pos}) `;
-    const partsDefs = {
-        prefixDef: preDef || (pos === 'noun' ? 'prominent' : pos === 'verb' ? 'actively' : pos === 'adjective' ? 'notably' : 'distinctly'),
-        suffixDef: sufDef || (pos === 'noun' ? 'distinctive' : pos === 'verb' ? 'effectively' : pos === 'adjective' ? 'characteristic' : 'uniquely')
-    };
-
-    // Determine semantic category of the roots
-    const root1CategoryInfo = rootSemanticCategories[root1] || rootSemanticCategories.default;
-    const root2CategoryInfo = rootSemanticCategories[root2] || rootSemanticCategories.default;
-    const rootAction1 = root1CategoryInfo.actionForm;
-    const rootAction2 = root2CategoryInfo.actionForm;
-    let rootEntity1 = root1CategoryInfo.entityForm;
-    let rootEntity2 = root2CategoryInfo.entityForm;
-
-    // Prevent entity duplication
-    const usedEntities = new Set();
-    if (rootEntity1) usedEntities.add(rootEntity1);
-    if (rootEntity2 && !usedEntities.has(rootEntity2)) {
-        usedEntities.add(rootEntity2);
-    } else if (rootEntity2 && usedEntities.has(rootEntity2)) {
-        // Find a different entity if root2 matches root1
-        const availableEntities = Object.values(rootSemanticCategories)
-            .filter(cat => cat.entityForm && !usedEntities.has(cat.entityForm))
-            .map(cat => cat.entityForm);
-        rootEntity2 = availableEntities.length > 0 ? availableEntities[Math.floor(Math.random() * availableEntities.length)] : "object";
-    }
-
-    // Select templates based on POS and root category
-    let templates = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
-    if (!templates) templates = { action: ["A generated entity with [prefixDef] [rootAction1] [rootAction2] [suffixDef] [nounEnding]."] };
-
-    let template;
-    if (pos === 'noun') {
-        const category = rootPos1 === 'verb' ? 'action' : (rootPos1 === 'noun' ? 'entity' : 'concept');
-        templates = templates[category] || templates.action;
-        template = templates[Math.floor(Math.random() * templates.length)];
-    } else {
-        template = templates[Math.floor(Math.random() * templates.length)];
-    }
-
-    // Determine the noun subject based on the suffix
-    const nounSubject = pos === 'noun' ? (nounSubjects[suffix] || nounSubjects.default) : '';
-
-    // Randomly select a noun ending if the template includes [nounEnding]
-    const nounEnding = pos === 'noun' ? nounEndings[Math.floor(Math.random() * nounEndings.length)] : '';
-
-    // Replace placeholders, ensuring grammatical coherence
-    let filledTemplate = template
-        .replace('[nounSubject]', nounSubject)
-        .replace('[prefixDef]', partsDefs.prefixDef)
-        .replace('[rootAction1]', rootAction1)
-        .replace('[rootAction2]', rootAction2 || '')
-        .replace('[rootEntity1]', rootEntity1)
-        .replace('[rootEntity2]', rootEntity2 || '')
-        .replace('[suffixDef]', partsDefs.suffixDef)
-        .replace('[nounEnding]', nounEnding)
-        .replace(/\s+/g, ' ')
-        .trim();
-
-    // Remove redundant spaces and ensure proper sentence structure
-    filledTemplate = filledTemplate.replace(/\s{2,}/g, ' ').trim();
-
-    // Capitalize only the first letter of the sentence after the POS tag
-    if (filledTemplate.length > 0) {
-        definition += filledTemplate.charAt(0).toUpperCase() + filledTemplate.slice(1);
-    } else {
-        definition += filledTemplate;
-    }
-
-    return definition;
-}
+ 
 
 function generateOtherForms(word, parts, type, theme) {
     const forms = [];
