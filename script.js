@@ -1348,8 +1348,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (generateButton) {
             generateButton.addEventListener("click", updateDisplay);
         }
-        if (copyButton) {
-            copyButton.addEventListener("click", copyToClipboard);
-        }
-        if (shuffleButton) {
-            shuffleButton.addEventListener("
+        if
