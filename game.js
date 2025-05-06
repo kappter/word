@@ -13,8 +13,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gameThemeType = document.getElementById("gameThemeType");
     const gamePermutationType = document.getElementById("gamePermutationType");
 
-    if (!startButton || !submitButton || !nextButton || !gameArea || !scoreDisplay || !questionDisplay || !answersList || !feedbackDisplay || !gameThemeType || !gamePermutationType) {
-        console.error("One or more game elements are missing:", { startButton, submitButton, nextButton, gameArea, scoreDisplay, questionDisplay, answersList, feedbackDisplay, gameThemeType, gamePermutationType });
+    // Log specific missing elements
+    const missingElements = [];
+    if (!startButton) missingElements.push("startGameButton");
+    if (!submitButton) missingElements.push("submitAnswerButton");
+    if (!nextButton) missingElements.push("nextQuestionButton");
+    if (!gameArea) missingElements.push("gameArea");
+    if (!scoreDisplay) missingElements.push("score");
+    if (!questionDisplay) missingElements.push("question");
+    if (!answersList) missingElements.push("answers");
+    if (!feedbackDisplay) missingElements.push("feedback");
+    if (!gameThemeType) missingElements.push("gameThemeType");
+    if (!gamePermutationType) missingElements.push("gamePermutationType");
+
+    if (missingElements.length > 0) {
+        console.error(`Missing game elements: ${missingElements.join(", ")}`);
         return;
     }
 

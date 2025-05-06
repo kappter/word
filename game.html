@@ -42,70 +42,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Creator - Game Mode</title>
-    <!-- Link to Merriweather font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Link to updated CSS file -->
+    <title>Word Creator - Game</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <h1>Word Creator - Game Mode</h1>
+    <div class="container">
+        <h1>Word Creator - Match the Definition</h1>
+        <a href="index.html" class="nav-link">Back to Word Creator</a>
+        <a href="guess_real.html" class="nav-link">Guess the Real Word</a>
 
-    <div id="loading-game" class="loading-indicator">Loading game data...</div>
+        <div id="loading-game" class="hidden">Loading game data...</div>
 
-    <main>
-        <a href="index.html" class="back-link">Back to Word Creator</a>
-
-        <div id="game-setup" class="controls">
-            <h2>Select Theme and Start</h2>
-            <div class="option-group">
-                <label for="gameThemeType">Select Theme:</label>
-                <select id="gameThemeType">
-                    <!-- Options will be populated by JS -->
-                    <option value="loading">Loading themes...</option>
-                </select>
-            </div>
-            <div class="buttons">
-                <button id="startGameButton" class="btn btn-generate">Start Game</button>
-            </div>
+        <div class="controls">
+            <label for="gameThemeType">Theme:</label>
+            <select id="gameThemeType"></select>
+            <label for="gamePermutationType">Word Type:</label>
+            <select id="gamePermutationType">
+                <option value="pre-root-suf">Prefix-Root-Suffix</option>
+                <option value="pre-root">Prefix-Root</option>
+                <option value="root-suf">Root-Suffix</option>
+                <option value="pre-root-root-suf">Prefix-Root-Root-Suffix</option>
+                <option value="pre-root-root">Prefix-Root-Root</option>
+                <option value="root-root">Root-Root</option>
+            </select>
+            <button id="startGameButton">Start Game</button>
         </div>
 
-        <div id="game-play" class="hidden">
-            <h2>Guess the Word!</h2>
-            <div id="question-area" class="word-container">
-                <p><strong>Definition:</strong></p>
-                <p id="gameDefinition">---</p>
-                <p><strong>Which word matches this definition?</strong></p>
-                <div id="choices-area">
-                    <!-- Multiple choice buttons will be added here -->
-                </div>
-            </div>
-            <div id="feedback-area" class="hidden">
-                <p id="feedbackText"></p>
-                <div class="buttons">
-                    <button id="nextQuestionButton" class="btn btn-generate">Next Question</button>
-                </div>
-            </div>
-            <div id="score-area">
-                <p>Score: <span id="score">0</span></p>
-                <p>Misses Remaining: <span id="misses">3</span></p>
-                <p>Question: <span id="questionNumber">1</span> / 5</p>
-            </div>
+        <div id="gameArea" class="hidden">
+            <div id="score">Score: 0</div>
+            <div id="question"></div>
+            <ul id="answers"></ul>
+            <div id="feedback" class="feedback"></div>
+            <button id="submitAnswerButton">Submit Answer</button>
+            <button id="nextQuestionButton" class="hidden">Next Question</button>
         </div>
-
-        <div id="game-over" class="hidden">
-            <h2>Game Over!</h2>
-            <p>Your final score: <span id="finalScore">0</span></p>
-            <div class="buttons">
-                <button id="playAgainButton" class="btn btn-generate">Play Again</button>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script src="script.js"></script>
     <script src="game.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93b2821b7ff3bfcc',t:'MTc0NjQ3MTkxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

@@ -665,7 +665,7 @@ function updateDisplay() {
 
     const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
     generatedWordEl.textContent = word || "No word generated";
-    likeMainWordButton.setAttribute('data-word', word || '');
+    likeMainWordButton.setAttribute('data-word', word Ascending order (default)
     likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
     pronunciationEl.textContent = pronunciation;
     wordDefinitionEl.textContent = definition || "No definition available.";
@@ -897,31 +897,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadWordParts();
     populateThemeDropdown();
 
-    const generateButton = document.getElementById("generateButton");
-    const copyButton = document.getElementById("copyButton");
-    const shuffleButton = document.getElementById("shuffleButton");
-    const clearLikesButton = document.getElementById("clearLikesButton");
-    const likeMainWordButton = document.getElementById("likeMainWordButton");
-    const permutationType = document.getElementById("permutationType");
-    const themeType = document.getElementById("themeType");
+    // Only initialize index.html-specific elements if on index.html
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
+        const generateButton = document.getElementById("generateButton");
+        const copyButton = document.getElementById("copyButton");
+        const shuffleButton = document.getElementById("shuffleButton");
+        const clearLikesButton = document.getElementById("clearLikesButton");
+        const likeMainWordButton = document.getElementById("likeMainWordButton");
+        const permutationType = document.getElementById("permutationType");
+        const themeType = document.getElementById("themeType");
 
-    if (!generateButton || !copyButton || !shuffleButton || !clearLikesButton || !likeMainWordButton || !permutationType || !themeType) {
-        console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, clearLikesButton, likeMainWordButton, permutationType, themeType });
-        return;
+        if (!generateButton || !copyButton || !shuffleButton || !clearLikesButton || !likeMainWordButton || !permutationType || !themeType) {
+            console.error("One or more interactive elements are missing:", { generateButton, copyButton, shuffleButton, clearLikesButton, likeMainWordButton, permutationType, themeType });
+            return;
+        }
+
+        generateButton.addEventListener("click", updateDisplay);
+        copyButton.addEventListener("click", copyToClipboard);
+        shuffleButton.addEventListener("click", () => {
+            console.log("Shuffle button clicked.");
+            shuffleAmalgamations();
+        });
+        clearLikesButton.addEventListener("click", () => {
+            console.log("Clear likes button clicked.");
+            clearLikes();
+        });
+        likeMainWordButton.addEventListener("click", toggleLike);
+        permutationType.addEventListener("change", updateDisplay);
+        themeType.addEventListener("change", updateDisplay);
+        updateDisplay();
     }
-
-    generateButton.addEventListener("click", updateDisplay);
-    copyButton.addEventListener("click", copyToClipboard);
-    shuffleButton.addEventListener("click", () => {
-        console.log("Shuffle button clicked.");
-        shuffleAmalgamations();
-    });
-    clearLikesButton.addEventListener("click", () => {
-        console.log("Clear likes button clicked.");
-        clearLikes();
-    });
-    likeMainWordButton.addEventListener("click", toggleLike);
-    permutationType.addEventListener("change", updateDisplay);
-    themeType.addEventListener("change", updateDisplay);
-    updateDisplay();
 });
