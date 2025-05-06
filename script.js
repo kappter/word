@@ -1341,4 +1341,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const copyButton = document.getElementById("copyButton");
         const shuffleButton = document.getElementById("shuffleButton");
         const clearLikesButton = document.getElementById("clearLikesButton");
-        const likeMainWordButton = document.getElementById("like
+        const likeMainWordButton = document.getElementById("likeMainWordButton");
+        const permutationType = document.getElementById("permutationType");
+        const themeType = document.getElementById("themeType");
+
+        if (generateButton) {
+            generateButton.addEventListener("click", updateDisplay);
+        }
+        if (copyButton) {
+            copyButton.addEventListener("click", copyToClipboard);
+        }
+        if (shuffleButton) {
+            shuffleButton.addEventListener("
