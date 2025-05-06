@@ -692,11 +692,11 @@ function generateExampleSentence(word, pos, theme, root1, root2, rootDef1, rootD
 
     // Determine the semantic category of the roots
     const root1CategoryInfo = rootSemanticCategories[root1] || rootSemanticCategories.default;
-    const root2CategoryInfo = rootSemanticCategories[root2] || rootSemanticCategories.default;
+    const root2CategoryInfo = root2 && root2 !== root1 ? rootSemanticCategories[root2] || rootSemanticCategories.default : null;
     const rootAction1 = root1CategoryInfo.actionForm;
-    const rootAction2 = root2CategoryInfo.actionForm;
+    const rootAction2 = root2CategoryInfo ? root2CategoryInfo.actionForm : rootAction1 !== 'being' ? 'being' : 'performing';
     const rootEntity1 = root1CategoryInfo.entityForm;
-    const rootEntity2 = root2CategoryInfo.entityForm;
+    const rootEntity2 = root2CategoryInfo ? root2CategoryInfo.entityForm : '';
 
     // Select the appropriate template based on the root's category (for nouns)
     let template;
@@ -712,7 +712,7 @@ function generateExampleSentence(word, pos, theme, root1, root2, rootDef1, rootD
     return template
         .replace('[word]', word)
         .replace('[rootAction1]', rootAction1)
-        .replace('[rootAction2]', rootAction2 || '')
+        .replace('[rootAction2]', root2 && root2 !== root1 ? rootAction2 : '')
         .replace('[rootEntity1]', rootEntity1)
         .replace('[rootEntity2]', rootEntity2 || '')
         .replace('[prefixDef]', prefixDef || 'notably')
@@ -720,87 +720,470 @@ function generateExampleSentence(word, pos, theme, root1, root2, rootDef1, rootD
         .trim();
 }
 
-// Function to load and organize data from word_parts.csv
-async function loadWordParts() {
-    if (themesLoadedPromise) return themesLoadedPromise;
+// Function to generate sentence definitions with semantic placeholders
+function generateSentenceDefinition(type, preDef, rootDef1, rootDef2, sufDef, pos, suffix, root1, root2, rootPos1, rootPos2, theme) {
+    let definition = `(${pos}) `;
+    const partsDefs = {
+        prefixDef: preDef || (pos === 'noun' ? 'prominent' : pos === 'verb' ? 'actively' : pos === 'adjective' ? 'notably' : 'distinctly'),
+        suffixDef: sufDef || (pos === 'noun' ? 'distinctive' : pos === 'verb' ? 'effectively' : pos === 'adjective' ? 'characteristic' : 'uniquely')
+    };
 
-    themesLoadedPromise = new Promise(async (resolve, reject) => {
-        const loadingElement = document.getElementById("loading-game");
-        if (loadingElement) loadingElement.classList.remove("hidden");
+    // Determine semantic category of the roots
+    const root1CategoryInfo = rootSemanticCategories[root1] || rootSemanticCategories.default;
+    const root2CategoryInfo = root2 && root2 !== root1 ? rootSemanticCategories[root2] || rootSemanticCategories.default : null;
+    const rootAction1 = root1CategoryInfo.actionForm;
+    const rootAction2 = root2CategoryInfo ? root2CategoryInfo.actionForm : rootAction1 !== 'being' ? 'being' : 'performing'; // Diversify if same
+    let rootEntity1 = root1CategoryInfo.entityForm;
+    let rootEntity2 = root2CategoryInfo ? root2CategoryInfo.entityForm : '';
 
-        try {
-            const response = await fetch("data/word_parts.csv");
-            if (!response.ok) throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
-            const csvText = await response.text();
-            const data = parseCSV(csvText);
+    // Prevent entity duplication
+    const usedEntities = new Set();
+    if (rootEntity1) usedEntities.add(rootEntity1);
+    if (rootEntity2 && !usedEntities.has(rootEntity2)) {
+        usedEntities.add(rootEntity2);
+    } else if (rootEntity2 && usedEntities.has(rootEntity2)) {
+        const availableEntities = Object.values(rootSemanticCategories)
+            .filter(cat => cat.entityForm && !usedEntities.has(cat.entityForm))
+            .map(cat => cat.entityForm);
+        rootEntity2 = availableEntities.length > 0 ? availableEntities[Math.floor(Math.random() * availableEntities.length)] : "object";
+    }
 
-            for (const key in themes) delete themes[key];
+    // Select templates based on POS and root category
+    let templates = definitionTemplates[theme]?.[pos] || definitionTemplates.normal[pos];
+    if (!templates) templates = { action: ["A generated entity with [prefixDef] [rootAction1] [rootAction2] [suffixDef] [nounEnding]."] };
 
-            data.forEach(({ type, part, term, definition, pos }) => {
-                if (!themes[type]) {
-                    themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], rootPos: [], suffixes: [], suffixDefs: [] };
-                }
-                let cleanedTerm = term;
-                if (part === "prefix") cleanedTerm = term.replace(/-+$/, "");
-                else if (part === "suffix") cleanedTerm = term.replace(/^-+/, "");
-                if (cleanedTerm) {
-                    if (part === "prefix") {
-                        themes[type].prefixes.push(cleanedTerm);
-                        themes[type].prefixDefs.push(definition || "");
-                    } else if (part === "root") {
-                        themes[type].roots.push(cleanedTerm);
-                        themes[type].rootDefs.push(definition || "");
-                        themes[type].rootPos.push(pos || "noun");
-                    } else if (part === "suffix") {
-                        themes[type].suffixes.push(cleanedTerm);
-                        themes[type].suffixDefs.push(definition || "");
-                    }
-                }
-            });
+    let template;
+    if (pos === 'noun') {
+        const category = rootPos1 === 'verb' ? 'action' : (rootPos1 === 'noun' ? 'entity' : 'concept');
+        templates = templates[category] || templates.action;
+        template = templates[Math.floor(Math.random() * templates.length)];
+    } else {
+        template = templates[Math.floor(Math.random() * templates.length)];
+    }
 
-            console.log("Themes loaded:", themes);
-            document.dispatchEvent(new CustomEvent('themesLoaded'));
-            resolve(themes);
-        } catch (error) {
-            console.error("Error loading or processing word parts:", error);
-            alert("Failed to load word parts data. Check console and ensure data/word_parts.csv is accessible.");
-            reject(error);
-        } finally {
-            if (loadingElement) loadingElement.classList.add("hidden");
+    // Determine the noun subject based on the suffix
+    const nounSubject = pos === 'noun' ? (nounSubjects[suffix] || nounSubjects.default) : '';
+
+    // Randomly select a noun ending if the template includes [nounEnding]
+    const nounEnding = pos === 'noun' ? nounEndings[Math.floor(Math.random() * nounEndings.length)] : '';
+
+    // Replace placeholders, ensuring grammatical coherence and avoiding duplication
+    let filledTemplate = template
+        .replace('[nounSubject]', nounSubject)
+        .replace('[prefixDef]', partsDefs.prefixDef)
+        .replace('[rootAction1]', rootAction1)
+        .replace('[rootAction2]', root2 && root2 !== root1 ? rootAction2 : '') // Only include rootAction2 if root2 is valid and different
+        .replace('[rootEntity1]', rootEntity1)
+        .replace('[rootEntity2]', rootEntity2 || '')
+        .replace('[suffixDef]', partsDefs.suffixDef)
+        .replace('[nounEnding]', nounEnding)
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Remove redundant spaces and ensure proper sentence structure
+    filledTemplate = filledTemplate.replace(/\s{2,}/g, ' ').trim();
+
+    // Capitalize only the first letter of the sentence after the POS tag
+    if (filledTemplate.length > 0) {
+        definition += filledTemplate.charAt(0).toUpperCase() + filledTemplate.slice(1);
+    } else {
+        definition += filledTemplate;
+    }
+
+    return definition;
+}
+
+// Function to generate pronunciation
+function generatePronunciation(word) {
+    return word ? `/${word.replace(/-/g, ' / ')}/` : '';
+}
+
+// Function to determine part of speech
+function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
+    let pos = 'noun';
+    const source = theme === 'all' ? themes['normal'] : themes[theme];
+    let suffix = '';
+    let rootPos1 = 'noun', rootPos2 = 'noun';
+
+    if (type.includes('root')) {
+        const rootSource = theme === 'all' ? themes['normal'] : themes[theme];
+        if (root1Index !== -1 && rootSource && rootSource.rootPos[root1Index]) {
+            rootPos1 = rootSource.rootPos[root1Index];
         }
-    });
-
-    return themesLoadedPromise;
-}
-
-function populateThemeDropdown() {
-    const themeDropdown = document.getElementById("themeType") || document.getElementById("gameThemeType");
-    if (!themeDropdown) return;
-
-    themeDropdown.innerHTML = '';
-    const allOption = document.createElement("option");
-    allOption.value = "all";
-    allOption.text = "All";
-    themeDropdown.appendChild(allOption);
-
-    Object.keys(themes).sort().forEach(themeKey => {
-        const themeData = themes[themeKey];
-        if (themeData && themeData.prefixes.length > 0 && themeData.roots.length > 0 && themeData.suffixes.length > 0) {
-            const option = document.createElement("option");
-            option.value = themeKey;
-            option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
-            themeDropdown.appendChild(option);
+        if (root2Index !== -1 && rootSource && rootSource.rootPos[root2Index]) {
+            rootPos2 = rootSource.rootPos[root2Index];
         }
+    }
+
+    if (type.endsWith('suf') && suffixIndex !== -1) {
+        if (source && source.suffixes.length > suffixIndex) suffix = source.suffixes[suffixIndex];
+
+        if (['ly', 'th'].includes(suffix)) return 'adverb';
+        if (['ize', 'ify', 'en', 'ate'].includes(suffix)) return 'verb';
+        if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible', 'ish', 'ive', 'less', 'some', 'y'].includes(suffix)) return 'adjective';
+        if (['ics', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ion', 'tion', 'sion', 'ship', 'dom', 'hood', 'logy', 'ology', 'phobia', 'philia', 'er', 'or', 'ant', 'ent', 'ard', 'ry', 'cy', 'tude'].includes(suffix)) return 'noun';
+    } else if (type.includes('root') && !type.endsWith('suf')) {
+        pos = rootPos1;
+    } else {
+        pos = 'noun';
+    }
+
+    if ((type === 'pre-root-root' || type === 'root-root') && !type.endsWith('suf')) {
+        pos = rootPos1;
+    }
+
+    return pos;
+}
+
+// Function to generate other forms
+function generateOtherForms(word, parts, type, theme) {
+    const forms = [];
+    const pos = getPartOfSpeech(type, parts.length > 0 ? parts.findIndex(p => p === parts[parts.length - 1]) : -1, -1, -1, theme);
+
+    if (parts.length > 0) {
+        const formWord = parts[0];
+        forms.push({ word: formWord, pos: 'noun', def: `A concept related to ${parts[0]}.`, example: `Example: The ${formWord} was central to the story.` });
+    }
+    if (parts.length > 1) {
+        const formWord = parts.slice(0, 2).join('-');
+        forms.push({ word: formWord, pos: pos, def: `Involving ${parts.slice(0, 2).join(' and ')}.`, example: `Example: It had a ${formWord} quality.` });
+    }
+    if (parts.length > 2) {
+        const formWord = parts.slice(0, 3).join('-');
+        forms.push({ word: formWord, pos: 'noun', def: `A thing involving ${parts.slice(0, 3).join(' and ')}.`, example: `Example: The ${formWord} glowed brightly.` });
+    }
+
+    return forms;
+}
+
+// Function to generate all permutations of an array and shuffle them
+function getPermutations(arr, originalWord) {
+    const result = [];
+    function permute(arr, current = [], remaining = arr) {
+        if (remaining.length === 0) {
+            const perm = current.join('-');
+            if (perm !== originalWord) { // Exclude the original word
+                result.push(perm);
+            }
+            return;
+        }
+        for (let i = 0; i < remaining.length; i++) {
+            const newRemaining = [...remaining.slice(0, i), ...remaining.slice(i + 1)];
+            permute(arr, [...current, remaining[i]], newRemaining);
+        }
+    }
+    permute(arr);
+    
+    // Shuffle the permutations array
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    
+    return result.slice(0, 5); // Limit to 5 permutations
+}
+
+// Function to generate amalgamations
+function generateAmalgamations(parts, originalWord) {
+    if (!parts || parts.length < 2) {
+        console.warn("Not enough parts to generate amalgamations:", parts);
+        return ["No combinations available"];
+    }
+    const permutations = getPermutations(parts, originalWord);
+    console.log("Generated permutations:", permutations);
+    return permutations.length > 0 ? permutations : ["No permutations available"];
+}
+
+// Function to update display
+function updateDisplay() {
+    const generatedWordEl = document.getElementById('generatedWord');
+    const likeMainWordButton = document.getElementById('likeMainWordButton');
+    const pronunciationEl = document.getElementById('pronunciation');
+    const wordDefinitionEl = document.getElementById('wordDefinition');
+    const otherFormsEl = document.getElementById('otherForms');
+    const amalgamationsEl = document.getElementById('amalgamations');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById('themeType');
+
+    if (!permutationType || !themeType || !generatedWordEl || !likeMainWordButton || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
+        console.error("One or more required elements are missing:", { generatedWordEl, likeMainWordButton, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
+        return;
+    }
+
+    const selectedWordType = permutationType.value;
+    const selectedTheme = themeType.value;
+
+    if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
+        generatedWordEl.textContent = "Loading...";
+        likeMainWordButton.setAttribute('data-word', '');
+        likeMainWordButton.textContent = '🤍';
+        pronunciationEl.textContent = "";
+        wordDefinitionEl.textContent = "Please wait for data to load.";
+        otherFormsEl.innerHTML = "";
+        amalgamationsEl.innerHTML = "<li>Loading...</li>";
+        return;
+    }
+
+    const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
+    generatedWordEl.textContent = word || "No word generated";
+    likeMainWordButton.setAttribute('data-word', word);
+    likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+    pronunciationEl.textContent = pronunciation;
+    wordDefinitionEl.textContent = definition || "No definition available.";
+    otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
+        .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
+    amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
+        .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+    updateLikes();
+    updateLikedWordsDisplay();
+}
+
+// Function to copy to clipboard
+function copyToClipboard() {
+    const generatedWord = document.getElementById('generatedWord')?.textContent || '';
+    const wordDefinition = document.getElementById('wordDefinition')?.textContent || '';
+    if (!generatedWord) return;
+
+    const textToCopy = `Word: ${generatedWord}\nDefinition: ${wordDefinition}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const copyButton = document.getElementById('copyButton');
+        if (copyButton) {
+            const originalText = copyButton.textContent;
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => { copyButton.textContent = originalText; }, 1500);
+        }
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text.');
     });
-    themeDropdown.value = "all";
 }
 
-function getRandomElement(arr) {
-    if (!arr || arr.length === 0) return { element: null, index: -1 };
-    const index = Math.floor(Math.random() * arr.length);
-    return { element: arr[index], index: index };
+// Function to shuffle amalgamations
+function shuffleAmalgamations() {
+    const amalgamationsEl = document.getElementById('amalgamations');
+    const generatedWordEl = document.getElementById('generatedWord');
+
+    if (!amalgamationsEl || !generatedWordEl) {
+        console.error("Required elements for shuffling are missing:", { amalgamationsEl, generatedWordEl });
+        return;
+    }
+
+    const wordText = generatedWordEl.textContent;
+    if (!wordText || wordText === "No word generated") {
+        console.warn("No generated word available to shuffle.");
+        amalgamationsEl.innerHTML = '<li>No word parts available to shuffle.</li>';
+        return;
+    }
+
+    const parts = wordText.split('-');
+    if (parts.length < 2 || parts[0] === "") {
+        console.warn("Not enough parts to shuffle:", parts);
+        amalgamationsEl.innerHTML = '<li>Not enough parts to shuffle.</li>';
+        return;
+    }
+
+    const permutations = generateAmalgamations(parts, wordText);
+    if (permutations.length === 0 || permutations[0] === "No permutations available") {
+        amalgamationsEl.innerHTML = '<li>No permutations generated.</li>';
+    } else {
+        amalgamationsEl.innerHTML = permutations
+            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+    }
+    updateLikes();
+    updateLikedWordsDisplay();
+    addPermutationClickHandlers();
 }
 
+// Function to get like status
+function getLikeStatus(word) {
+    return JSON.parse(localStorage.getItem('likedWords') || '{}')[word] || false;
+}
+
+// Function to toggle like
+function toggleLike(event) {
+    const button = event.target;
+    const word = button.getAttribute('data-word');
+    const likedWords = JSON.parse(localStorage.getItem('likedWords') || '{}');
+    likedWords[word] = !likedWords[word];
+    localStorage.setItem('likedWords', JSON.stringify(likedWords));
+    button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+    updateLikedWordsDisplay();
+}
+
+// Function to update likes
+function updateLikes() {
+    const buttons = document.querySelectorAll('.like-btn');
+    if (buttons.length === 0) {
+        console.log("No like buttons found to update.");
+        return;
+    }
+    buttons.forEach(button => {
+        const word = button.getAttribute('data-word');
+        button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+        button.removeEventListener('click', toggleLike);
+        button.addEventListener('click', toggleLike);
+    });
+}
+
+// Function to clear likes
+function clearLikes() {
+    localStorage.setItem('likedWords', JSON.stringify({}));
+    updateLikes();
+    updateLikedWordsDisplay();
+}
+
+// Function to update liked words display
+function updateLikedWordsDisplay() {
+    const likedWordsEl = document.getElementById('likedWords');
+    if (!likedWordsEl) {
+        console.error("Liked words element not found.");
+        return;
+    }
+
+    const likedWords = JSON.parse(localStorage.getItem('likedWords') || '{}');
+    const likedWordsList = Object.keys(likedWords).filter(word => likedWords[word]);
+    
+    if (likedWordsList.length === 0) {
+        likedWordsEl.innerHTML = '<li>No liked words yet.</li>';
+    } else {
+        likedWordsEl.innerHTML = likedWordsList
+            .map(word => `<li class="liked-word" data-word="${word}">${word}</li>`)
+            .join('');
+    }
+    addLikedWordClickHandlers();
+}
+
+// Function to add liked word click handlers
+function addLikedWordClickHandlers() {
+    const likedWords = document.querySelectorAll('.liked-word');
+    likedWords.forEach(lw => {
+        lw.removeEventListener('click', loadLikedWord);
+        lw.addEventListener('click', loadLikedWord);
+    });
+}
+
+// Function to load liked word
+function loadLikedWord(event) {
+    const word = event.target.getAttribute('data-word');
+    const generatedWordEl = document.getElementById('generatedWord');
+    const likeMainWordButton = document.getElementById('likeMainWordButton');
+    const pronunciationEl = document.getElementById('pronunciation');
+    const wordDefinitionEl = document.getElementById('wordDefinition');
+    const otherFormsEl = document.getElementById('otherForms');
+    const amalgamationsEl = document.getElementById('amalgamations');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById('themeType');
+
+    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl && permutationType && themeType) {
+        generatedWordEl.textContent = word;
+        likeMainWordButton.setAttribute('data-word', word);
+        likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+        pronunciationEl.textContent = generatePronunciation(word);
+
+        const selectedWordType = 'pre-root-suf';
+        const selectedTheme = themeType.value;
+
+        const parts = word.split('-');
+        let prefix = '', root1 = '', root2 = '', suffix = '';
+        let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
+        let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+        let rootPos1 = 'noun', rootPos2 = 'noun';
+
+        const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
+        if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
+        if (parts.length >= 2) {
+            root1 = parts[1] || '';
+            root1Index = themeData.roots.indexOf(root1);
+            rootDef1 = themeData.rootDefs[root1Index] || '';
+            rootPos1 = themeData.rootPos[root1Index] || 'noun';
+        }
+        if (parts.length >= 3) {
+            root2 = parts[2] || '';
+            root2Index = themeData.roots.indexOf(root2);
+            rootDef2 = themeData.rootDefs[root2Index] || '';
+            rootPos2 = themeData.rootPos[root2Index] || 'noun';
+        }
+        if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
+
+        const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
+        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
+        wordDefinitionEl.textContent = `${definition} ${example}`;
+
+        otherFormsEl.innerHTML = "";
+        amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
+            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        updateLikes();
+        updateLikedWordsDisplay();
+    }
+}
+
+// Function to add permutation click handlers
+function addPermutationClickHandlers() {
+    const permutations = document.querySelectorAll('.permutation');
+    permutations.forEach(p => {
+        p.removeEventListener('click', loadPermutation);
+        p.addEventListener('click', loadPermutation);
+    });
+}
+
+// Function to load permutation
+function loadPermutation(event) {
+    const word = event.target.getAttribute('data-word');
+    const generatedWordEl = document.getElementById('generatedWord');
+    const likeMainWordButton = document.getElementById('likeMainWordButton');
+    const pronunciationEl = document.getElementById('pronunciation');
+    const wordDefinitionEl = document.getElementById('wordDefinition');
+    const otherFormsEl = document.getElementById('otherForms');
+    const amalgamationsEl = document.getElementById('amalgamations');
+    const permutationType = document.getElementById('permutationType');
+    const themeType = document.getElementById('themeType');
+
+    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl && permutationType && themeType) {
+        generatedWordEl.textContent = word;
+        likeMainWordButton.setAttribute('data-word', word);
+        likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
+        pronunciationEl.textContent = generatePronunciation(word);
+
+        const selectedWordType = permutationType.value;
+        const selectedTheme = themeType.value;
+
+        const parts = word.split('-');
+        let prefix = '', root1 = '', root2 = '', suffix = '';
+        let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
+        let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+        let rootPos1 = 'noun', rootPos2 = 'noun';
+
+        const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
+        if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
+        if (parts.length >= 2) {
+            root1 = parts[1] || '';
+            root1Index = themeData.roots.indexOf(root1);
+            rootDef1 = themeData.rootDefs[root1Index] || '';
+            rootPos1 = themeData.rootPos[root1Index] || 'noun';
+        }
+        if (parts.length >= 3) {
+            root2 = parts[2] || '';
+            root2Index = themeData.roots.indexOf(root2);
+            rootDef2 = themeData.rootDefs[root2Index] || '';
+            rootPos2 = themeData.rootPos[root2Index] || 'noun';
+        }
+        if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
+
+        const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
+        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
+        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
+        wordDefinitionEl.textContent = `${definition} ${example}`;
+
+        otherFormsEl.innerHTML = "";
+        amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
+            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        updateLikes();
+        updateLikedWordsDisplay();
+    }
+}
+
+// Function to generate word and definition
 function generateWordAndDefinition(wordType, themeKey, options = {}) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
@@ -885,403 +1268,84 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     return { word, definition: example ? `${definition} ${example}` : definition, pronunciation, parts, pos };
 }
 
-function generatePronunciation(word) {
-    return word ? `/${word.replace(/-/g, ' / ')}/` : '';
-}
+// Function to populate theme dropdown
+function populateThemeDropdown() {
+    const themeDropdown = document.getElementById("themeType") || document.getElementById("gameThemeType");
+    if (!themeDropdown) return;
 
-function getPartOfSpeech(type, suffixIndex, root1Index, root2Index, theme) {
-    let pos = 'noun';
-    const source = theme === 'all' ? null : themes[theme];
-    let suffix = '';
-    let rootPos1 = 'noun', rootPos2 = 'noun';
+    themeDropdown.innerHTML = '';
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.text = "All";
+    themeDropdown.appendChild(allOption);
 
-    if (type.includes('root')) {
-        const rootSource = theme === 'all' ? themes['normal'] : themes[theme];
-        if (root1Index !== -1 && rootSource && rootSource.rootPos[root1Index]) {
-            rootPos1 = rootSource.rootPos[root1Index];
+    Object.keys(themes).sort().forEach(themeKey => {
+        const themeData = themes[themeKey];
+        if (themeData && themeData.prefixes.length > 0 && themeData.roots.length > 0 && themeData.suffixes.length > 0) {
+            const option = document.createElement("option");
+            option.value = themeKey;
+            option.text = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
+            themeDropdown.appendChild(option);
         }
-        if (root2Index !== -1 && rootSource && rootSource.rootPos[root2Index]) {
-            rootPos2 = rootSource.rootPos[root2Index];
-        }
-    }
-
-    if (type.endsWith('suf') && suffixIndex !== -1) {
-        if (source && source.suffixes.length > suffixIndex) suffix = source.suffixes[suffixIndex];
-
-        if (['ly', 'th'].includes(suffix)) return 'adverb';
-        if (['ize', 'ify', 'en', 'ate'].includes(suffix)) return 'verb';
-        if (['ous', 'al', 'an', 'ile', 'ic', 'esque', 'ful', 'ious', 'ar', 'able', 'ible', 'ish', 'ive', 'less', 'some', 'y'].includes(suffix)) return 'adjective';
-        if (['ics', 'ism', 'ist', 'ity', 'ty', 'ment', 'ness', 'ion', 'tion', 'sion', 'ship', 'dom', 'hood', 'logy', 'ology', 'phobia', 'philia', 'er', 'or', 'ant', 'ent', 'ard', 'ry', 'cy', 'tude'].includes(suffix)) return 'noun';
-    } else if (type.includes('root') && !type.endsWith('suf')) {
-        pos = rootPos1;
-    } else {
-        pos = 'noun';
-    }
-
-    if ((type === 'pre-root-root' || type === 'root-root') && !type.endsWith('suf')) {
-        pos = rootPos1;
-    }
-
-    return pos;
-}
-
- 
-
-function generateOtherForms(word, parts, type, theme) {
-    const forms = [];
-    const pos = getPartOfSpeech(type, parts.length > 0 ? parts.findIndex(p => p === parts[parts.length - 1]) : -1, -1, -1, theme);
-
-    if (parts.length > 0) {
-        const formWord = parts[0];
-        forms.push({ word: formWord, pos: 'noun', def: `A concept related to ${parts[0]}.`, example: `Example: The ${formWord} was central to the story.` });
-    }
-    if (parts.length > 1) {
-        const formWord = parts.slice(0, 2).join('-');
-        forms.push({ word: formWord, pos: pos, def: `Involving ${parts.slice(0, 2).join(' and ')}.`, example: `Example: It had a ${formWord} quality.` });
-    }
-    if (parts.length > 2) {
-        const formWord = parts.slice(0, 3).join('-');
-        forms.push({ word: formWord, pos: 'noun', def: `A thing involving ${parts.slice(0, 3).join(' and ')}.`, example: `Example: The ${formWord} glowed brightly.` });
-    }
-
-    return forms;
-}
-
-// Function to generate all permutations of an array and shuffle them
-function getPermutations(arr, originalWord) {
-    const result = [];
-    function permute(arr, current = [], remaining = arr) {
-        if (remaining.length === 0) {
-            const perm = current.join('-');
-            if (perm !== originalWord) { // Exclude the original word
-                result.push(perm);
-            }
-            return;
-        }
-        for (let i = 0; i < remaining.length; i++) {
-            const newRemaining = [...remaining.slice(0, i), ...remaining.slice(i + 1)];
-            permute(arr, [...current, remaining[i]], newRemaining);
-        }
-    }
-    permute(arr);
-    
-    // Shuffle the permutations array
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-    }
-    
-    return result.slice(0, 5); // Limit to 5 permutations
-}
-
-function generateAmalgamations(parts, originalWord) {
-    if (!parts || parts.length < 2) {
-        console.warn("Not enough parts to generate amalgamations:", parts);
-        return ["No combinations available"];
-    }
-    const permutations = getPermutations(parts, originalWord);
-    console.log("Generated permutations:", permutations);
-    return permutations.length > 0 ? permutations : ["No permutations available"];
-}
-
-function updateDisplay() {
-    const generatedWordEl = document.getElementById('generatedWord');
-    const likeMainWordButton = document.getElementById('likeMainWordButton');
-    const pronunciationEl = document.getElementById('pronunciation');
-    const wordDefinitionEl = document.getElementById('wordDefinition');
-    const otherFormsEl = document.getElementById('otherForms');
-    const amalgamationsEl = document.getElementById('amalgamations');
-    const permutationType = document.getElementById('permutationType');
-    const themeType = document.getElementById('themeType');
-
-    if (!permutationType || !themeType || !generatedWordEl || !likeMainWordButton || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
-        console.error("One or more required elements are missing:", { generatedWordEl, likeMainWordButton, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
-        return;
-    }
-
-    const selectedWordType = permutationType.value;
-    const selectedTheme = themeType.value;
-
-    if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
-        generatedWordEl.textContent = "Loading...";
-        likeMainWordButton.setAttribute('data-word', '');
-        likeMainWordButton.textContent = '🤍';
-        pronunciationEl.textContent = "";
-        wordDefinitionEl.textContent = "Please wait for data to load.";
-        otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = "<li>Loading...</li>";
-        return;
-    }
-
-    const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
-    generatedWordEl.textContent = word || "No word generated";
-    likeMainWordButton.setAttribute('data-word', word);
-    likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-    pronunciationEl.textContent = pronunciation;
-    wordDefinitionEl.textContent = definition || "No definition available.";
-    otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
-        .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
-    amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
-        .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-    updateLikes();
-    updateLikedWordsDisplay();
-}
-
-function copyToClipboard() {
-    const generatedWord = document.getElementById('generatedWord')?.textContent || '';
-    const wordDefinition = document.getElementById('wordDefinition')?.textContent || '';
-    if (!generatedWord) return;
-
-    const textToCopy = `Word: ${generatedWord}\nDefinition: ${wordDefinition}`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const copyButton = document.getElementById('copyButton');
-        if (copyButton) {
-            const originalText = copyButton.textContent;
-            copyButton.textContent = 'Copied!';
-            setTimeout(() => { copyButton.textContent = originalText; }, 1500);
-        }
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
-        alert('Failed to copy text.');
     });
+    themeDropdown.value = "all";
 }
 
-function shuffleAmalgamations() {
-    const amalgamationsEl = document.getElementById('amalgamations');
-    const generatedWordEl = document.getElementById('generatedWord');
-
-    if (!amalgamationsEl || !generatedWordEl) {
-        console.error("Required elements for shuffling are missing:", { amalgamationsEl, generatedWordEl });
-        return;
-    }
-
-    const wordText = generatedWordEl.textContent;
-    if (!wordText || wordText === "No word generated") {
-        console.warn("No generated word available to shuffle.");
-        amalgamationsEl.innerHTML = '<li>No word parts available to shuffle.</li>';
-        return;
-    }
-
-    const parts = wordText.split('-');
-    if (parts.length < 2 || parts[0] === "") {
-        console.warn("Not enough parts to shuffle:", parts);
-        amalgamationsEl.innerHTML = '<li>Not enough parts to shuffle.</li>';
-        return;
-    }
-
-    const permutations = generateAmalgamations(parts, wordText);
-    if (permutations.length === 0 || permutations[0] === "No permutations available") {
-        amalgamationsEl.innerHTML = '<li>No permutations generated.</li>';
-    } else {
-        amalgamationsEl.innerHTML = permutations
-            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-    }
-    updateLikes();
-    updateLikedWordsDisplay();
-    addPermutationClickHandlers();
+// Function to get random element
+function getRandomElement(arr) {
+    if (!arr || arr.length === 0) return { element: null, index: -1 };
+    const index = Math.floor(Math.random() * arr.length);
+    return { element: arr[index], index: index };
 }
 
-function getLikeStatus(word) {
-    return JSON.parse(localStorage.getItem('likedWords') || '{}')[word] || false;
-}
+// Function to load word parts
+async function loadWordParts() {
+    if (themesLoadedPromise) return themesLoadedPromise;
 
-function toggleLike(event) {
-    const button = event.target;
-    const word = button.getAttribute('data-word');
-    const likedWords = JSON.parse(localStorage.getItem('likedWords') || '{}');
-    likedWords[word] = !likedWords[word];
-    localStorage.setItem('likedWords', JSON.stringify(likedWords));
-    button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-    updateLikedWordsDisplay();
-}
+    themesLoadedPromise = new Promise(async (resolve, reject) => {
+        const loadingElement = document.getElementById("loading-game");
+        if (loadingElement) loadingElement.classList.remove("hidden");
 
-function updateLikes() {
-    const buttons = document.querySelectorAll('.like-btn');
-    if (buttons.length === 0) {
-        console.log("No like buttons found to update.");
-        return;
-    }
-    buttons.forEach(button => {
-        const word = button.getAttribute('data-word');
-        button.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-        button.removeEventListener('click', toggleLike);
-        button.addEventListener('click', toggleLike);
+        try {
+            const response = await fetch("data/word_parts.csv");
+            if (!response.ok) throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
+            const csvText = await response.text();
+            const data = parseCSV(csvText);
+
+            for (const key in themes) delete themes[key];
+
+            data.forEach(({ type, part, term, definition, pos }) => {
+                if (!themes[type]) {
+                    themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], rootPos: [], suffixes: [], suffixDefs: [] };
+                }
+                let cleanedTerm = term;
+                if (part === "prefix") cleanedTerm = term.replace(/-+$/, "");
+                else if (part === "suffix") cleanedTerm = term.replace(/^-+/, "");
+                if (cleanedTerm) {
+                    if (part === "prefix") {
+                        themes[type].prefixes.push(cleanedTerm);
+                        themes[type].prefixDefs.push(definition || "");
+                    } else if (part === "root") {
+                        themes[type].roots.push(cleanedTerm);
+                        themes[type].rootDefs.push(definition || "");
+                        themes[type].rootPos.push(pos || "noun");
+                    } else if (part === "suffix") {
+                        themes[type].suffixes.push(cleanedTerm);
+                        themes[type].suffixDefs.push(definition || "");
+                    }
+                }
+            });
+
+            console.log("Themes loaded:", themes);
+            document.dispatchEvent(new CustomEvent('themesLoaded'));
+            resolve(themes);
+        } catch (error) {
+            console.error("Error loading or processing word parts:", error);
+            alert("Failed to load word parts data. Check console and ensure data/word_parts.csv is accessible.");
+            reject(error);
+        } finally {
+            if (loadingElement) loadingElement.classList.add("hidden");
+        }
     });
-}
 
-function clearLikes() {
-    localStorage.setItem('likedWords', JSON.stringify({}));
-    updateLikes();
-    updateLikedWordsDisplay();
-}
-
-function updateLikedWordsDisplay() {
-    const likedWordsEl = document.getElementById('likedWords');
-    if (!likedWordsEl) {
-        console.error("Liked words element not found.");
-        return;
-    }
-
-    const likedWords = JSON.parse(localStorage.getItem('likedWords') || '{}');
-    const likedWordsList = Object.keys(likedWords).filter(word => likedWords[word]);
-    
-    if (likedWordsList.length === 0) {
-        likedWordsEl.innerHTML = '<li>No liked words yet.</li>';
-    } else {
-        likedWordsEl.innerHTML = likedWordsList
-            .map(word => `<li class="liked-word" data-word="${word}">${word}</li>`)
-            .join('');
-    }
-    addLikedWordClickHandlers();
-}
-
-function addLikedWordClickHandlers() {
-    const likedWords = document.querySelectorAll('.liked-word');
-    likedWords.forEach(lw => {
-        lw.removeEventListener('click', loadLikedWord);
-        lw.addEventListener('click', loadLikedWord);
-    });
-}
-
-function loadLikedWord(event) {
-    const word = event.target.getAttribute('data-word');
-    const generatedWordEl = document.getElementById('generatedWord');
-    const likeMainWordButton = document.getElementById('likeMainWordButton');
-    const pronunciationEl = document.getElementById('pronunciation');
-    const wordDefinitionEl = document.getElementById('wordDefinition');
-    const otherFormsEl = document.getElementById('otherForms');
-    const amalgamationsEl = document.getElementById('amalgamations');
-    const permutationType = document.getElementById('permutationType');
-    const themeType = document.getElementById('themeType');
-
-    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl && permutationType && themeType) {
-        generatedWordEl.textContent = word;
-        likeMainWordButton.setAttribute('data-word', word);
-        likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-        pronunciationEl.textContent = generatePronunciation(word);
-
-        const selectedWordType = 'pre-root-suf';
-        const selectedTheme = themeType.value;
-
-        const parts = word.split('-');
-        let prefix = '', root1 = '', root2 = '', suffix = '';
-        let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
-        let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
-        let rootPos1 = 'noun', rootPos2 = 'noun';
-
-        const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
-        if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
-        if (parts.length >= 2) {
-            root1 = parts[1] || '';
-            root1Index = themeData.roots.indexOf(root1);
-            rootDef1 = themeData.rootDefs[root1Index] || '';
-            rootPos1 = themeData.rootPos[root1Index] || 'noun';
-        }
-        if (parts.length >= 3) {
-            root2 = parts[2] || '';
-            root2Index = themeData.roots.indexOf(root2);
-            rootDef2 = themeData.rootDefs[root2Index] || '';
-            rootPos2 = themeData.rootPos[root2Index] || 'noun';
-        }
-        if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
-
-        const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
-        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
-        wordDefinitionEl.textContent = `${definition} ${example}`;
-
-        otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
-            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-        updateLikes();
-        updateLikedWordsDisplay();
-    }
-}
-
-function addPermutationClickHandlers() {
-    const permutations = document.querySelectorAll('.permutation');
-    permutations.forEach(p => {
-        p.removeEventListener('click', loadPermutation);
-        p.addEventListener('click', loadPermutation);
-    });
-}
-
-// [Previous content remains unchanged until loadPermutation function...]
-
-function loadPermutation(event) {
-    const word = event.target.getAttribute('data-word');
-    const generatedWordEl = document.getElementById('generatedWord');
-    const likeMainWordButton = document.getElementById('likeMainWordButton');
-    const pronunciationEl = document.getElementById('pronunciation');
-    const wordDefinitionEl = document.getElementById('wordDefinition');
-    const otherFormsEl = document.getElementById('otherForms');
-    const amalgamationsEl = document.getElementById('amalgamations');
-    const permutationType = document.getElementById('permutationType');
-    const themeType = document.getElementById('themeType');
-
-    if (generatedWordEl && likeMainWordButton && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl && permutationType && themeType) {
-        generatedWordEl.textContent = word;
-        likeMainWordButton.setAttribute('data-word', word);
-        likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-        pronunciationEl.textContent = generatePronunciation(word);
-
-        const selectedWordType = permutationType.value;
-        const selectedTheme = themeType.value;
-
-        const parts = word.split('-');
-        let prefix = '', root1 = '', root2 = '', suffix = '';
-        let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
-        let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
-        let rootPos1 = 'noun', rootPos2 = 'noun';
-
-        const themeData = selectedTheme === 'all' ? themes['normal'] : themes[selectedTheme];
-        if (parts.length >= 1) prefix = parts[0] || '', prefixDef = themeData.prefixDefs[themeData.prefixes.indexOf(prefix)] || '';
-        if (parts.length >= 2) {
-            root1 = parts[1] || '';
-            root1Index = themeData.roots.indexOf(root1);
-            rootDef1 = themeData.rootDefs[root1Index] || '';
-            rootPos1 = themeData.rootPos[root1Index] || 'noun';
-        }
-        if (parts.length >= 3) {
-            root2 = parts[2] || '';
-            root2Index = themeData.roots.indexOf(root2);
-            rootDef2 = themeData.rootDefs[root2Index] || '';
-            rootPos2 = themeData.rootPos[root2Index] || 'noun';
-        }
-        if (parts.length >= 3) suffix = parts[parts.length - 1] || '', suffixDef = themeData.suffixDefs[themeData.suffixes.indexOf(suffix)] || '';
-
-        const pos = getPartOfSpeech(selectedWordType, suffixIndex, root1Index, root2Index, selectedTheme);
-        const definition = generateSentenceDefinition(selectedWordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, selectedTheme);
-        const example = generateExampleSentence(word, pos, selectedTheme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
-        wordDefinitionEl.textContent = `${definition} ${example}`;
-
-        otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
-            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-        updateLikes();
-        updateLikedWordsDisplay();
-    }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadWordParts();
-    populateThemeDropdown();
-    themeType = document.getElementById("themeType");
-    const permutationType = document.getElementById("permutationType");
-    const generateButton = document.getElementById("generateButton");
-    const copyButton = document.getElementById("copyButton");
-    const shuffleButton = document.getElementById("shuffleButton");
-    const clearLikesButton = document.getElementById("clearLikesButton");
-
-    if (generateButton) generateButton.addEventListener("click", updateDisplay);
-    if (copyButton) copyButton.addEventListener("click", copyToClipboard);
-    if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
-    if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
-    if (permutationType) permutationType.addEventListener("change", updateDisplay);
-    if (themeType) themeType.addEventListener("change", updateDisplay);
-
-    updateDisplay();
-    addPermutationClickHandlers();
-    updateLikes();
-    updateLikedWordsDisplay();
-});
+    return themesLoaded
