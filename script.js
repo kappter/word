@@ -1348,4 +1348,14 @@ async function loadWordParts() {
         }
     });
 
-    return themesLoaded
+    return themesLoadedPromise;
+}
+
+// Event listener for DOM content loaded
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadWordParts();
+    populateThemeDropdown();
+    themeType = document.getElementById("themeType");
+    const permutationType = document.getElementById("permutationType");
+    const generateButton = document.getElementById("generateButton");
+    const copyButton =
