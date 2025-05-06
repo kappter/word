@@ -72,7 +72,6 @@ function parseCSV(csvText) {
             }
 
             if (validEntry) {
-                // Ensure pos is lowercase and valid if present
                 if (entry.part === "root" && entry.pos) {
                     entry.pos = entry.pos.toLowerCase();
                     const validPos = ["noun", "verb", "adjective"];
@@ -204,59 +203,17 @@ function generateExampleSentence(word, pos, theme) {
     let template = exampleTemplates[theme]?.[pos] || exampleTemplates.normal[pos];
     if (!template) template = "Example: The [word] was used.";
 
-    // Define replacement terms based on POS and theme
     const replacements = {
-        normal: {
-            noun: "the entity",
-            verb: "it",
-            adjective: "something",
-            adverb: "in that way"
-        },
-        fantasy: {
-            noun: "the artifact",
-            verb: "the magic",
-            adjective: "the enchantment",
-            adverb: "with mystical grace"
-        },
-        astronomy: {
-            noun: "the phenomenon",
-            verb: "the observation",
-            adjective: "the celestial body",
-            adverb: "across the cosmos"
-        },
-        shakespearian: {
-            noun: "the tale",
-            verb: "the act",
-            adjective: "the character",
-            adverb: "with noble flair"
-        },
-        popculture: {
-            noun: "the trend",
-            verb: "the hype",
-            adjective: "the vibe",
-            adverb: "virally"
-        },
-        technical: {
-            noun: "the system",
-            verb: "the process",
-            adjective: "the technology",
-            adverb: "technically"
-        },
-        math: {
-            noun: "the equation",
-            verb: "the calculation",
-            adjective: "the method",
-            adverb: "mathematically"
-        },
-        geography: {
-            noun: "the landscape",
-            verb: "the flow",
-            adjective: "the region",
-            adverb: "geographically"
-        }
+        normal: { noun: "the entity", verb: "it", adjective: "something", adverb: "in that way" },
+        fantasy: { noun: "the artifact", verb: "the magic", adjective: "the enchantment", adverb: "with mystical grace" },
+        astronomy: { noun: "the phenomenon", verb: "the observation", adjective: "the celestial body", adverb: "across the cosmos" },
+        shakespearian: { noun: "the tale", verb: "the act", adjective: "the character", adverb: "with noble flair" },
+        popculture: { noun: "the trend", verb: "the hype", adjective: "the vibe", adverb: "virally" },
+        technical: { noun: "the system", verb: "the process", adjective: "the technology", adverb: "technically" },
+        math: { noun: "the equation", verb: "the calculation", adjective: "the method", adverb: "mathematically" },
+        geography: { noun: "the landscape", verb: "the flow", adjective: "the region", adverb: "geographically" }
     };
 
-    // Use theme-specific replacement if available, otherwise fall back to normal
     const replacement = replacements[theme]?.[pos] || replacements.normal[pos] || "it";
     return template.replace('[word]', replacement);
 }
@@ -279,11 +236,7 @@ async function loadWordParts() {
 
             data.forEach(({ type, part, term, definition, pos }) => {
                 if (!themes[type]) {
-                    themes[type] = { 
-                        prefixes: [], prefixDefs: [], 
-                        roots: [], rootDefs: [], rootPos: [], 
-                        suffixes: [], suffixDefs: [] 
-                    };
+                    themes[type] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], rootPos: [], suffixes: [], suffixDefs: [] };
                 }
                 let cleanedTerm = term;
                 if (part === "prefix") cleanedTerm = term.replace(/-+$/, "");
@@ -372,14 +325,10 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         }
     }
 
-    console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themes[themeKey]?.prefixes, roots: themes[themeKey]?.roots, suffixes: themes[themeKey]?.suffixes });
+    console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themeKey === 'all' ? allPrefixes : themes[themeKey]?.prefixes, roots: themeKey === 'all' ? allRoots : themes[themeKey]?.roots, suffixes: themeKey === 'all' ? allSuffixes : themes[themeKey]?.suffixes });
 
     const getParts = (partType) => {
-        const source = themeKey === 'all' ? { 
-            prefixes: allPrefixes, prefixDefs: allPrefixDefs, 
-            roots: allRoots, rootDefs: allRootDefs, rootPos: allRootPos, 
-            suffixes: allSuffixes, suffixDefs: allSuffixDefs 
-        } : themes[themeKey];
+        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, rootPos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
         switch (partType) {
             case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
             case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.rootPos };
@@ -517,33 +466,35 @@ function generateOtherForms(word, parts, type, theme) {
 
     if (parts.length > 0) {
         const formWord = parts[0];
-        forms.push({ 
-            word: formWord, 
-            pos: 'noun', 
-            def: `A concept related to ${parts[0]}.`, 
-            example: `Example: The ${formWord} was central to the story.` 
-        });
+        forms.push({ word: formWord, pos: 'noun', def: `A concept related to ${parts[0]}.`, example: `Example: The ${formWord} was central to the story.` });
     }
     if (parts.length > 1) {
         const formWord = parts.slice(0, 2).join('-');
-        forms.push({ 
-            word: formWord, 
-            pos: pos, 
-            def: `Involving ${parts.slice(0, 2).join(' and ')}.`, 
-            example: `Example: It had a ${formWord} quality.` 
-        });
+        forms.push({ word: formWord, pos: pos, def: `Involving ${parts.slice(0, 2).join(' and ')}.`, example: `Example: It had a ${formWord} quality.` });
     }
     if (parts.length > 2) {
         const formWord = parts.slice(0, 3).join('-');
-        forms.push({ 
-            word: formWord, 
-            pos: 'noun', 
-            def: `A thing involving ${parts.slice(0, 3).join(' and ')}.`, 
-            example: `Example: The ${formWord} glowed brightly.` 
-        });
+        forms.push({ word: formWord, pos: 'noun', def: `A thing involving ${parts.slice(0, 3).join(' and ')}.`, example: `Example: The ${formWord} glowed brightly.` });
     }
 
     return forms;
+}
+
+// Function to generate all permutations of an array
+function getPermutations(arr) {
+    const result = [];
+    function permute(arr, current = [], remaining = arr) {
+        if (remaining.length === 0) {
+            result.push(current.join('-'));
+            return;
+        }
+        for (let i = 0; i < remaining.length; i++) {
+            const newRemaining = [...remaining.slice(0, i), ...remaining.slice(i + 1)];
+            permute(arr, [...current, remaining[i]], newRemaining);
+        }
+    }
+    permute(arr);
+    return result.slice(0, 5); // Limit to 5 permutations to avoid overwhelming the UI
 }
 
 function generateAmalgamations(parts) {
@@ -551,17 +502,7 @@ function generateAmalgamations(parts) {
         console.warn("Not enough parts to generate amalgamations:", parts);
         return ["No combinations available"];
     }
-    const amalgamations = [];
-    for (let i = 0; i < parts.length; i++) {
-        for (let j = 0; j < parts.length; j++) {
-            if (i !== j) {
-                amalgamations.push(`${parts[i]}-${parts[j]}`);
-            }
-        }
-    }
-    const uniqueAmalgamations = [...new Set(amalgamations)].slice(0, 5);
-    console.log("Generated amalgamations:", uniqueAmalgamations);
-    return uniqueAmalgamations.length > 0 ? uniqueAmalgamations : ["No combinations available"];
+    return getPermutations(parts);
 }
 
 function updateDisplay() {
@@ -597,7 +538,7 @@ function updateDisplay() {
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
         .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
     amalgamationsEl.innerHTML = generateAmalgamations(parts)
-        .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
     updateLikes();
     updateLikedWordsDisplay();
 }
@@ -644,15 +585,16 @@ function shuffleAmalgamations() {
         return;
     }
 
-    const newAmalgamations = generateAmalgamations(parts);
-    if (newAmalgamations.length === 0 || newAmalgamations[0] === "No combinations available") {
-        amalgamationsEl.innerHTML = '<li>No amalgamations generated.</li>';
+    const permutations = getPermutations(parts);
+    if (permutations.length === 0 || permutations[0] === "No combinations available") {
+        amalgamationsEl.innerHTML = '<li>No permutations generated.</li>';
     } else {
-        amalgamationsEl.innerHTML = newAmalgamations
-            .map(a => `<li>${a} <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        amalgamationsEl.innerHTML = permutations
+            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
     }
     updateLikes();
     updateLikedWordsDisplay();
+    addPermutationClickHandlers();
 }
 
 function getLikeStatus(word) {
@@ -705,6 +647,36 @@ function updateLikedWordsDisplay() {
         likedWordsEl.innerHTML = likedWordsList
             .map(word => `<li>${word}</li>`)
             .join('');
+    }
+}
+
+function addPermutationClickHandlers() {
+    const permutations = document.querySelectorAll('.permutation');
+    permutations.forEach(p => {
+        p.removeEventListener('click', loadPermutation);
+        p.addEventListener('click', loadPermutation);
+    });
+}
+
+function loadPermutation(event) {
+    const word = event.target.getAttribute('data-word');
+    const generatedWordEl = document.getElementById('generatedWord');
+    const pronunciationEl = document.getElementById('pronunciation');
+    const wordDefinitionEl = document.getElementById('wordDefinition');
+    const otherFormsEl = document.getElementById('otherForms');
+    const amalgamationsEl = document.getElementById('amalgamations');
+
+    if (generatedWordEl && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl) {
+        generatedWordEl.textContent = word;
+        pronunciationEl.textContent = generatePronunciation(word);
+        // Note: Full definition and other forms require re-generating with original parts' definitions
+        // This is a placeholder; for accurate definitions, we need the original parts' indices
+        wordDefinitionEl.textContent = `(${getPartOfSpeech('pre-root-suf', -1, -1, -1, 'normal')}) A permuted word.`;
+        otherFormsEl.innerHTML = "";
+        amalgamationsEl.innerHTML = generateAmalgamations(word.split('-'))
+            .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
+        updateLikes();
+        updateLikedWordsDisplay();
     }
 }
 
