@@ -665,7 +665,7 @@ function updateDisplay() {
 
     const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
     generatedWordEl.textContent = word || "No word generated";
-    likeMainWordButton.setAttribute('data-word', word Ascending order (default)
+    likeMainWordButton.setAttribute('data-word', word);
     likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
     pronunciationEl.textContent = pronunciation;
     wordDefinitionEl.textContent = definition || "No definition available.";

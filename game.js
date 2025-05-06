@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    if (typeof loadWordParts !== 'function') {
+        console.error("loadWordParts is not defined. Ensure script.js is loaded before game.js.");
+        return;
+    }
+
     await loadWordParts();
     populateThemeDropdown();
 
