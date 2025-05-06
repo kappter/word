@@ -105,13 +105,19 @@
             <button id="copyButton" class="btn btn-copy">Copy Word</button>
             <a href="game.html"><button class="btn btn-play">Play Game</button></a>
             <a href="guess_real.html"><button class="btn btn-generate">Guess the Real Word</button></a>
+            <button id="clearLikesButton" class="btn btn-clear">Clear Likes</button>
+        </div>
+
+        <div class="mt-4">
+            <h3>Liked Words:</h3>
+            <ul id="likedWords" class="list-disc list-inside"></ul>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="fixed-footer">
         <div class="footer-content">
-            <span>&copy;2025 Ken Kappie. All rights reserved.</span>
+            <span>©2025 Ken Kappie. All rights reserved.</span>
             <div class="social-icons">
                 <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
                 <a href="https://x.com" target="_blank"><i class="fab fa-x"></i></a>
@@ -128,7 +134,7 @@
 
     <style>
         main {
-            padding-bottom: 80px; /* Add padding to ensure buttons are not overlapped by footer */
+            padding-bottom: 80px;
         }
 
         .fixed-footer {
@@ -144,17 +150,17 @@
             align-items: center;
             z-index: 1000;
             font-family: Arial, sans-serif;
-            min-height: 50px; /* Ensure a consistent height */
+            min-height: 50px;
         }
 
         .footer-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+            flex-wrap: wrap;
             width: 100%;
-            max-width: 1200px; /* Constrain the width to prevent overflow */
-            gap: 10px; /* Add spacing between elements */
+            max-width: 1200px;
+            gap: 10px;
         }
 
         .social-icons {
@@ -176,7 +182,7 @@
         .footer-links {
             display: flex;
             align-items: center;
-            flex-wrap: wrap; /* Allow links to wrap if needed */
+            flex-wrap: wrap;
         }
 
         .footer-links a {
@@ -184,7 +190,7 @@
             margin: 0 8px;
             text-decoration: none;
             font-size: 14px;
-            white-space: nowrap; /* Prevent link text from breaking */
+            white-space: nowrap;
         }
 
         .footer-links a:hover {
@@ -208,6 +214,20 @@
             .social-icons {
                 margin-top: 5px;
             }
+        }
+
+        .btn-clear {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .btn-clear:hover {
+            background-color: #c0392b;
         }
     </style>
 
