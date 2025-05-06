@@ -1327,20 +1327,3 @@ function loadPermutation(event) {
         otherFormsEl.innerHTML = "";
         amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
             .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-        updateLikes();
-        updateLikedWordsDisplay();
-    }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadWordParts();
-    populateThemeDropdown();
-
-    if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
-        const generateButton = document.getElementById("generateButton");
-        const copyButton = document.getElementById("copyButton");
-        const shuffleButton = document.getElementById("shuffleButton");
-        const clearLikesButton = document.getElementById("clearLikesButton");
-        const likeMainWordButton = document.getElementById("likeMainWordButton");
-        const permutationType = document.getElementById("permutationType");
-        const themeType = document.getElementById("themeType
