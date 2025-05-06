@@ -1343,9 +1343,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         const clearLikesButton = document.getElementById("clearLikesButton");
         const likeMainWordButton = document.getElementById("likeMainWordButton");
         const permutationType = document.getElementById("permutationType");
-        const themeType = document.getElementById("themeType");
-
-        if (generateButton) {
-            generateButton.addEventListener("click", updateDisplay);
-        }
-        if
+        const themeType = document.getElementById("themeType
