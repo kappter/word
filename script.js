@@ -480,12 +480,15 @@ function generateOtherForms(word, parts, type, theme) {
     return forms;
 }
 
-// Function to generate all permutations of an array
-function getPermutations(arr) {
+// Function to generate all permutations of an array and shuffle them
+function getPermutations(arr, originalWord) {
     const result = [];
     function permute(arr, current = [], remaining = arr) {
         if (remaining.length === 0) {
-            result.push(current.join('-'));
+            const perm = current.join('-');
+            if (perm !== originalWord) { // Exclude the original word
+                result.push(perm);
+            }
             return;
         }
         for (let i = 0; i < remaining.length; i++) {
@@ -494,15 +497,24 @@ function getPermutations(arr) {
         }
     }
     permute(arr);
-    return result.slice(0, 5); // Limit to 5 permutations to avoid overwhelming the UI
+    
+    // Shuffle the permutations array
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    
+    return result.slice(0, 5); // Limit to 5 permutations
 }
 
-function generateAmalgamations(parts) {
+function generateAmalgamations(parts, originalWord) {
     if (!parts || parts.length < 2) {
         console.warn("Not enough parts to generate amalgamations:", parts);
         return ["No combinations available"];
     }
-    return getPermutations(parts);
+    const permutations = getPermutations(parts, originalWord);
+    console.log("Generated permutations:", permutations);
+    return permutations.length > 0 ? permutations : ["No permutations available"];
 }
 
 function updateDisplay() {
@@ -537,7 +549,7 @@ function updateDisplay() {
     wordDefinitionEl.textContent = definition || "No definition available.";
     otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
         .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
-    amalgamationsEl.innerHTML = generateAmalgamations(parts)
+    amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
         .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
     updateLikes();
     updateLikedWordsDisplay();
@@ -585,8 +597,8 @@ function shuffleAmalgamations() {
         return;
     }
 
-    const permutations = getPermutations(parts);
-    if (permutations.length === 0 || permutations[0] === "No combinations available") {
+    const permutations = generateAmalgamations(parts, wordText);
+    if (permutations.length === 0 || permutations[0] === "No permutations available") {
         amalgamationsEl.innerHTML = '<li>No permutations generated.</li>';
     } else {
         amalgamationsEl.innerHTML = permutations
@@ -669,11 +681,9 @@ function loadPermutation(event) {
     if (generatedWordEl && pronunciationEl && wordDefinitionEl && otherFormsEl && amalgamationsEl) {
         generatedWordEl.textContent = word;
         pronunciationEl.textContent = generatePronunciation(word);
-        // Note: Full definition and other forms require re-generating with original parts' definitions
-        // This is a placeholder; for accurate definitions, we need the original parts' indices
         wordDefinitionEl.textContent = `(${getPartOfSpeech('pre-root-suf', -1, -1, -1, 'normal')}) A permuted word.`;
         otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = generateAmalgamations(word.split('-'))
+        amalgamationsEl.innerHTML = generateAmalgamations(word.split('-'), word)
             .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
         updateLikes();
         updateLikedWordsDisplay();
