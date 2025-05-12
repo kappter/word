@@ -38,46 +38,86 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function updateDisplay() {
-    const generatedWordEl = document.getElementById('generatedWord');
-    const likeMainWordButton = document.getElementById('likeMainWordButton');
-    const pronunciationEl = document.getElementById('pronunciation');
-    const wordDefinitionEl = document.getElementById('wordDefinition');
-    const otherFormsEl = document.getElementById('otherForms');
-    const amalgamationsEl = document.getElementById('amalgamations');
-    const permutationType = document.getElementById('permutationType');
-    const themeType = document.getElementById('themeType');
+    // Get DOM elements
+    const themeDropdown = document.getElementById("theme-dropdown");
+    const permutationType = document.getElementById("permutationType");
+    const generatedWordElement = document.getElementById("generatedWord");
+    const pronunciationElement = document.getElementById("pronunciation");
+    const wordDefinitionElement = document.getElementById("wordDefinition");
+    const likeMainWordButton = document.getElementById("likeMainWordButton");
+    const otherFormsElement = document.getElementById("otherForms");
+    const amalgamationsElement = document.getElementById("amalgamations");
 
-    if (!permutationType || !themeType || !generatedWordEl || !likeMainWordButton || !pronunciationEl || !wordDefinitionEl || !otherFormsEl || !amalgamationsEl) {
-        console.error("One or more required elements are missing:", { generatedWordEl, likeMainWordButton, pronunciationEl, wordDefinitionEl, otherFormsEl, amalgamationsEl, permutationType, themeType });
+    // Validate elements
+    if (!generatedWordElement || !pronunciationElement || !wordDefinitionElement || !likeMainWordButton ||
+        !otherFormsElement || !amalgamationsElement) {
+        console.error("One or more UI elements not found.");
         return;
     }
 
-    const selectedWordType = permutationType.value;
-    const selectedTheme = themeType.value;
+    // Get selected values with fallbacks
+    const theme = themeDropdown ? themeDropdown.value : "normal";
+    const wordType = permutationType ? permutationType.value : "pre-root-suf";
 
-    if (Object.keys(themes).length === 0 && selectedTheme !== 'all') {
-        generatedWordEl.textContent = "Loading...";
-        likeMainWordButton.setAttribute('data-word', '');
-        likeMainWordButton.textContent = '🤍';
-        pronunciationEl.textContent = "";
-        wordDefinitionEl.textContent = "Please wait for data to load.";
-        otherFormsEl.innerHTML = "";
-        amalgamationsEl.innerHTML = "<li>Loading...</li>";
+    // Check if themes are loaded
+    if (!window.themes || !window.themes[theme]) {
+        console.error(`Theme ${theme} not loaded.`);
+        generatedWordElement.textContent = "Error: Theme not loaded";
+        wordDefinitionElement.textContent = "";
+        pronunciationElement.textContent = "";
+        likeMainWordButton.dataset.word = "";
+        otherFormsElement.innerHTML = "";
+        amalgamationsElement.innerHTML = "";
         return;
     }
 
-    const { word, definition, pronunciation, parts } = generateWordAndDefinition(selectedWordType, selectedTheme);
-    generatedWordEl.textContent = word || "No word generated";
-    likeMainWordButton.setAttribute('data-word', word);
-    likeMainWordButton.textContent = getLikeStatus(word) ? '❤️' : '🤍';
-    pronunciationEl.textContent = pronunciation;
-    wordDefinitionEl.textContent = definition || "No definition available.";
-    otherFormsEl.innerHTML = generateOtherForms(word, parts, selectedWordType, selectedTheme)
-        .map(f => `<li>${f.word} (${f.pos}): ${f.def} ${f.example}</li>`).join('');
-    amalgamationsEl.innerHTML = generateAmalgamations(parts, word)
-        .map(a => `<li><span class="permutation" data-word="${a}">${a}</span> <button class="like-btn" data-word="${a}">${getLikeStatus(a) ? '❤️' : '🤍'}</button></li>`).join('');
-    updateLikes();
-    updateLikedWordsDisplay();
+    // Generate word and definition
+    const wordData = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+
+    // Update main word display
+    generatedWordElement.textContent = wordData.word || "No word generated";
+    pronunciationElement.textContent = wordData.pronunciation || "";
+    wordDefinitionElement.textContent = wordData.definition || "No definition available";
+    likeMainWordButton.dataset.word = wordData.word || "";
+
+    // Update other forms (e.g., plural, adjective forms)
+    otherFormsElement.innerHTML = "";
+    if (wordData.word) {
+        const baseWord = wordData.word.toLowerCase();
+        const otherForms = [];
+        if (wordData.parts.suffix && wordData.parts.suffix.endsWith("y") && !["a", "e", "i", "o", "u"].includes(wordData.parts.root1.slice(-1))) {
+            otherForms.push(`${baseWord.slice(0, -1)}ies`); // Plural for y-ending words
+        } else if (wordData.parts.suffix && ["s", "x", "z", "ch", "sh"].some(end => wordData.word.endsWith(end))) {
+            otherForms.push(`${baseWord}es`); // Plural for s, x, z, ch, sh endings
+        } else {
+            otherForms.push(`${baseWord}s`); // Standard plural
+        }
+        if (wordData.parts.suffix && ["able", "ible"].some(suf => wordData.parts.suffix.includes(suf))) {
+            otherForms.push(`${baseWord.slice(0, -4)}ity`); // Adjective to noun (e.g., readable -> readability)
+        }
+        otherFormsElement.innerHTML = otherForms.map(form => `<li>${form}</li>`).join("");
+    }
+
+    // Update amalgamations (playful combinations)
+    amalgamationsElement.innerHTML = "";
+    if (wordData.word && window.themes[theme]) {
+        const { prefixes, roots, suffixes } = window.themes[theme];
+        const maxAmalgamations = 3;
+        const amalgamations = new Set();
+        while (amalgamations.size < maxAmalgamations && (prefixes.length > 0 || roots.length > 0 || suffixes.length > 0)) {
+            const randPrefix = prefixes.length > 0 ? prefixes[Math.floor(Math.random() * prefixes.length)].term : "";
+            const randRoot = roots.length > 0 ? roots[Math.floor(Math.random() * roots.length)].term : "";
+            const randSuffix = suffixes.length > 0 ? suffixes[Math.floor(Math.random() * suffixes.length)].term : "";
+            const amalgamation = (randPrefix + randRoot + randSuffix)
+                .replace(/^-/, "")
+                .replace(/-$/, "")
+                .replace(/-+/g, "-");
+            if (amalgamation && amalgamation !== wordData.word) {
+                amalgamations.add(amalgamation);
+            }
+        }
+        amalgamationsElement.innerHTML = Array.from(amalgamations).map(am => `<li>${am}</li>`).join("");
+    }
 }
 
 function copyToClipboard() {
