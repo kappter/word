@@ -162,7 +162,12 @@
                 addLikedWordClickHandlers();
             } catch (error) {
                 console.error("Error loading word parts:", error);
-                document.getElementById("loading-game").textContent = "Failed to load word parts. Please refresh.";
+                const loadingElement = document.getElementById("loading-game");
+                if (loadingElement) {
+                    loadingElement.textContent = "Failed to load word parts. Please check the CSV file and refresh.";
+                    loadingElement.classList.remove("loading-indicator");
+                    loadingElement.classList.add("error-message");
+                }
             }
         });
     </script>
