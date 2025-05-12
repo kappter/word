@@ -169,131 +169,119 @@
     <script src="scripts/wordGenerator.js"></script>
     <script src="scripts/gameLogic.js"></script>
     <script>
-        let score = 0;
-        let currentWordData = null;
-        let selectedAnswer = null;
+    let score = 0;
+    let currentWordData = null;
+    let selectedAnswer = null;
 
-        function populateThemeDropdown() {
-            const dropdown = document.getElementById('theme-dropdown');
-            if (!dropdown) {
-                console.warn('Theme dropdown element not found');
-                return;
-            }
-            dropdown.innerHTML = '<option value="" disabled selected>Select a theme</option>';
-            const themes = window.themes || {};
-            if (Object.keys(themes).length === 0) {
-                console.warn('No themes available to populate dropdown');
-                return;
-            }
-            Object.keys(themes).forEach(theme => {
-                const option = document.createElement('option');
-                option.value = theme;
-                option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
-                dropdown.appendChild(option);
-            });
-            console.log('Theme dropdown populated with:', Object.keys(themes));
+    function populateThemeDropdown() {
+        const dropdown = document.getElementById('theme-dropdown');
+        if (!dropdown) {
+            console.warn('Theme dropdown element not found');
+            return;
         }
-
-        function generateQuestion(theme, wordType) {
-            // Generate the correct word and definition
-            currentWordData = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
-            window.wordleTarget = currentWordData.word;
-
-            // Generate two incorrect definitions using different words from the same theme
-            const incorrect1 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
-            const incorrect2 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
-
-            // Ensure incorrect definitions are different from the correct one
-            while (incorrect1.word === currentWordData.word) {
-                incorrect1 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
-            }
-            while (incorrect2.word === currentWordData.word || incorrect2.word === incorrect1.word) {
-                incorrect2 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
-            }
-
-            // Display the word
-            document.getElementById('question').textContent = `Match the word: ${currentWordData.word}`;
-
-            // Shuffle and display answer options
-            const definitions = [
-                { text: currentWordData.definition, isCorrect: true },
-                { text: incorrect1.definition, isCorrect: false },
-                { text: incorrect2.definition, isCorrect: false }
-            ].sort(() => Math.random() - 0.5); // Shuffle
-
-            const answersList = document.getElementById('answers');
-            answersList.innerHTML = '';
-            definitions.forEach((def, index) => {
-                const li = document.createElement('li');
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = 'answer';
-                input.value = index;
-                input.addEventListener('change', () => {
-                    selectedAnswer = def;
-                });
-                li.appendChild(input);
-                li.appendChild(document.createTextNode(def.text));
-                answersList.appendChild(li);
-            });
-
-            // Reset feedback and buttons
-            document.getElementById('feedback').textContent = '';
-            document.getElementById('submitAnswerButton').classList.remove('hidden');
-            document.getElementById('nextQuestionButton').classList.add('hidden');
+        dropdown.innerHTML = '<option value="" disabled selected>Select a theme</option>';
+        const themes = window.themes || {};
+        if (Object.keys(themes).length === 0) {
+            console.warn('No themes available to populate dropdown. Current window.themes:', window.themes);
+            return;
         }
+        Object.keys(themes).forEach(theme => {
+            const option = document.createElement('option');
+            option.value = theme;
+            option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+            dropdown.appendChild(option);
+        });
+        console.log('Theme dropdown populated with:', Object.keys(themes));
+    }
 
-        document.getElementById('startGameButton').addEventListener('click', () => {
-            const theme = document.getElementById('theme-dropdown').value;
-            const wordType = document.getElementById('gamePermutationType').value;
-            if (!theme) {
-                alert('Please select a theme!');
-                return;
-            }
-            score = 0;
-            document.getElementById('score').textContent = `Score: ${score}`;
-            document.getElementById('gameArea').classList.remove('hidden');
-            generateQuestion(theme, wordType);
+    function generateQuestion(theme, wordType) {
+        currentWordData = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+        window.wordleTarget = currentWordData.word;
+
+        const incorrect1 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+        const incorrect2 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+
+        while (incorrect1.word === currentWordData.word) incorrect1 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+        while (incorrect2.word === currentWordData.word || incorrect2.word === incorrect1.word) incorrect2 = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+
+        document.getElementById('question').textContent = `Match the word: ${currentWordData.word}`;
+        const definitions = [
+            { text: currentWordData.definition, isCorrect: true },
+            { text: incorrect1.definition, isCorrect: false },
+            { text: incorrect2.definition, isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        const answersList = document.getElementById('answers');
+        answersList.innerHTML = '';
+        definitions.forEach((def, index) => {
+            const li = document.createElement('li');
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'answer';
+            input.value = index;
+            input.addEventListener('change', () => { selectedAnswer = def; });
+            li.appendChild(input);
+            li.appendChild(document.createTextNode(def.text));
+            answersList.appendChild(li);
         });
 
-        document.getElementById('submitAnswerButton').addEventListener('click', () => {
-            if (!selectedAnswer) {
-                alert('Please select an answer!');
-                return;
-            }
-            const feedback = document.getElementById('feedback');
-            if (selectedAnswer.isCorrect) {
-                score++;
-                feedback.textContent = 'Correct!';
-                feedback.className = 'feedback correct';
-            } else {
-                feedback.textContent = `Incorrect! The correct definition was: ${currentWordData.definition}`;
-                feedback.className = 'feedback incorrect';
-            }
-            document.getElementById('score').textContent = `Score: ${score}`;
-            document.getElementById('submitAnswerButton').classList.add('hidden');
-            document.getElementById('nextQuestionButton').classList.remove('hidden');
-        });
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('submitAnswerButton').classList.remove('hidden');
+        document.getElementById('nextQuestionButton').classList.add('hidden');
+    }
 
-        document.getElementById('nextQuestionButton').addEventListener('click', () => {
-            const theme = document.getElementById('theme-dropdown').value;
-            const wordType = document.getElementById('gamePermutationType').value;
-            generateQuestion(theme, wordType);
-        });
+    document.getElementById('startGameButton').addEventListener('click', () => {
+        const theme = document.getElementById('theme-dropdown').value;
+        const wordType = document.getElementById('gamePermutationType').value;
+        if (!theme) {
+            alert('Please select a theme!');
+            return;
+        }
+        score = 0;
+        document.getElementById('score').textContent = `Score: ${score}`;
+        document.getElementById('gameArea').classList.remove('hidden');
+        generateQuestion(theme, wordType);
+    });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                await loadWordParts();
-                populateThemeDropdown();
-            } catch (error) {
-                console.error('Failed to start game:', error);
-                const loadingElement = document.getElementById('loading-game');
-                if (loadingElement) {
-                    loadingElement.textContent = 'Failed to start game. Check console.';
-                    loadingElement.classList.remove('hidden');
-                }
+    document.getElementById('submitAnswerButton').addEventListener('click', () => {
+        if (!selectedAnswer) {
+            alert('Please select an answer!');
+            return;
+        }
+        const feedback = document.getElementById('feedback');
+        if (selectedAnswer.isCorrect) {
+            score++;
+            feedback.textContent = 'Correct!';
+            feedback.className = 'feedback correct';
+        } else {
+            feedback.textContent = `Incorrect! The correct definition was: ${currentWordData.definition}`;
+            feedback.className = 'feedback incorrect';
+        }
+        document.getElementById('score').textContent = `Score: ${score}`;
+        document.getElementById('submitAnswerButton').classList.add('hidden');
+        document.getElementById('nextQuestionButton').classList.remove('hidden');
+    });
+
+    document.getElementById('nextQuestionButton').addEventListener('click', () => {
+        const theme = document.getElementById('theme-dropdown').value;
+        const wordType = document.getElementById('gamePermutationType').value;
+        generateQuestion(theme, wordType);
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await loadWordParts();
+            console.log('Themes after load:', window.themes); // Debug log
+            populateThemeDropdown();
+        } catch (error) {
+            console.error('Failed to start game:', error);
+            const loadingElement = document.getElementById('loading-game');
+            if (loadingElement) {
+                loadingElement.textContent = 'Failed to start game. Check console.';
+                loadingElement.classList.remove('hidden');
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
