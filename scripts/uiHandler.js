@@ -1,28 +1,41 @@
-// uiHandler.js (updated)
+// In gameLogic.js or a new uiHandler.js
 function populateThemeDropdown() {
-    const themeType = document.getElementById('themeType');
-    if (!themeType) {
-        console.error("Theme dropdown element not found.");
+    const dropdown = document.getElementById('theme-dropdown');
+    if (!dropdown) {
+        console.warn('Theme dropdown element not found');
         return;
     }
 
     // Clear existing options
-    themeType.innerHTML = '';
+    dropdown.innerHTML = '<option value="" disabled selected>Select a theme</option>';
 
-    // Add an "all" option
-    const allOption = document.createElement('option');
-    allOption.value = 'all';
-    allOption.textContent = 'All Themes';
-    themeType.appendChild(allOption);
-
-    // Add each theme from the themes object
+    // Populate with themes from wordGenerator.js
+    const themes = window.themes || {}; // Ensure themes is accessible (global or passed)
     Object.keys(themes).forEach(theme => {
         const option = document.createElement('option');
         option.value = theme;
-        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1); // Capitalize theme name
-        themeType.appendChild(option);
+        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1); // Capitalize for display
+        dropdown.appendChild(option);
     });
+
+    console.log('Theme dropdown populated with:', Object.keys(themes));
 }
+
+// Call this after loadWordParts in game.html
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await loadWordParts();
+        initializeWordleGame();
+        populateThemeDropdown(); // Add this line
+    } catch (error) {
+        console.error('Failed to start game:', error);
+        const loadingElement = document.getElementById('loading-game');
+        if (loadingElement) {
+            loadingElement.textContent = 'Failed to start game. Check console.';
+            loadingElement.classList.remove('hidden');
+        }
+    }
+});
 
 function updateDisplay() {
     const generatedWordEl = document.getElementById('generatedWord');
