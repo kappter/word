@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,8 +65,8 @@
                 </select>
             </div>
             <div class="option-group">
-                <label for="themeType">Select Theme:</label>
-                <select id="themeType">
+                <label for="theme-dropdown">Select Theme:</label> <!-- Changed ID to theme-dropdown -->
+                <select id="theme-dropdown">
                     <option value="all">All</option>
                     <option value="normal">Normal</option>
                     <option value="technical">Technical</option>
@@ -89,7 +128,6 @@
     <script src="scripts/uiHandler.js"></script>
     <script src="scripts/gameLogic.js"></script>
     <script>
-        // Custom file loading script (moved to top for clarity)
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
         var gk_fileData = {};
@@ -119,9 +157,7 @@
             return gk_fileData[filename] || "";
         }
 
-        // DOM Content Loaded event
         document.addEventListener("DOMContentLoaded", async () => {
-            // Wait for word parts to load
             try {
                 await loadWordParts();
                 document.getElementById("loading-game").classList.add("hidden");
@@ -132,26 +168,26 @@
                 return;
             }
 
-            const themeType = document.getElementById("themeType");
+            const themeDropdown = document.getElementById("theme-dropdown");
             const permutationType = document.getElementById("permutationType");
             const generateButton = document.getElementById("generateButton");
             const copyButton = document.getElementById("copyButton");
             const shuffleButton = document.getElementById("shuffleButton");
             const clearLikesButton = document.getElementById("clearLikesButton");
 
-            if (themeType) themeType.addEventListener("change", updateDisplay);
+            if (themeDropdown) themeDropdown.addEventListener("change", updateDisplay);
             if (permutationType) permutationType.addEventListener("change", updateDisplay);
             if (generateButton) generateButton.addEventListener("click", updateDisplay);
             if (copyButton) copyButton.addEventListener("click", copyToClipboard);
             if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
             if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
 
+            // Initial update with default values
             updateDisplay();
             addPermutationClickHandlers();
             addLikedWordClickHandlers();
         });
 
-        // Custom script for Cloudflare (unchanged)
         (function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93ec78cf5804138f',t:'MTc0NzA3OTcwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
     </script>
 </body>
