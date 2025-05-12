@@ -898,6 +898,7 @@ async function loadWordParts() {
 
             parsedData.forEach(entry => {
                 const theme = entry.type || 'normal';
+                console.log(`Processing entry for theme: ${theme}, part: ${entry.part}, term: ${entry.term}`); // Debug log
                 if (themes[theme]) {
                     if (entry.part === 'prefix') {
                         themes[theme].prefixes.push(entry.term);
@@ -914,11 +915,12 @@ async function loadWordParts() {
             });
 
             Object.keys(themes).forEach(theme => {
-    if (themes[theme].prefixes.length === 0 || themes[theme].roots.length === 0 || themes[theme].suffixes.length === 0) {
-        console.warn(`Theme ${theme} has insufficient data. Falling back to 'normal' theme.`);
-        themes[theme] = { ...themes.normal };
-    }
-});
+                console.log(`Theme ${theme} data: prefixes=${themes[theme].prefixes.length}, roots=${themes[theme].roots.length}, suffixes=${themes[theme].suffixes.length}`); // Debug log
+                if (themes[theme].prefixes.length === 0 || themes[theme].roots.length === 0 || themes[theme].suffixes.length === 0) {
+                    console.warn(`Theme ${theme} has insufficient data. Falling back to 'normal' theme.`);
+                    themes[theme] = { ...themes.normal };
+                }
+            });
 
             console.log("Themes loaded successfully:", themes);
             if (loadingElement) loadingElement.classList.add("hidden");
