@@ -928,65 +928,50 @@ function getRandomElement(array) {
 }
 
 async function loadWordParts() {
-    const themes = {};
-    if (themesLoadedPromise) return themesLoadedPromise;
+    window.themes = {};
+    let csvData;
+    try {
+        csvData = await fetchCsvData();
+    } catch (error) {
+        console.error("Failed to fetch CSV data:", error);
+        throw error;
+    }
 
-    themesLoadedPromise = new Promise(async (resolve, reject) => {
-        const loadingElement = document.getElementById("loading-game");
-        if (loadingElement) loadingElement.classList.remove("hidden");
+    const entries = parseCsvData(csvData);
+    console.log(`Successfully parsed ${entries.length} valid entries from CSV.`);
 
-        try {
-            const response = await fetch("data/word_parts.csv");
-            if (!response.ok) throw new Error(`Failed to load word_parts.csv: ${response.status} ${response.statusText}`);
+    entries.forEach((entry, index) => {
+        const { theme, part, term, def } = entry;
 
-            const csvText = await response.text();
-            const parsedData = parseCSV(csvText);
+        if (!theme || !part || !term) {
+            console.warn(`Skipping invalid entry at index ${index}:`, entry);
+            return;
+        }
 
-            themes.normal = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], rootPos: [], suffixes: [], suffixDefs: [] };
-            const themesList = ['fantasy', 'astronomy', 'shakespearian', 'popculture', 'technical', 'math', 'geography'];
-            themesList.forEach(theme => {
-                themes[theme] = { prefixes: [], prefixDefs: [], roots: [], rootDefs: [], rootPos: [], suffixes: [], suffixDefs: [] };
-            });
+        console.log(`Processing entry for theme: ${theme}, part: ${part}, term: ${term}`);
 
-            parsedData.forEach(entry => {
-                const theme = entry.type || 'normal';
-                console.log(`Processing entry for theme: ${theme}, part: ${entry.part}, term: ${entry.term}`); // Debug log
-                if (themes[theme]) {
-                    if (entry.part === 'prefix') {
-                        themes[theme].prefixes.push(entry.term);
-                        themes[theme].prefixDefs.push(entry.definition);
-                    } else if (entry.part === 'root') {
-                        themes[theme].roots.push(entry.term);
-                        themes[theme].rootDefs.push(entry.definition);
-                        themes[theme].rootPos.push(entry.pos || 'noun');
-                    } else if (entry.part === 'suffix') {
-                        themes[theme].suffixes.push(entry.term);
-                        themes[theme].suffixDefs.push(entry.definition);
-                    }
-                }
-            });
+        if (!window.themes[theme]) {
+            window.themes[theme] = { prefixes: [], roots: [], suffixes: [] };
+        }
 
-            Object.keys(themes).forEach(theme => {
-                console.log(`Theme ${theme} data: prefixes=${themes[theme].prefixes.length}, roots=${themes[theme].roots.length}, suffixes=${themes[theme].suffixes.length}`); // Debug log
-                if (themes[theme].prefixes.length === 0 || themes[theme].roots.length === 0 || themes[theme].suffixes.length === 0) {
-                    console.warn(`Theme ${theme} has insufficient data. Falling back to 'normal' theme.`);
-                    themes[theme] = { ...themes.normal };
-                }
-            });
-
-            console.log("Themes loaded successfully:", themes);
-            window.themes = themes; // Set global themes
-            if (loadingElement) loadingElement.classList.add("hidden");
-            resolve(themes); // Resolve with the themes object
-        } catch (error) {
-            console.error("Error loading word parts:", error);
-            if (loadingElement) {
-                loadingElement.textContent = "Failed to load word parts. Check console.";
-                loadingElement.classList.remove("hidden");
-            }
-            reject(error);
+        if (part === "prefix") {
+            window.themes[theme].prefixes.push({ term, def });
+        } else if (part === "root") {
+            window.themes[theme].roots.push({ term, def });
+        } else if (part === "suffix") {
+            window.themes[theme].suffixes.push({ term, def });
         }
     });
 
-    return themesLoadedPromise; // Return the promise
+    for (const theme in window.themes) {
+        console.log(`Theme ${theme} data: prefixes=${window.themes[theme].prefixes.length}, roots=${window.themes[theme].roots.length}, suffixes=${window.themes[theme].suffixes.length}`);
+        // Log sample data for astronomy theme
+        if (theme === "astronomy") {
+            console.log("Astronomy prefixes sample:", window.themes[theme].prefixes.slice(0, 3));
+            console.log("Astronomy roots sample:", window.themes[theme].roots.slice(0, 3));
+            console.log("Astronomy suffixes sample:", window.themes[theme].suffixes.slice(0, 3));
+        }
+    }
+
+    console.log("Themes loaded successfully:", window.themes);
 }
