@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function updateDisplay() {
-    // Get DOM elements
+    console.log("Updating display...");
+
     const themeDropdown = document.getElementById("theme-dropdown");
     const permutationType = document.getElementById("permutationType");
     const generatedWordElement = document.getElementById("generatedWord");
@@ -48,7 +49,6 @@ function updateDisplay() {
     const otherFormsElement = document.getElementById("otherForms");
     const amalgamationsElement = document.getElementById("amalgamations");
 
-    // Validate elements
     const missingElements = [];
     if (!generatedWordElement) missingElements.push("generatedWordElement");
     if (!pronunciationElement) missingElements.push("pronunciationElement");
@@ -62,17 +62,14 @@ function updateDisplay() {
         return;
     }
 
-    // Get selected values with fallbacks
     let theme = themeDropdown ? themeDropdown.value : "normal";
     const wordType = permutationType ? permutationType.value : "pre-root-suf";
 
-    // Ensure theme is valid
     if (!theme) {
         console.warn("Theme is empty, defaulting to 'normal'.");
         theme = "normal";
     }
 
-    // Check if themes are loaded
     if (!window.themes || !window.themes[theme]) {
         console.error(`Theme ${theme} not loaded.`);
         generatedWordElement.textContent = "Error: Theme not loaded";
@@ -84,34 +81,32 @@ function updateDisplay() {
         return;
     }
 
-    // Generate word and definition
     const wordData = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+    console.log("Received word data in updateDisplay:", wordData);
 
-    // Update main word display
     generatedWordElement.textContent = wordData.word || "No word generated";
     pronunciationElement.textContent = wordData.pronunciation || "";
     wordDefinitionElement.textContent = wordData.definition || "No definition available";
     likeMainWordButton.dataset.word = wordData.word || "";
+    console.log("Updated UI elements - Word:", generatedWordElement.textContent, "Definition:", wordDefinitionElement.textContent);
 
-    // Update other forms (e.g., plural, adjective forms)
     otherFormsElement.innerHTML = "";
     if (wordData.word) {
         const baseWord = wordData.word.toLowerCase();
         const otherForms = [];
         if (wordData.parts.suffix && wordData.parts.suffix.endsWith("y") && !["a", "e", "i", "o", "u"].includes(wordData.parts.root1?.slice(-1))) {
-            otherForms.push(`${baseWord.slice(0, -1)}ies`); // Plural for y-ending words
+            otherForms.push(`${baseWord.slice(0, -1)}ies`);
         } else if (wordData.parts.suffix && ["s", "x", "z", "ch", "sh"].some(end => wordData.word.endsWith(end))) {
-            otherForms.push(`${baseWord}es`); // Plural for s, x, z, ch, sh endings
+            otherForms.push(`${baseWord}es`);
         } else {
-            otherForms.push(`${baseWord}s`); // Standard plural
+            otherForms.push(`${baseWord}s`);
         }
         if (wordData.parts.suffix && ["able", "ible"].some(suf => wordData.parts.suffix.includes(suf))) {
-            otherForms.push(`${baseWord.slice(0, -4)}ity`); // Adjective to noun (e.g., readable -> readability)
+            otherForms.push(`${baseWord.slice(0, -4)}ity`);
         }
         otherFormsElement.innerHTML = otherForms.map(form => `<li>${form}</li>`).join("");
     }
 
-    // Update amalgamations (playful combinations)
     amalgamationsElement.innerHTML = "";
     if (wordData.word && window.themes[theme]) {
         const { prefixes, roots, suffixes } = window.themes[theme];
