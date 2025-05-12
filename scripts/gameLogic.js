@@ -1,9 +1,7 @@
 // gameLogic.js
 function initializeWordleGame() {
     console.log("Initializing Wordle game...");
-    const word = generateWordAndDefinition('pre-root-suf', 'normal', { removeHyphens: true }).word;
-    // Add logic to set up the Wordle grid, handle guesses, etc.
-    // Example: Store the word for game logic
+    const word = generateWordAndDefinition('pre-root-suf', 'geography', { removeHyphens: true }).word;
     window.wordleTarget = word;
     console.log(`Wordle target word: ${word}`);
 }
