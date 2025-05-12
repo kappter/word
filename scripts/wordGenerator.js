@@ -772,109 +772,115 @@ function generateAmalgamations(parts, originalWord) {
     return permutations.length > 0 ? permutations : ["No permutations available"];
 }
 
-function generateWordAndDefinition(wordType, themeKey, options = {}) {
-    let prefix = '', root1 = '', root2 = '', suffix = '';
-    let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
-    let rootPos1 = '', rootPos2 = '';
-    let prefixIndex = -1, root1Index = -1, root2Index = -1, suffixIndex = -1;
+function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
+    // Default options
+    const { removeHyphens = false, pos = "noun" } = options;
 
-    const allPrefixes = [], allPrefixDefs = [];
-    const allRoots = [], allRootDefs = [], allRootPos = [];
-    const allSuffixes = [], allSuffixDefs = [];
+    // Ensure theme is defined, fall back to 'normal' if not
+    if (!theme || !window.themes || !window.themes[theme]) {
+        console.warn(`Theme ${theme} not found, falling back to 'normal'.`);
+        theme = "normal";
+    }
+
+    // Handle 'all' theme by combining all parts from available themes
+    let themeData = window.themes[theme];
     if (theme === "all" && window.themes) {
-    const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []);
-    const allRoots = Object.values(window.themes).flatMap(t => t.roots || []);
-    const allSuffixes = Object.values(window.themes).flatMap(t => t.suffixes || []);
-    // Override theme data for 'all'
-    themeData = { prefixes: allPrefixes, roots: allRoots, suffixes: allSuffixes };
-}
+        const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []);
+        const allRoots = Object.values(window.themes).flatMap(t => t.roots || []);
+        const allSuffixes = Object.values(window.themes).flatMap(t => t.suffixes || []);
+        themeData = { prefixes: allPrefixes, roots: allRoots, suffixes: allSuffixes };
+    }
 
-    if (themeKey === 'all') {
-        Object.values(themes).forEach(themeData => {
-            allPrefixes.push(...themeData.prefixes);
-            allPrefixDefs.push(...themeData.prefixDefs);
-            allRoots.push(...themeData.roots);
-            allRootDefs.push(...themeData.rootDefs);
-            allRootPos.push(...themeData.rootPos);
-            allSuffixes.push(...themeData.suffixes);
-            allSuffixDefs.push(...themeData.suffixDefs);
-        });
+    // Extract parts based on theme data
+    const { prefixes = [], roots = [], suffixes = [] } = themeData;
+
+    // Select parts based on wordType
+    let selectedPrefix = "";
+    let selectedRoot1 = "";
+    let selectedRoot2 = "";
+    let selectedSuffix = "";
+    let prefixDef = "";
+    let root1Def = "";
+    let root2Def = "";
+    let suffixDef = "";
+
+    if (prefixes.length > 0 && (wordType.includes("pre") || wordType === "all")) {
+        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        selectedPrefix = removeHyphens ? randomPrefix.term.replace(/-$/, "") : randomPrefix.term;
+        prefixDef = randomPrefix.def || "";
+    }
+
+    if (roots.length > 0) {
+        const randomRoot = roots[Math.floor(Math.random() * roots.length)];
+        selectedRoot1 = removeHyphens ? randomRoot.term.replace(/-$/, "") : randomRoot.term;
+        root1Def = randomRoot.def || "";
+        if (wordType === "pre-root-root" && roots.length > 1) {
+            let secondRoot;
+            do {
+                secondRoot = roots[Math.floor(Math.random() * roots.length)];
+            } while (secondRoot.term === selectedRoot1.term);
+            selectedRoot2 = removeHyphens ? secondRoot.term.replace(/-$/, "") : secondRoot.term;
+            root2Def = secondRoot.def || "";
+        }
+    }
+
+    if (suffixes.length > 0 && (wordType.includes("suf") || wordType === "all")) {
+        const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+        selectedSuffix = removeHyphens ? randomSuffix.term.replace(/^-/, "") : randomSuffix.term;
+        suffixDef = randomSuffix.def || "";
+    }
+
+    // Construct the word
+    let finalWord = "";
+    let definitionParts = [];
+    if (selectedPrefix) {
+        finalWord += selectedPrefix;
+        definitionParts.push(prefixDef);
+    }
+    if (selectedRoot1) {
+        finalWord += selectedRoot1;
+        definitionParts.push(root1Def);
+    }
+    if (selectedRoot2) {
+        finalWord += selectedRoot2;
+        definitionParts.push(root2Def);
+    }
+    if (selectedSuffix) {
+        finalWord += selectedSuffix;
+        definitionParts.push(suffixDef);
+    }
+
+    // Generate definition
+    let definition = "";
+    if (finalWord) {
+        const meaningfulParts = definitionParts.filter(part => part);
+        definition = `(${pos}) A thing `;
+        if (meaningfulParts.length > 0) {
+            definition += meaningfulParts
+                .map(part => part.toLowerCase().replace(/[^a-zA-Z\s]/g, ""))
+                .join(" and ")
+                .replace(/ and $/, "") + " ";
+        }
+        definition += "in a distinctive way. Example: They discovered a " + finalWord + " that combined ";
+        definition += meaningfulParts.length > 1
+            ? meaningfulParts.slice(0, -1).join(", ") + ", and " + meaningfulParts[meaningfulParts.length - 1]
+            : meaningfulParts[0] || "entity";
+        definition += ".";
     } else {
-        if (!themes[themeKey] || !themes[themeKey].prefixes.length || !themes[themeKey].roots.length || !themes[themeKey].suffixes.length) {
-            console.warn(`Theme ${themeKey} has insufficient data. Falling back to 'normal' theme.`);
-            themeKey = 'normal';
-        }
+        definition = "(noun) No word generated.";
     }
 
-    console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themeKey === 'all' ? allPrefixes : themes[themeKey]?.prefixes, roots: themeKey === 'all' ? allRoots : themes[themeKey]?.roots, suffixes: themeKey === 'all' ? allSuffixes : themes[themeKey]?.suffixes });
-
-    const getParts = (partType) => {
-        const source = themeKey === 'all' 
-            ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, pos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } 
-            : themes[themeKey] || themes['normal'];
-        if (!source || (themeKey !== 'all' && (!source.prefixes || !source.roots || !source.suffixes))) {
-            console.error(`Invalid source data for theme: ${themeKey}`, source);
-            return { elements: [], defs: [], pos: [] };
-        }
-        switch (partType) {
-            case 'prefix': return { elements: source.prefixes || [], defs: source.prefixDefs || [] };
-            case 'root': return { elements: source.roots || [], defs: source.rootDefs || [], pos: source.pos || [] };
-            case 'suffix': return { elements: source.suffixes || [], defs: source.suffixDefs || [] };
-            default: return { elements: [], defs: [], pos: [] };
-        }
-    };
-
-    if (wordType === 'pre-root-suf' || wordType === 'pre-root') {
-        const { elements, defs } = getParts('prefix');
-        const result = getRandomElement(elements);
-        prefix = result.element;
-        prefixIndex = result.index;
-        prefixDef = themeKey === 'all' ? allPrefixDefs[prefixIndex] || '' : defs[prefixIndex] || '';
-        console.log(`Selected prefix: ${prefix}, def: ${prefixDef}`);
-    }
-    if (wordType.includes('root')) {
-        const { elements, defs, pos } = getParts('root');
-        const result1 = getRandomElement(elements);
-        root1 = result1.element;
-        root1Index = result1.index;
-        rootDef1 = themeKey === 'all' ? allRootDefs[root1Index] || '' : defs[root1Index] || '';
-        rootPos1 = themeKey === 'all' ? allRootPos[root1Index] || 'noun' : pos[root1Index] || 'noun';
-        console.log(`Selected root1: ${root1}, def: ${rootDef1}, pos: ${rootPos1}`);
-
-        if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
-            const result2 = getRandomElement(elements);
-            root2 = result2.element;
-            root2Index = result2.index;
-            rootDef2 = themeKey === 'all' ? allRootDefs[root2Index] || '' : defs[root2Index] || '';
-            rootPos2 = themeKey === 'all' ? allRootPos[root2Index] || 'noun' : pos[root2Index] || 'noun';
-            console.log(`Selected root2: ${root2}, def: ${rootDef2}, pos: ${rootPos2}`);
-        }
-    }
-    if (wordType.endsWith('suf')) {
-        const { elements, defs } = getParts('suffix');
-        const result = getRandomElement(elements);
-        suffix = result.element;
-        suffixIndex = result.index;
-        suffixDef = themeKey === 'all' ? allSuffixDefs[suffixIndex] || '' : defs[suffixIndex] || '';
-        console.log(`Selected suffix: ${suffix}, def: ${suffixDef}`);
-    }
-
-    const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
-    let word = parts.length > 0 ? parts.join('-').replace(/--+/g, '-') : '';
-    if (options.removeHyphens && word) {
-        word = word.replace(/-/g, '');
-    }
-    console.log(`Generated word parts: ${parts}, final word: ${word}`);
-    const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
-    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, themeKey === 'all' ? 'normal' : themeKey);
-    const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
-    const pronunciation = generatePronunciation(word);
-
+    // Return word data
     return {
-        word,
-        definition: `${definition} ${example}`.trim(),
-        pronunciation,
-        parts
+        word: finalWord || "",
+        pronunciation: "", // Add logic for pronunciation if available
+        definition: definition,
+        parts: {
+            prefix: selectedPrefix,
+            root1: selectedRoot1,
+            root2: selectedRoot2,
+            suffix: selectedSuffix
+        }
     };
 }
 
