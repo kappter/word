@@ -781,6 +781,13 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     const allPrefixes = [], allPrefixDefs = [];
     const allRoots = [], allRootDefs = [], allRootPos = [];
     const allSuffixes = [], allSuffixDefs = [];
+    if (theme === "all" && window.themes) {
+    const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []);
+    const allRoots = Object.values(window.themes).flatMap(t => t.roots || []);
+    const allSuffixes = Object.values(window.themes).flatMap(t => t.suffixes || []);
+    // Override theme data for 'all'
+    themeData = { prefixes: allPrefixes, roots: allRoots, suffixes: allSuffixes };
+}
 
     if (themeKey === 'all') {
         Object.values(themes).forEach(themeData => {
