@@ -49,9 +49,16 @@ function updateDisplay() {
     const amalgamationsElement = document.getElementById("amalgamations");
 
     // Validate elements
-    if (!generatedWordElement || !pronunciationElement || !wordDefinitionElement || !likeMainWordButton ||
-        !otherFormsElement || !amalgamationsElement) {
-        console.error("One or more UI elements not found.");
+    const missingElements = [];
+    if (!generatedWordElement) missingElements.push("generatedWordElement");
+    if (!pronunciationElement) missingElements.push("pronunciationElement");
+    if (!wordDefinitionElement) missingElements.push("wordDefinitionElement");
+    if (!likeMainWordButton) missingElements.push("likeMainWordButton");
+    if (!otherFormsElement) missingElements.push("otherFormsElement");
+    if (!amalgamationsElement) missingElements.push("amalgamationsElement");
+
+    if (missingElements.length > 0) {
+        console.error(`Missing required elements: ${missingElements.join(", ")}`);
         return;
     }
 
@@ -85,7 +92,7 @@ function updateDisplay() {
     if (wordData.word) {
         const baseWord = wordData.word.toLowerCase();
         const otherForms = [];
-        if (wordData.parts.suffix && wordData.parts.suffix.endsWith("y") && !["a", "e", "i", "o", "u"].includes(wordData.parts.root1.slice(-1))) {
+        if (wordData.parts.suffix && wordData.parts.suffix.endsWith("y") && !["a", "e", "i", "o", "u"].includes(wordData.parts.root1?.slice(-1))) {
             otherForms.push(`${baseWord.slice(0, -1)}ies`); // Plural for y-ending words
         } else if (wordData.parts.suffix && ["s", "x", "z", "ch", "sh"].some(end => wordData.word.endsWith(end))) {
             otherForms.push(`${baseWord}es`); // Plural for s, x, z, ch, sh endings
@@ -104,10 +111,13 @@ function updateDisplay() {
         const { prefixes, roots, suffixes } = window.themes[theme];
         const maxAmalgamations = 3;
         const amalgamations = new Set();
-        while (amalgamations.size < maxAmalgamations && (prefixes.length > 0 || roots.length > 0 || suffixes.length > 0)) {
-            const randPrefix = prefixes.length > 0 ? prefixes[Math.floor(Math.random() * prefixes.length)].term : "";
-            const randRoot = roots.length > 0 ? roots[Math.floor(Math.random() * roots.length)].term : "";
-            const randSuffix = suffixes.length > 0 ? suffixes[Math.floor(Math.random() * suffixes.length)].term : "";
+        const validPrefixes = prefixes.filter(item => item && item.term);
+        const validRoots = roots.filter(item => item && item.term);
+        const validSuffixes = suffixes.filter(item => item && item.term);
+        while (amalgamations.size < maxAmalgamations && (validPrefixes.length > 0 || validRoots.length > 0 || validSuffixes.length > 0)) {
+            const randPrefix = validPrefixes.length > 0 ? validPrefixes[Math.floor(Math.random() * validPrefixes.length)].term : "";
+            const randRoot = validRoots.length > 0 ? validRoots[Math.floor(Math.random() * validRoots.length)].term : "";
+            const randSuffix = validSuffixes.length > 0 ? validSuffixes[Math.floor(Math.random() * validSuffixes.length)].term : "";
             const amalgamation = (randPrefix + randRoot + randSuffix)
                 .replace(/^-/, "")
                 .replace(/-$/, "")
