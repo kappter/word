@@ -1,4 +1,29 @@
-// uiHandler.js
+// uiHandler.js (updated)
+function populateThemeDropdown() {
+    const themeType = document.getElementById('themeType');
+    if (!themeType) {
+        console.error("Theme dropdown element not found.");
+        return;
+    }
+
+    // Clear existing options
+    themeType.innerHTML = '';
+
+    // Add an "all" option
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Themes';
+    themeType.appendChild(allOption);
+
+    // Add each theme from the themes object
+    Object.keys(themes).forEach(theme => {
+        const option = document.createElement('option');
+        option.value = theme;
+        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1); // Capitalize theme name
+        themeType.appendChild(option);
+    });
+}
+
 function updateDisplay() {
     const generatedWordEl = document.getElementById('generatedWord');
     const likeMainWordButton = document.getElementById('likeMainWordButton');
