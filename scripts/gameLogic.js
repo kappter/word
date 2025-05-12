@@ -1,6 +1,5 @@
 // gameLogic.js
 function initializeWordleGame() {
-    // Ensure we're on the right page
     if (!document.getElementById("wordle-game-container")) {
         console.log("Skipping Wordle game initialization on this page.");
         return;
@@ -10,7 +9,6 @@ function initializeWordleGame() {
     const themeDropdown = document.getElementById("theme-dropdown");
     let theme = themeDropdown ? themeDropdown.value : "normal";
 
-    // Ensure theme is valid
     if (!theme || !window.themes || !window.themes[theme]) {
         console.warn(`Theme ${theme} not found or not loaded, defaulting to 'normal'.`);
         theme = "normal";
@@ -19,8 +17,24 @@ function initializeWordleGame() {
     const wordData = generateWordAndDefinition("pre-root-suf", theme, { removeHyphens: true });
     console.log("Wordle target word:", wordData.word);
     console.log("Definition:", wordData.definition);
+}
 
-    // Additional Wordle game initialization logic...
+function populateThemeDropdown() {
+    const themeDropdown = document.getElementById("theme-dropdown");
+    if (!themeDropdown) {
+        console.log("Theme dropdown element not found on this page.");
+        return;
+    }
+
+    if (themeDropdown.options.length > 0) {
+        console.log("Theme dropdown already populated, skipping.");
+        return;
+    }
+
+    const themes = Object.keys(window.themes || {});
+    themes.sort();
+    themeDropdown.innerHTML = themes.map(theme => `<option value="${theme}">${theme.charAt(0).toUpperCase() + theme.slice(1)}</option>`).join("");
+    console.log("Theme dropdown populated with:", themes);
 }
 
 function initializeGuessRealGame() {
