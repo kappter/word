@@ -52,12 +52,13 @@
         <a href="index.html" class="nav-link">Back to Word Creator</a>
         <a href="guess_real.html" class="nav-link">Guess the Real Word</a>
 
-        <div id="loading-game" class="hidden">Loading game data...</div>
-
-        <div class="controls">
-                <select id="theme-dropdown">
-    <option value="" disabled selected>Select a theme</option>
-</select>
+        <div id="loading-game" class="hidden">Loading game...</div>
+    <div id="game-container">
+        <label for="theme-dropdown">Select Theme:</label>
+        <select id="theme-dropdown">
+            <option value="" disabled selected>Select a theme</option>
+        </select>
+    </div>
             <label for="gameThemeType">Theme:</label>
             <select id="gameThemeType"></select>
             <label for="gamePermutationType">Word Type:</label>
@@ -88,14 +89,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                await loadWordParts(); // Load themes
-                initializeWordleGame(); // Initialize game
+                await loadWordParts();
+                initializeWordleGame();
+                populateThemeDropdown();
             } catch (error) {
-                console.error("Failed to start game:", error);
-                const loadingElement = document.getElementById("loading-game");
+                console.error('Failed to start game:', error);
+                const loadingElement = document.getElementById('loading-game');
                 if (loadingElement) {
-                    loadingElement.textContent = "Failed to start game. Check console.";
-                    loadingElement.classList.remove("hidden");
+                    loadingElement.textContent = 'Failed to start game. Check console.';
+                    loadingElement.classList.remove('hidden');
                 }
             }
         });
