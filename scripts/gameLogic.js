@@ -1,14 +1,26 @@
 // gameLogic.js
 function initializeWordleGame() {
-    try {
-        console.log("Initializing Wordle game...");
-        const wordData = generateWordAndDefinition('pre-root-suf', 'geography', { removeHyphens: true });
-        window.wordleTarget = wordData.word;
-        console.log(`Wordle target word: ${wordData.word}`);
-        console.log(`Definition: ${wordData.definition}`);
-    } catch (error) {
-        console.error("Failed to initialize Wordle game:", error);
+    // Ensure we're on the right page
+    if (!document.getElementById("wordle-game-container")) {
+        console.log("Skipping Wordle game initialization on this page.");
+        return;
     }
+
+    console.log("Initializing Wordle game...");
+    const themeDropdown = document.getElementById("theme-dropdown");
+    let theme = themeDropdown ? themeDropdown.value : "normal";
+
+    // Ensure theme is valid
+    if (!theme || !window.themes || !window.themes[theme]) {
+        console.warn(`Theme ${theme} not found or not loaded, defaulting to 'normal'.`);
+        theme = "normal";
+    }
+
+    const wordData = generateWordAndDefinition("pre-root-suf", theme, { removeHyphens: true });
+    console.log("Wordle target word:", wordData.word);
+    console.log("Definition:", wordData.definition);
+
+    // Additional Wordle game initialization logic...
 }
 
 function initializeGuessRealGame() {
@@ -21,25 +33,16 @@ function initializeGuessRealGame() {
 }
 // In gameLogic.js or a new uiHandler.js
 function populateThemeDropdown() {
-    const dropdown = document.getElementById('theme-dropdown');
-    if (!dropdown) {
-        console.warn('Theme dropdown element not found');
+    const themeDropdown = document.getElementById("theme-dropdown");
+    if (!themeDropdown) {
+        console.log("Theme dropdown element not found on this page.");
         return;
     }
 
-    // Clear existing options
-    dropdown.innerHTML = '<option value="" disabled selected>Select a theme</option>';
-
-    // Populate with themes from wordGenerator.js
-    const themes = window.themes || {}; // Ensure themes is accessible (global or passed)
-    Object.keys(themes).forEach(theme => {
-        const option = document.createElement('option');
-        option.value = theme;
-        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1); // Capitalize for display
-        dropdown.appendChild(option);
-    });
-
-    console.log('Theme dropdown populated with:', Object.keys(themes));
+    const themes = Object.keys(window.themes || {});
+    themes.sort();
+    themeDropdown.innerHTML = themes.map(theme => `<option value="${theme}">${theme.charAt(0).toUpperCase() + theme.slice(1)}</option>`).join("");
+    console.log("Theme dropdown populated with:", themes);
 }
 
 // Call this after loadWordParts in game.html
@@ -56,4 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingElement.classList.remove('hidden');
         }
     }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    initializeWordleGame();
+    populateThemeDropdown();
 });
