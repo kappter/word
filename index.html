@@ -42,125 +42,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Creator</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="data:,">
+    <title>Word Parts Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
-<body>
-    <h1>Word Creator</h1>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Word Parts Game</h1>
+        <p class="text-lg text-gray-600">Explore word parts and their meanings!</p>
+    </header>
 
-    <div id="loading-game" class="loading-indicator">Loading word parts...</div>
+    <main class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div id="loading" class="text-center text-gray-500">Loading word parts...</div>
 
-    <main>
-        <div id="game-setup" class="controls">
-            <h2>Select Options and Generate</h2>
-            <div class="option-group">
-                <label for="permutationType">Select Word Type:</label>
-                <select id="permutationType">
-                    <option value="pre-root-suf">Prefix-Root-Suffix</option>
-                    <option value="root-suf">Root-Suffix</option>
-                    <option value="pre-root">Prefix-Root</option>
-                    <option value="pre-root-root">Prefix-Root-Root</option>
-                    <option value="root">Root Only</option>
-                </select>
-            </div>
-            <div class="option-group">
-                <label for="themeType">Select Theme:</label>
-                <select id="themeType">
-                    <option value="all">All</option>
+        <div id="game-section" class="hidden">
+            <div class="mb-4">
+                <label for="theme-dropdown" class="block text-sm font-medium text-gray-700">Select Theme:</label>
+                <select id="theme-dropdown" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                     <option value="normal">Normal</option>
-                    <option value="technical">Technical</option>
-                    <option value="shakespearian">Shakespearian</option>
-                    <option value="popculture">Pop Culture</option>
-                    <option value="astronomy">Astronomy</option>
-                    <option value="fantasy">Fantasy</option>
                 </select>
             </div>
-            <div class="buttons">
-                <button id="generateButton" class="btn btn-generate">Generate New Word</button>
-            </div>
-        </div>
 
-        <div id="word-container" class="word-container">
-            <div class="word-header">
-                <p id="generatedWord" class="text-2xl font-semibold"></p>
-                <button id="likeMainWordButton" class="like-btn" data-word="">🤍</button>
+            <div id="word-display" class="mb-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800">Generated Word</h2>
+                <p id="generated-word" class="text-lg text-gray-600">Click "Generate Word" to start!</p>
+                <p id="word-definition" class="text-sm text-gray-500"></p>
             </div>
-            <p id="pronunciation" class="italic"></p>
-            <p id="wordDefinition"></p>
-            <div class="mt-2">
-                <h3>Other Forms:</h3>
-                <ul id="otherForms" class="list-disc list-inside"></ul>
-            </div>
-            <div class="mt-2">
-                <h3>Playful Amalgamations:</h3>
-                <button id="shuffleButton" class="btn btn-generate">Shuffle Parts</button>
-                <ul id="amalgamations" class="list-disc list-inside mt-2"></ul>
-            </div>
-        </div>
 
-        <div class="buttons">
-            <button id="copyButton" class="btn btn-copy">Copy Word</button>
-            <a href="game.html"><button class="btn btn-play">Play Game</button></a>
-            <a href="guess_real.html"><button class="btn btn-generate">Guess the Real Word</button></a>
-            <button id="clearLikesButton" class="btn btn-clear">Clear Likes</button>
-        </div>
-
-        <div class="mt-4">
-            <h3>Liked Words:</h3>
-            <ul id="likedWords" class="list-disc list-inside"></ul>
+            <div class="flex justify-center space-x-4">
+                <button id="generate-word" class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Generate Word</button>
+                <button id="start-wordle" class="bg-green-500 text-white p-2 rounded-md hover:bg-green-600">Play Wordle</button>
+            </div>
         </div>
     </main>
 
-    <footer class="fixed-footer">
-        <div class="footer-content">
-            <p>© 2025 Ken Kapptie | For educational use only | All rights reserved.</p>
-            <div class="donation-links">
-                <a href="https://github.com/kappter/word">Detailed info on app | </a>
-                <a href="https://kappter.github.io/portfolio/#projects" target="_blank">More tools like this | </a>
-                <a href="https://kappter.github.io/portfolio/proposal.html">Want your own?</a>  
-            </div>
-        </div>
-    </footer>
+    <script src="scripts/fileHandler.js"></script>
+    <script src="scripts/wordGenerator.js"></script>
+    <script src="scripts/gameLogic.js"></script>
+    <script src="scripts/uiHandler.js"></script>
+    <script>
+        const loadingDiv = document.getElementById("loading");
+        const gameSection = document.getElementById("game-section");
+        const themeDropdown = document.getElementById("theme-dropdown");
+        const generateWordButton = document.getElementById("generate-word");
+        const startWordleButton = document.getElementById("start-wordle");
+        const generatedWordElement = document.getElementById("generated-word");
+        const wordDefinitionElement = document.getElementById("word-definition");
 
-    <!-- In index.html -->
-<script src="scripts/fileHandler.js"></script>
-<script src="scripts/wordGenerator.js"></script>
-<script src="scripts/uiHandler.js"></script>
-<script src="scripts/gameLogic.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        await loadWordParts();
-        populateThemeDropdown();
-        const themeType = document.getElementById("themeType");
-        const permutationType = document.getElementById("permutationType");
-        const generateButton = document.getElementById("generateButton");
-        const copyButton = document.getElementById("copyButton");
-        const shuffleButton = document.getElementById("shuffleButton");
-        const clearLikesButton = document.getElementById("clearLikesButton");
+        let currentTheme = themeDropdown.value;
 
-        if (themeType) {
-            themeType.addEventListener("change", updateDisplay);
+        // Update current theme when dropdown changes
+        themeDropdown.addEventListener("change", () => {
+            currentTheme = themeDropdown.value;
+            console.log(`Theme changed to: ${currentTheme}`);
+        });
+
+        // Populate the theme dropdown with available themes
+        function populateThemeDropdown() {
+            if (!window.themes || Object.keys(window.themes).length === 0) {
+                console.error("No themes available to populate dropdown.");
+                return;
+            }
+            themeDropdown.innerHTML = "";
+            Object.keys(window.themes).forEach(theme => {
+                const option = document.createElement("option");
+                option.value = theme;
+                option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+                themeDropdown.appendChild(option);
+            });
+            currentTheme = themeDropdown.value;
+            console.log("Theme dropdown populated with:", Object.keys(window.themes));
         }
-        if (permutationType) {
-            permutationType.addEventListener("change", updateDisplay);
+
+        // Update the UI with a generated word
+        function updateDisplay() {
+            const wordData = generateWordAndDefinition("pre-root-suf", currentTheme, { removeHyphens: true });
+            generatedWordElement.textContent = wordData.word || "No word generated";
+            wordDefinitionElement.innerHTML = wordData.definition || "No definition available";
+            console.log("Generated word:", wordData.word);
         }
-        if (generateButton) {
-            generateButton.addEventListener("click", updateDisplay);
+
+        // Initialize the page
+        async function initialize() {
+            try {
+                await loadWordParts(); // Wait for word parts to load
+                console.log("Themes loaded successfully:", window.themes);
+                populateThemeDropdown();
+                loadingDiv.classList.add("hidden");
+                gameSection.classList.remove("hidden");
+            } catch (error) {
+                console.error("Error loading word parts:", error);
+                loadingDiv.textContent = "Failed to load word parts. Please refresh the page.";
+            }
         }
-        if (copyButton) {
-            copyButton.addEventListener("click", copyToClipboard);
-        }
-        if (shuffleButton) {
-            shuffleButton.addEventListener("click", shuffleAmalgamations);
-        }
-        if (clearLikesButton) {
-            clearLikesButton.addEventListener("click", clearLikes);
-        }
-        updateDisplay();
-        addPermutationClickHandlers();
-        addLikedWordClickHandlers();
-    });
-</script>
+
+        // Event listeners
+        generateWordButton.addEventListener("click", () => {
+            if (!window.themes[currentTheme]) {
+                console.error(`Theme ${currentTheme} not loaded.`);
+                return;
+            }
+            updateDisplay();
+        });
+
+        startWordleButton.addEventListener("click", () => {
+            window.location.href = "game.html";
+        });
+
+        // Start initialization
+        initialize();
+    </script>
 </body>
 </html>
