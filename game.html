@@ -80,6 +80,13 @@
     </div>
 
     <script src="scripts/fileHandler.js"></script>
-<script src="scripts/script.js"></script>
+<script src="scripts/wordGenerator.js"></script>
+<script src="scripts/gameLogic.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadWordParts();
+        initializeWordleGame();
+    });
+</script>
 </body>
 </html>
