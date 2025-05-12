@@ -79,13 +79,23 @@
         </div>
     </div>
 
-   <script src="scripts/wordGenerator.js"></script>
-<script src="scripts/gameLogic.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        await loadWordParts(); // Line 87
-        // Initialize game logic here
-    });
-</script>
+   <script src="scripts/fileHandler.js"></script>
+    <script src="scripts/wordGenerator.js"></script>
+    <script src="scripts/gameLogic.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await loadWordParts(); // Load themes
+                initializeWordleGame(); // Initialize game
+            } catch (error) {
+                console.error("Failed to start game:", error);
+                const loadingElement = document.getElementById("loading-game");
+                if (loadingElement) {
+                    loadingElement.textContent = "Failed to start game. Check console.";
+                    loadingElement.classList.remove("hidden");
+                }
+            }
+        });
+    </script>
 </body>
 </html>
