@@ -773,16 +773,15 @@ function generateAmalgamations(parts, originalWord) {
 }
 
 function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
-    // Default options
+    console.log(`Generating word with wordType: ${wordType}, theme: ${theme}, options:`, options);
+
     const { removeHyphens = false, pos = "noun" } = options;
 
-    // Ensure theme is defined, fall back to 'normal' if not
     if (!theme || !window.themes || !window.themes[theme]) {
         console.warn(`Theme ${theme} not found, falling back to 'normal'.`);
         theme = "normal";
     }
 
-    // Handle 'all' theme by combining all parts from available themes
     let themeData = window.themes[theme];
     if (theme === "all" && window.themes) {
         const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []).filter(item => item && item.term);
@@ -791,16 +790,13 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         themeData = { prefixes: allPrefixes, roots: allRoots, suffixes: allSuffixes };
     }
 
-    // Extract parts based on theme data
     const { prefixes = [], roots = [], suffixes = [] } = themeData;
 
-    // Validate arrays
     if (!prefixes.length && !roots.length && !suffixes.length) {
         console.error(`No valid parts available for theme: ${theme}`);
         return { word: "", pronunciation: "", definition: "(noun) No parts available to generate a word.", parts: {} };
     }
 
-    // Select parts based on wordType
     let selectedPrefix = "";
     let selectedRoot1 = "";
     let selectedRoot2 = "";
@@ -845,7 +841,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         }
     }
 
-    // Construct the word
     let finalWord = "";
     let definitionParts = [];
     if (selectedPrefix) {
@@ -865,7 +860,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         definitionParts.push(suffixDef);
     }
 
-    // Generate definition
     let definition = "";
     if (finalWord) {
         const meaningfulParts = definitionParts.filter(part => part);
@@ -885,10 +879,9 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         definition = "(noun) No word generated.";
     }
 
-    // Return word data
     return {
         word: finalWord || "",
-        pronunciation: "", // Add logic for pronunciation if available
+        pronunciation: "",
         definition: definition,
         parts: {
             prefix: selectedPrefix,
