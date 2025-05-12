@@ -806,21 +806,35 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
     let root2Def = "";
     let suffixDef = "";
 
+    // Log available parts
+    console.log(`Available parts for theme ${theme}: prefixes=${prefixes.length}, roots=${roots.length}, suffixes=${suffixes.length}`);
+    console.log("Sample prefixes:", prefixes.slice(0, 3));
+    console.log("Sample roots:", roots.slice(0, 3));
+    console.log("Sample suffixes:", suffixes.slice(0, 3));
+
+    // Select prefix if required
     if (prefixes.length > 0 && (wordType.includes("pre") || wordType === "all")) {
         const validPrefixes = prefixes.filter(item => item && item.term);
+        console.log(`Valid prefixes after filtering: ${validPrefixes.length}`);
         if (validPrefixes.length > 0) {
             const randomPrefix = validPrefixes[Math.floor(Math.random() * validPrefixes.length)];
             selectedPrefix = removeHyphens ? randomPrefix.term.replace(/-$/, "") : randomPrefix.term;
             prefixDef = randomPrefix.def || "";
+            console.log(`Selected prefix: ${selectedPrefix}, definition: ${prefixDef}`);
+        } else {
+            console.warn("No valid prefixes available after filtering.");
         }
     }
 
+    // Select root (required for all word types)
     if (roots.length > 0) {
         const validRoots = roots.filter(item => item && item.term);
+        console.log(`Valid roots after filtering: ${validRoots.length}`);
         if (validRoots.length > 0) {
             const randomRoot = validRoots[Math.floor(Math.random() * validRoots.length)];
             selectedRoot1 = removeHyphens ? randomRoot.term.replace(/-$/, "") : randomRoot.term;
             root1Def = randomRoot.def || "";
+            console.log(`Selected root1: ${selectedRoot1}, definition: ${root1Def}`);
             if (wordType === "pre-root-root" && validRoots.length > 1) {
                 let secondRoot;
                 do {
@@ -828,19 +842,30 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
                 } while (secondRoot.term === randomRoot.term);
                 selectedRoot2 = removeHyphens ? secondRoot.term.replace(/-$/, "") : secondRoot.term;
                 root2Def = secondRoot.def || "";
+                console.log(`Selected root2: ${selectedRoot2}, definition: ${root2Def}`);
             }
+        } else {
+            console.warn("No valid roots available after filtering.");
         }
+    } else {
+        console.warn("No roots available for theme:", theme);
     }
 
+    // Select suffix if required
     if (suffixes.length > 0 && (wordType.includes("suf") || wordType === "all")) {
         const validSuffixes = suffixes.filter(item => item && item.term);
+        console.log(`Valid suffixes after filtering: ${validSuffixes.length}`);
         if (validSuffixes.length > 0) {
             const randomSuffix = validSuffixes[Math.floor(Math.random() * validSuffixes.length)];
             selectedSuffix = removeHyphens ? randomSuffix.term.replace(/^-/, "") : randomSuffix.term;
             suffixDef = randomSuffix.def || "";
+            console.log(`Selected suffix: ${selectedSuffix}, definition: ${suffixDef}`);
+        } else {
+            console.warn("No valid suffixes available after filtering.");
         }
     }
 
+    // Construct the word
     let finalWord = "";
     let definitionParts = [];
     if (selectedPrefix) {
@@ -860,6 +885,7 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         definitionParts.push(suffixDef);
     }
 
+    // Generate definition
     let definition = "";
     if (finalWord) {
         const meaningfulParts = definitionParts.filter(part => part);
@@ -876,6 +902,7 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
             : meaningfulParts[0] || "entity";
         definition += ".";
     } else {
+        console.warn("Final word is empty. Selected parts:", { selectedPrefix, selectedRoot1, selectedRoot2, selectedSuffix });
         definition = "(noun) No word generated.";
     }
 
