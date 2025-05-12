@@ -131,6 +131,35 @@ function updateDisplay() {
     }
 }
 
+// Placeholder for other functions like shuffleAmalgamations, copyToClipboard, etc.
+function shuffleAmalgamations() {
+    console.log("Shuffling amalgamations...");
+    updateDisplay();
+}
+
+function copyToClipboard() {
+    const wordElement = document.getElementById("generatedWord");
+    const word = wordElement.textContent;
+    if (word && word !== "No word generated") {
+        navigator.clipboard.writeText(word).then(() => {
+            alert("Word copied to clipboard!");
+        }).catch(err => {
+            console.error("Failed to copy word:", err);
+        });
+    } else {
+        alert("No word to copy!");
+    }
+}
+
+function clearLikes() {
+    console.log("Clearing liked words...");
+    localStorage.removeItem("likedWords");
+    const likedWordsElement = document.getElementById("likedWords");
+    if (likedWordsElement) {
+        likedWordsElement.innerHTML = "";
+    }
+}
+
 function copyToClipboard() {
     const generatedWord = document.getElementById('generatedWord')?.textContent || '';
     const wordDefinition = document.getElementById('wordDefinition')?.textContent || '';
