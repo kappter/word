@@ -785,14 +785,20 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
     // Handle 'all' theme by combining all parts from available themes
     let themeData = window.themes[theme];
     if (theme === "all" && window.themes) {
-        const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []);
-        const allRoots = Object.values(window.themes).flatMap(t => t.roots || []);
-        const allSuffixes = Object.values(window.themes).flatMap(t => t.suffixes || []);
+        const allPrefixes = Object.values(window.themes).flatMap(t => t.prefixes || []).filter(item => item && item.term);
+        const allRoots = Object.values(window.themes).flatMap(t => t.roots || []).filter(item => item && item.term);
+        const allSuffixes = Object.values(window.themes).flatMap(t => t.suffixes || []).filter(item => item && item.term);
         themeData = { prefixes: allPrefixes, roots: allRoots, suffixes: allSuffixes };
     }
 
     // Extract parts based on theme data
     const { prefixes = [], roots = [], suffixes = [] } = themeData;
+
+    // Validate arrays
+    if (!prefixes.length && !roots.length && !suffixes.length) {
+        console.error(`No valid parts available for theme: ${theme}`);
+        return { word: "", pronunciation: "", definition: "(noun) No parts available to generate a word.", parts: {} };
+    }
 
     // Select parts based on wordType
     let selectedPrefix = "";
@@ -805,29 +811,38 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
     let suffixDef = "";
 
     if (prefixes.length > 0 && (wordType.includes("pre") || wordType === "all")) {
-        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        selectedPrefix = removeHyphens ? randomPrefix.term.replace(/-$/, "") : randomPrefix.term;
-        prefixDef = randomPrefix.def || "";
+        const validPrefixes = prefixes.filter(item => item && item.term);
+        if (validPrefixes.length > 0) {
+            const randomPrefix = validPrefixes[Math.floor(Math.random() * validPrefixes.length)];
+            selectedPrefix = removeHyphens ? randomPrefix.term.replace(/-$/, "") : randomPrefix.term;
+            prefixDef = randomPrefix.def || "";
+        }
     }
 
     if (roots.length > 0) {
-        const randomRoot = roots[Math.floor(Math.random() * roots.length)];
-        selectedRoot1 = removeHyphens ? randomRoot.term.replace(/-$/, "") : randomRoot.term;
-        root1Def = randomRoot.def || "";
-        if (wordType === "pre-root-root" && roots.length > 1) {
-            let secondRoot;
-            do {
-                secondRoot = roots[Math.floor(Math.random() * roots.length)];
-            } while (secondRoot.term === selectedRoot1.term);
-            selectedRoot2 = removeHyphens ? secondRoot.term.replace(/-$/, "") : secondRoot.term;
-            root2Def = secondRoot.def || "";
+        const validRoots = roots.filter(item => item && item.term);
+        if (validRoots.length > 0) {
+            const randomRoot = validRoots[Math.floor(Math.random() * validRoots.length)];
+            selectedRoot1 = removeHyphens ? randomRoot.term.replace(/-$/, "") : randomRoot.term;
+            root1Def = randomRoot.def || "";
+            if (wordType === "pre-root-root" && validRoots.length > 1) {
+                let secondRoot;
+                do {
+                    secondRoot = validRoots[Math.floor(Math.random() * validRoots.length)];
+                } while (secondRoot.term === randomRoot.term);
+                selectedRoot2 = removeHyphens ? secondRoot.term.replace(/-$/, "") : secondRoot.term;
+                root2Def = secondRoot.def || "";
+            }
         }
     }
 
     if (suffixes.length > 0 && (wordType.includes("suf") || wordType === "all")) {
-        const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-        selectedSuffix = removeHyphens ? randomSuffix.term.replace(/^-/, "") : randomSuffix.term;
-        suffixDef = randomSuffix.def || "";
+        const validSuffixes = suffixes.filter(item => item && item.term);
+        if (validSuffixes.length > 0) {
+            const randomSuffix = validSuffixes[Math.floor(Math.random() * validSuffixes.length)];
+            selectedSuffix = removeHyphens ? randomSuffix.term.replace(/^-/, "") : randomSuffix.term;
+            suffixDef = randomSuffix.def || "";
+        }
     }
 
     // Construct the word
