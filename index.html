@@ -44,12 +44,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Creator</title>
     <link rel="icon" href="data:,">
-    <!-- Link to Merriweather font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Link to custom CSS -->
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Word Creator</h1>
@@ -117,166 +111,18 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="fixed-footer">
         <div class="footer-content">
-             <p>© 2025 Ken Kapptie | For educational use only | All rights reserved.</p>
-        <div class="donation-links">
-            <a href="https://github.com/kappter/word">Detailed info on app | </a>
-            <a href="https://kappter.github.io/portfolio/#projects" target="_blank">More tools like this | </a>
-            <a href="https://kappter.github.io/portfolio/proposal.html">Want your own?</a>  
-        </div>
+            <p>© 2025 Ken Kapptie | For educational use only | All rights reserved.</p>
+            <div class="donation-links">
+                <a href="https://github.com/kappter/word">Detailed info on app | </a>
+                <a href="https://kappter.github.io/portfolio/#projects" target="_blank">More tools like this | </a>
+                <a href="https://kappter.github.io/portfolio/proposal.html">Want your own?</a>  
+            </div>
         </div>
     </footer>
 
-    <style>
-        main {
-            padding-bottom: 80px;
-        }
-
-        .fixed-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #1a1a1a;
-            color: #ccc;
-            padding: 8px 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-            min-height: 50px;
-        }
-
-        .footer-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 1200px;
-            gap: 10px;
-        }
-
-        .social-icons {
-            display: flex;
-            align-items: center;
-        }
-
-        .social-icons a {
-            color: #ccc;
-            margin: 0 5px;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .social-icons a:hover {
-            color: #fff;
-        }
-
-        .footer-links {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: #ccc;
-            margin: 0 8px;
-            text-decoration: none;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .footer-links a:hover {
-            color: #fff;
-        }
-
-        .fab {
-            font-family: "Font Awesome 5 Brands", sans-serif;
-        }
-
-        @media (max-width: 600px) {
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-links {
-                margin-top: 5px;
-            }
-
-            .social-icons {
-                margin-top: 5px;
-            }
-        }
-
-        .btn-clear {
-            background-color: #e74c3c;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .btn-clear:hover {
-            background-color: #c0392b;
-        }
-
-        .word-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-    </style>
-
-    <!-- Include Font Awesome for social icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-            return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-                try {
-                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                    var firstSheetName = workbook.SheetNames[0];
-                    var worksheet = workbook.Sheets[firstSheetName];
-
-                    // Convert sheet to JSON to filter blank rows
-                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                    // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                    var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                    // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                    var headerRowIndex = filteredData.findIndex((row, index) =>
-                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                    );
-                    // Fallback
-                    if (headerRowIndex === -1 || headerRowIndex > 25) {
-                        headerRowIndex = 0;
-                    }
-
-                    // Convert filtered JSON back to CSV
-                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                    return csv;
-                } catch (e) {
-                    console.error(e);
-                    return "";
-                }
-            }
-            return gk_fileData[filename] || "";
-        }
-    </script>
-    <script src="script.js"></script>
+    <script src="scripts/fileHandler.js"></script>
+    <script src="scripts/script.js"></script>
 </body>
 </html>
