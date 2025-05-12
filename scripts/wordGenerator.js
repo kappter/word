@@ -231,7 +231,7 @@ const definitionTemplates = {
         ],
         adverb: [
             "In a [prefixDef] [rootAction1] manner with [suffixDef] logic.",
-            "With [prefixDef] and [suffixDef] [reference] calculations."
+            "With [prefixDef] and [suffixDef] [rootAction1] calculations."
         ]
     },
     geography: {
@@ -870,6 +870,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         parts
     };
 }
+
 function getRandomElement(array) {
     if (!array || array.length === 0) return { element: '', index: -1 };
     const index = Math.floor(Math.random() * array.length);
@@ -924,8 +925,9 @@ async function loadWordParts() {
             });
 
             console.log("Themes loaded successfully:", themes);
+            window.themes = themes; // Set global themes
             if (loadingElement) loadingElement.classList.add("hidden");
-            resolve();
+            resolve(themes); // Resolve with the themes object
         } catch (error) {
             console.error("Error loading word parts:", error);
             if (loadingElement) {
@@ -935,7 +937,6 @@ async function loadWordParts() {
             reject(error);
         }
     });
-window.themes = themes; // Set global themes
-    return themes;
-    return themesLoadedPromise;
+
+    return themesLoadedPromise; // Return the promise
 }
