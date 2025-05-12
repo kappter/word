@@ -1,65 +1,87 @@
-const wordList = ['apple', 'house', 'smile', 'river', 'cloud']; // Replace with larger dictionary
-const targetWord = wordList[Math.floor(Math.random() * wordList.length)];
-let attempts = 0;
-const maxAttempts = 6;
+// Wordle-like game initialization (for game.html)
+function initializeWordleGame() {
+    const gameContainer = document.getElementById("game-container");
+    const loadingElement = document.getElementById("loading-game");
+    if (!gameContainer || !loadingElement) return;
 
-function validateGuess(guess) {
-    if (guess.length !== 5 || !wordList.includes(guess.toLowerCase())) {
-        return false;
-    }
-    return true;
-}
+    loadWordParts().then(() => {
+        const gameThemeType = document.getElementById("gameThemeType");
+        const targetWord = generateWordAndDefinition("pre-root-suf", gameThemeType ? gameThemeType.value : "normal", { excludeExample: true }).word;
+        let guesses = [];
+        let currentGuess = "";
+        const maxGuesses = 6;
 
-function provideFeedback(guess) {
-    const feedback = [];
-    for (let i = 0; i < guess.length; i++) {
-        if (guess[i] === targetWord[i]) {
-            feedback.push('correct');
-        } else if (targetWord.includes(guess[i])) {
-            feedback.push('present');
-        } else {
-            feedback.push('absent');
+        gameContainer.classList.remove("hidden");
+        loadingElement.classList.add("hidden");
+
+        const guessInput = document.getElementById("guess-input");
+        const submitGuess = document.getElementById("submit-guess");
+        const guessGrid = document.getElementById("guess-grid");
+
+        if (!guessInput || !submitGuess || !guessGrid) {
+            console.error("Required game elements missing.");
+            return;
         }
-    }
-    return feedback;
+
+        submitGuess.addEventListener("click", () => {
+            if (currentGuess.length !== targetWord.split('-').length || guesses.length >= maxGuesses) return;
+
+            guesses.push(currentGuess);
+            const row = document.createElement("div");
+            row.className = "guess-row";
+            targetWord.split('-').forEach((part, index) => {
+                const cell = document.createElement("div");
+                cell.className = "guess-cell";
+                cell.textContent = currentGuess.split('-')[index] || "";
+                if (currentGuess.split('-')[index] === part) {
+                    cell.classList.add("correct");
+                } else if (targetWord.split('-').includes(currentGuess.split('-')[index])) {
+                    cell.classList.add("present");
+                } else {
+                    cell.classList.add("absent");
+                }
+                row.appendChild(cell);
+            });
+            guessGrid.appendChild(row);
+
+            if (currentGuess === targetWord) {
+                alert("Congratulations! You guessed the word!");
+                resetGame();
+            } else if (guesses.length >= maxGuesses) {
+                alert(`Game Over! The word was ${targetWord}.`);
+                resetGame();
+            }
+
+            currentGuess = "";
+            guessInput.value = "";
+        });
+
+        guessInput.addEventListener("input", (e) => {
+            currentGuess = e.target.value.replace(/[^a-zA-Z-]/g, '').toLowerCase();
+            if (currentGuess.split('-').length > targetWord.split('-').length) {
+                currentGuess = currentGuess.split('-').slice(0, targetWord.split('-').length).join('-');
+                guessInput.value = currentGuess;
+            }
+        });
+
+        function resetGame() {
+            guesses = [];
+            currentGuess = "";
+            guessGrid.innerHTML = "";
+            guessInput.value = "";
+            initializeWordleGame();
+        }
+    }).catch(error => {
+        console.error("Game initialization failed:", error);
+        loadingElement.textContent = "Failed to load game. Check console.";
+    });
 }
 
-function handleGuess() {
-    const input = document.getElementById('guess-input').value.toLowerCase();
-    if (!validateGuess(input)) {
-        alert('Please enter a valid 5-letter word.');
-        return;
-    }
-
-    const feedback = provideFeedback(input);
-    displayFeedback(input, feedback);
-    attempts++;
-
-    if (input === targetWord) {
-        alert('Congratulations! You won!');
-        resetGame();
-    } else if (attempts >= maxAttempts) {
-        alert(`Game Over! The word was ${targetWord}.`);
-        resetGame();
+// Start Wordle game only on game.html
+if (window.location.pathname.includes('game.html')) {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeWordleGame);
+    } else {
+        initializeWordleGame();
     }
 }
-
-function displayFeedback(guess, feedback) {
-    const row = document.createElement('div');
-    row.className = 'guess-row';
-    for (let i = 0; i < guess.length; i++) {
-        const tile = document.createElement('span');
-        tile.textContent = guess[i].toUpperCase();
-        tile.className = `tile ${feedback[i]}`;
-        row.appendChild(tile);
-    }
-    document.getElementById('game-container').appendChild(row);
-}
-
-function resetGame() {
-    attempts = 0;
-    document.getElementById('game-container').innerHTML = '';
-    document.getElementById('guess-input').value = '';
-}
-
-document.getElementById('submit-guess').addEventListener('click', handleGuess);
