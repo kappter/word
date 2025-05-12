@@ -123,8 +123,44 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="scripts/fileHandler.js"></script>
-    <script src="scripts/script.js"></script>
+    <!-- In index.html -->
+<script src="scripts/fileHandler.js"></script>
+<script src="scripts/wordGenerator.js"></script>
+<script src="scripts/uiHandler.js"></script>
+<script src="scripts/gameLogic.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadWordParts();
+        populateThemeDropdown();
+        const themeType = document.getElementById("themeType");
+        const permutationType = document.getElementById("permutationType");
+        const generateButton = document.getElementById("generateButton");
+        const copyButton = document.getElementById("copyButton");
+        const shuffleButton = document.getElementById("shuffleButton");
+        const clearLikesButton = document.getElementById("clearLikesButton");
+
+        if (themeType) {
+            themeType.addEventListener("change", updateDisplay);
+        }
+        if (permutationType) {
+            permutationType.addEventListener("change", updateDisplay);
+        }
+        if (generateButton) {
+            generateButton.addEventListener("click", updateDisplay);
+        }
+        if (copyButton) {
+            copyButton.addEventListener("click", copyToClipboard);
+        }
+        if (shuffleButton) {
+            shuffleButton.addEventListener("click", shuffleAmalgamations);
+        }
+        if (clearLikesButton) {
+            clearLikesButton.addEventListener("click", clearLikes);
+        }
+        updateDisplay();
+        addPermutationClickHandlers();
+        addLikedWordClickHandlers();
+    });
+</script>
 </body>
 </html>
