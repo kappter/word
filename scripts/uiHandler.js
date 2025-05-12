@@ -63,8 +63,14 @@ function updateDisplay() {
     }
 
     // Get selected values with fallbacks
-    const theme = themeDropdown ? themeDropdown.value : "normal";
+    let theme = themeDropdown ? themeDropdown.value : "normal";
     const wordType = permutationType ? permutationType.value : "pre-root-suf";
+
+    // Ensure theme is valid
+    if (!theme) {
+        console.warn("Theme is empty, defaulting to 'normal'.");
+        theme = "normal";
+    }
 
     // Check if themes are loaded
     if (!window.themes || !window.themes[theme]) {
