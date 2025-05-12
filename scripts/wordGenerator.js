@@ -879,7 +879,7 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         definition = "(noun) No word generated.";
     }
 
-    return {
+    const wordData = {
         word: finalWord || "",
         pronunciation: "",
         definition: definition,
@@ -890,6 +890,8 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
             suffix: selectedSuffix
         }
     };
+    console.log("Generated word data:", wordData);
+    return wordData;
 }
 
 function getRandomElement(array) {
