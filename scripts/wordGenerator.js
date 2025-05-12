@@ -877,6 +877,7 @@ function getRandomElement(array) {
 }
 
 async function loadWordParts() {
+    const themes = {};
     if (themesLoadedPromise) return themesLoadedPromise;
 
     themesLoadedPromise = new Promise(async (resolve, reject) => {
@@ -934,6 +935,7 @@ async function loadWordParts() {
             reject(error);
         }
     });
-
+window.themes = themes; // Set global themes
+    return themes;
     return themesLoadedPromise;
 }
