@@ -492,6 +492,45 @@ const exampleTemplates = {
     }
 };
 
+async function fetchCsvData() {
+    try {
+        const response = await fetch('data/word_parts.csv');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+        }
+        const csvData = await response.text();
+        return csvData;
+    } catch (error) {
+        console.error("Error fetching CSV data:", error);
+        throw error;
+    }
+}
+
+// Parse CSV data into an array of objects
+function parseCsvData(csvData) {
+    const lines = csvData.split('\n');
+    const headers = lines[0].split(',').map(header => header.trim());
+    const entries = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const values = line.split(',').map(value => value.trim());
+        const entry = {};
+
+        for (let j = 0; j < headers.length && j < values.length; j++) {
+            entry[headers[j]] = values[j];
+        }
+
+        if (entry.theme && entry.part && entry.term) {
+            entries.push(entry);
+        }
+    }
+
+    return entries;
+}
+
 function parseCSV(csvText) {
     const lines = csvText.trim().split("\n");
     if (lines.length < 2) {
@@ -806,13 +845,11 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
     let root2Def = "";
     let suffixDef = "";
 
-    // Log available parts
-    console.log(`Available parts for theme ${theme}: prefixes=${prefixes.length}, roots=${roots.length}, suffixes=${suffixes.length}`);
+    console.log(`Available parts for theme ${theme}: prefixes=${prefixes.length}, roots=${prefixes.length}, suffixes=${suffixes.length}`);
     console.log("Sample prefixes:", prefixes.slice(0, 3));
     console.log("Sample roots:", roots.slice(0, 3));
     console.log("Sample suffixes:", suffixes.slice(0, 3));
 
-    // Select prefix if required
     if (prefixes.length > 0 && (wordType.includes("pre") || wordType === "all")) {
         const validPrefixes = prefixes.filter(item => item && item.term);
         console.log(`Valid prefixes after filtering: ${validPrefixes.length}`);
@@ -826,7 +863,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         }
     }
 
-    // Select root (required for all word types)
     if (roots.length > 0) {
         const validRoots = roots.filter(item => item && item.term);
         console.log(`Valid roots after filtering: ${validRoots.length}`);
@@ -851,7 +887,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         console.warn("No roots available for theme:", theme);
     }
 
-    // Select suffix if required
     if (suffixes.length > 0 && (wordType.includes("suf") || wordType === "all")) {
         const validSuffixes = suffixes.filter(item => item && item.term);
         console.log(`Valid suffixes after filtering: ${validSuffixes.length}`);
@@ -865,7 +900,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         }
     }
 
-    // Construct the word
     let finalWord = "";
     let definitionParts = [];
     if (selectedPrefix) {
@@ -885,7 +919,6 @@ function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
         definitionParts.push(suffixDef);
     }
 
-    // Generate definition
     let definition = "";
     if (finalWord) {
         const meaningfulParts = definitionParts.filter(part => part);
@@ -965,7 +998,6 @@ async function loadWordParts() {
 
     for (const theme in window.themes) {
         console.log(`Theme ${theme} data: prefixes=${window.themes[theme].prefixes.length}, roots=${window.themes[theme].roots.length}, suffixes=${window.themes[theme].suffixes.length}`);
-        // Log sample data for astronomy theme
         if (theme === "astronomy") {
             console.log("Astronomy prefixes sample:", window.themes[theme].prefixes.slice(0, 3));
             console.log("Astronomy roots sample:", window.themes[theme].roots.slice(0, 3));
