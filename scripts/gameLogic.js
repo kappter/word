@@ -1,9 +1,14 @@
 // gameLogic.js
 function initializeWordleGame() {
-    console.log("Initializing Wordle game...");
-    const word = generateWordAndDefinition('pre-root-suf', 'geography', { removeHyphens: true }).word;
-    window.wordleTarget = word;
-    console.log(`Wordle target word: ${word}`);
+    try {
+        console.log("Initializing Wordle game...");
+        const wordData = generateWordAndDefinition('pre-root-suf', 'geography', { removeHyphens: true });
+        window.wordleTarget = wordData.word;
+        console.log(`Wordle target word: ${wordData.word}`);
+        console.log(`Definition: ${wordData.definition}`);
+    } catch (error) {
+        console.error("Failed to initialize Wordle game:", error);
+    }
 }
 
 function initializeGuessRealGame() {
