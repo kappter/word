@@ -120,33 +120,43 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             try {
+                console.log("Starting page load...");
                 await loadWordParts();
+                console.log("Word parts loaded successfully.");
                 document.getElementById("loading-game").classList.add("hidden");
 
-                // Populate theme dropdown after themes are loaded
                 populateThemeDropdown();
+                console.log("Theme dropdown populated in index.html");
 
-                // Ensure theme dropdown has a valid value
                 const themeDropdown = document.getElementById("theme-dropdown");
                 if (themeDropdown && !themeDropdown.value) {
                     themeDropdown.value = "normal";
+                    console.log("Set default theme to 'normal'");
                 }
 
-                // Set up event listeners
                 const permutationType = document.getElementById("permutationType");
-                const generateButton = document.getElementById("generateButton"); // Fixed typo: was "copyButton"
+                const generateButton = document.getElementById("generateButton");
                 const copyButton = document.getElementById("copyButton");
                 const shuffleButton = document.getElementById("shuffleButton");
                 const clearLikesButton = document.getElementById("clearLikesButton");
 
-                if (themeDropdown) themeDropdown.addEventListener("change", updateDisplay);
-                if (permutationType) permutationType.addEventListener("change", updateDisplay);
-                if (generateButton) generateButton.addEventListener("click", updateDisplay);
+                if (themeDropdown) themeDropdown.addEventListener("change", () => {
+                    console.log("Theme dropdown changed, calling updateDisplay");
+                    updateDisplay();
+                });
+                if (permutationType) permutationType.addEventListener("change", () => {
+                    console.log("Permutation type changed, calling updateDisplay");
+                    updateDisplay();
+                });
+                if (generateButton) generateButton.addEventListener("click", () => {
+                    console.log("Generate button clicked, calling updateDisplay");
+                    updateDisplay();
+                });
                 if (copyButton) copyButton.addEventListener("click", copyToClipboard);
                 if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
                 if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
 
-                // Initial display update
+                console.log("Calling initial updateDisplay");
                 updateDisplay();
                 addPermutationClickHandlers();
                 addLikedWordClickHandlers();
