@@ -558,3 +558,8 @@ Geography,root,tecto,"building: tectonic; architect",noun
 Geography,root,terr,"land: terrain; territory; terrestrial",noun
 Geography,root,volv,"roll: revolve; involve; evolve",verb
 Geography,root,zo,"animal: zoology; zoogeography; zootoxin",noun
+Geography,suffix,ic,"relating to",""
+Geography,suffix,al,"relating to",""
+Geography,suffix,ity,"quality",""
+Geography,suffix,ology,"study of",""
+Geography,suffix,ism,"process or belief",""
