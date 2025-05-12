@@ -914,11 +914,11 @@ async function loadWordParts() {
             });
 
             Object.keys(themes).forEach(theme => {
-                if (themes[theme].prefixes.length === 0 || themes[theme].roots.length === 0 || themes[theme].suffixes.length === 0) {
-                    console.warn(`Theme ${theme} has insufficient data. Falling back to 'normal' theme.`);
-                    themes[theme] = { ...themes.normal };
-                }
-            });
+    if (themes[theme].prefixes.length === 0 || themes[theme].roots.length === 0 || themes[theme].suffixes.length === 0) {
+        console.warn(`Theme ${theme} has insufficient data. Falling back to 'normal' theme.`);
+        themes[theme] = { ...themes.normal };
+    }
+});
 
             console.log("Themes loaded successfully:", themes);
             if (loadingElement) loadingElement.classList.add("hidden");
