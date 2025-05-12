@@ -772,6 +772,7 @@ function generateAmalgamations(parts, originalWord) {
     return permutations.length > 0 ? permutations : ["No permutations available"];
 }
 
+// In wordGenerator.js, around line 800
 function generateWordAndDefinition(wordType, themeKey, options = {}) {
     let prefix = '', root1 = '', root2 = '', suffix = '';
     let prefixDef = '', rootDef1 = '', rootDef2 = '', suffixDef = '';
@@ -794,6 +795,7 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
         });
     } else {
         if (!themes[themeKey] || !themes[themeKey].prefixes.length || !themes[themeKey].roots.length || !themes[themeKey].suffixes.length) {
+            console.warn(`Theme ${themeKey} has insufficient data. Falling back to 'normal' theme.`);
             themeKey = 'normal';
         }
     }
@@ -801,15 +803,69 @@ function generateWordAndDefinition(wordType, themeKey, options = {}) {
     console.log(`Generating word for theme: ${themeKey}, wordType: ${wordType}`, { prefixes: themeKey === 'all' ? allPrefixes : themes[themeKey]?.prefixes, roots: themeKey === 'all' ? allRoots : themes[themeKey]?.roots, suffixes: themeKey === 'all' ? allSuffixes : themes[themeKey]?.suffixes });
 
     const getParts = (partType) => {
-        const source = themeKey === 'all' ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, pos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } : themes[themeKey];
+        const source = themeKey === 'all' 
+            ? { prefixes: allPrefixes, prefixDefs: allPrefixDefs, roots: allRoots, rootDefs: allRootDefs, pos: allRootPos, suffixes: allSuffixes, suffixDefs: allSuffixDefs } 
+            : themes[themeKey] || themes['normal']; // Fallback to 'normal' if themeKey is undefined
+        if (!source || (themeKey !== 'all' && (!source.prefixes || !source.roots || !source.suffixes))) {
+            console.error(`Invalid source data for theme: ${themeKey}`, source);
+            return { elements: [], defs: [], pos: [] }; // Return empty arrays to prevent errors
+        }
         switch (partType) {
-            case 'prefix': return { elements: source.prefixes, defs: source.prefixDefs };
-            case 'root': return { elements: source.roots, defs: source.rootDefs, pos: source.pos };
-            case 'suffix': return { elements: source.suffixes, defs: source.suffixDefs };
+            case 'prefix': return { elements: source.prefixes || [], defs: source.prefixDefs || [] };
+            case 'root': return { elements: source.roots || [], defs: source.rootDefs || [], pos: source.pos || [] };
+            case 'suffix': return { elements: source.suffixes || [], defs: source.suffixDefs || [] };
             default: return { elements: [], defs: [], pos: [] };
         }
     };
 
+    if (wordType === 'pre-root-suf' || wordType === 'pre-root') {
+        const { elements, defs } = getParts('prefix');
+        const result = getRandomElement(elements);
+        prefix = result.element;
+        prefixIndex = result.index;
+        prefixDef = themeKey === 'all' ? allPrefixDefs[prefixIndex] || '' : defs[prefixIndex] || '';
+    }
+    if (wordType.includes('root')) {
+        const { elements, defs, pos } = getParts('root');
+        const result1 = getRandomElement(elements);
+        root1 = result1.element;
+        root1Index = result1.index;
+        rootDef1 = themeKey === 'all' ? allRootDefs[root1Index] || '' : defs[root1Index] || '';
+        rootPos1 = themeKey === 'all' ? allRootPos[root1Index] || 'noun' : pos[root1Index] || 'noun';
+
+        if (wordType === 'pre-root-root-suf' || wordType === 'root-root' || wordType === 'pre-root-root') {
+            const result2 = getRandomElement(elements);
+            root2 = result2.element;
+            root2Index = result2.index;
+            rootDef2 = themeKey === 'all' ? allRootDefs[root2Index] || '' : defs[root2Index] || '';
+            rootPos2 = themeKey === 'all' ? allRootPos[root2Index] || 'noun' : pos[root2Index] || 'noun';
+        }
+    }
+    if (wordType.endsWith('suf')) {
+        const { elements, defs } = getParts('suffix');
+        const result = getRandomElement(elements);
+        suffix = result.element;
+        suffixIndex = result.index;
+        suffixDef = themeKey === 'all' ? allSuffixDefs[suffixIndex] || '' : defs[suffixIndex] || '';
+    }
+
+    const parts = [prefix, root1, root2, suffix].filter(part => part && part.trim() !== '');
+    let word = parts.length > 0 ? parts.join('-').replace(/--+/g, '-') : '';
+    if (options.removeHyphens && word) {
+        word = word.replace(/-/g, '');
+    }
+    const pos = getPartOfSpeech(wordType, suffixIndex, root1Index, root2Index, themeKey === 'all' ? 'normal' : themeKey);
+    const definition = generateSentenceDefinition(wordType, prefixDef, rootDef1, rootDef2, suffixDef, pos, suffix, root1, root2, rootPos1, rootPos2, themeKey === 'all' ? 'normal' : themeKey);
+    const example = options.excludeExample ? '' : generateExampleSentence(word, pos, themeKey, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2);
+    const pronunciation = generatePronunciation(word);
+
+    return {
+        word,
+        definition: `${definition} ${example}`.trim(),
+        pronunciation,
+        parts
+    };
+}
     if (wordType === 'pre-root-suf' || wordType === 'pre-root') {
         const { elements, defs } = getParts('prefix');
         const result = getRandomElement(elements);
