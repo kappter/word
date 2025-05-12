@@ -1,4 +1,3 @@
-// gameLogic.js
 function initializeWordleGame() {
     if (!document.getElementById("wordle-game-container")) {
         console.log("Skipping Wordle game initialization on this page.");
