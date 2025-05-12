@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -162,30 +123,33 @@
                 await loadWordParts();
                 document.getElementById("loading-game").classList.add("hidden");
                 populateThemeDropdown();
+
+                // Ensure theme dropdown has a valid value before calling updateDisplay
+                const themeDropdown = document.getElementById("theme-dropdown");
+                if (themeDropdown && !themeDropdown.value) {
+                    themeDropdown.value = "normal"; // Set default value
+                }
+
+                const permutationType = document.getElementById("permutationType");
+                const generateButton = document.getElementById("copyButton");
+                const shuffleButton = document.getElementById("shuffleButton");
+                const clearLikesButton = document.getElementById("clearLikesButton");
+
+                if (themeDropdown) themeDropdown.addEventListener("change", updateDisplay);
+                if (permutationType) permutationType.addEventListener("change", updateDisplay);
+                if (generateButton) generateButton.addEventListener("click", updateDisplay);
+                if (copyButton) copyButton.addEventListener("click", copyToClipboard);
+                if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
+                if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
+
+                // Call updateDisplay after themes are loaded and dropdowns are populated
+                updateDisplay();
+                addPermutationClickHandlers();
+                addLikedWordClickHandlers();
             } catch (error) {
                 console.error("Error loading word parts:", error);
                 document.getElementById("loading-game").textContent = "Failed to load word parts. Please refresh.";
-                return;
             }
-
-            const themeDropdown = document.getElementById("theme-dropdown");
-            const permutationType = document.getElementById("permutationType");
-            const generateButton = document.getElementById("generateButton");
-            const copyButton = document.getElementById("copyButton");
-            const shuffleButton = document.getElementById("shuffleButton");
-            const clearLikesButton = document.getElementById("clearLikesButton");
-
-            if (themeDropdown) themeDropdown.addEventListener("change", updateDisplay);
-            if (permutationType) permutationType.addEventListener("change", updateDisplay);
-            if (generateButton) generateButton.addEventListener("click", updateDisplay);
-            if (copyButton) copyButton.addEventListener("click", copyToClipboard);
-            if (shuffleButton) shuffleButton.addEventListener("click", shuffleAmalgamations);
-            if (clearLikesButton) clearLikesButton.addEventListener("click", clearLikes);
-
-            // Initial update with default values
-            updateDisplay();
-            addPermutationClickHandlers();
-            addLikedWordClickHandlers();
         });
     </script>
 </body>
