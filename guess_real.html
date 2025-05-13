@@ -42,69 +42,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Creator - Guess the Real Word</title>
-    <!-- Link to Merriweather font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Link to CSS file -->
+    <title>Guess Real or Made Up</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:,">
 </head>
 <body>
-    <h1>Word Creator - Guess the Real Word</h1>
+    <h1>Guess Real or Made Up</h1>
 
-    <div id="loading-game" class="loading-indicator">Loading game data...</div>
+    <div id="loading-guess" class="loading-indicator">Loading word parts...</div>
 
     <main>
-        <a href="index.html" class="back-link">Back to Word Creator</a>
-
-        <div id="game-setup" class="controls">
-            <h2>Select Theme and Start</h2>
-            <div class="option-group">
-                <label for="gameThemeType">Select Theme for Generated Words:</label>
-                <select id="gameThemeType">
-                    <!-- Options will be populated by JS -->
-                    <option value="loading">Loading themes...</option>
-                </select>
-            </div>
+        <div id="guess-game-container" class="mt-4">
+            <h2>Is this word real or made up?</h2>
+            <p id="guess-word" class="text-2xl font-semibold mb-2"></p>
+            <p id="guess-definition" class="mb-4"></p>
             <div class="buttons">
-                <button id="startGameButton" class="btn btn-generate">Start Game</button>
+                <button id="real-button" class="btn btn-generate mr-2">Real</button>
+                <button id="made-up-button" class="btn btn-generate">Made Up</button>
             </div>
+            <div id="guess-message" class="mt-2"></div>
+            <button id="new-word-button" class="btn btn-generate mt-2">New Word</button>
         </div>
 
-        <div id="game-play" class="hidden">
-            <h2>Which Word is Real?</h2>
-            <div id="question-area" class="word-container">
-                <p><strong>Definition of the Real Word:</strong></p>
-                <p id="gameDefinition">---</p>
-                <p><strong>Choose the real English word:</strong></p>
-                <div id="choices-area">
-                    <!-- Multiple choice buttons will be added here -->
-                </div>
-            </div>
-            <div id="feedback-area" class="hidden">
-                <p id="feedbackText"></p>
-                <div class="buttons">
-                    <button id="nextQuestionButton" class="btn btn-generate">Next Question</button>
-                </div>
-            </div>
-            <div id="score-area">
-                <p>Score: <span id="score">0</span></p>
-                <p>Misses Remaining: <span id="misses">3</span></p>
-                <p>Question: <span id="questionNumber">1</span> / 5</p>
-            </div>
-        </div>
-
-        <div id="game-over" class="hidden">
-            <h2>Game Over!</h2>
-            <p>Your final score: <span id="finalScore">0</span></p>
-            <div class="buttons">
-                <button id="playAgainButton" class="btn btn-generate">Play Again</button>
-            </div>
+        <div class="mt-4">
+            <a href="index.html"><button class="btn btn-play">Back to Word Creator</button></a>
         </div>
     </main>
 
-    <script src="script.js"></script>
-    <script src="guess_real.js"></script>
+    <footer class="fixed-footer">
+        <div class="footer-content">
+            <p>© 2025 Ken Kapptie | For educational use only | All rights reserved.</p>
+            <div class="donation-links">
+                <a href="https://github.com/kappter/word">Detailed info on app | </a>
+                <a href="https://kappter.github.io/portfolio/#projects" target="_blank">More tools like this | </a>
+                <a href="https://kappter.github.io/portfolio/proposal.html">Want your own?</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/fileHandler.js"></script>
+    <script src="scripts/wordGenerator.js"></script>
+    <script src="scripts/uiHandler.js"></script>
+    <script src="scripts/guessRealLogic.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                await loadWordParts();
+                document.getElementById("loading-guess").classList.add("hidden");
+                initializeGuessGame();
+            } catch (error) {
+                console.error("Error loading word parts:", error);
+                const loadingElement = document.getElementById("loading-guess");
+                if (loadingElement) {
+                    loadingElement.textContent = "Failed to load word parts. Please check the CSV file and refresh.";
+                    loadingElement.classList.remove("loading-indicator");
+                    loadingElement.classList.add("error-message");
+                }
+            }
+        });
+    </script>
 </body>
 </html>
