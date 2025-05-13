@@ -98,6 +98,21 @@ select:focus {
     font-size: 1.1rem;
     margin-bottom: 10px;
 }
+/* Add to styles.css */
+#definition-game-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#definition-options label {
+    display: block;
+    margin: 0.5rem 0;
+}
+
+#game-message {
+    color: #333;
+    font-weight: bold;
+}
 
 /* Add to styles.css */
 #mini-game-board {
