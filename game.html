@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -52,9 +13,9 @@
     <div id="loading-game" class="loading-indicator">Loading word parts...</div>
 
     <main>
-        <!-- Theme Dropdown (for Wordle game) -->
+        <!-- Theme Dropdown -->
         <div id="game-setup" class="controls">
-            <h2>Wordle Game</h2>
+            <h2>Word Definition Game</h2>
             <div class="option-group">
                 <label for="theme-dropdown">Select Theme:</label>
                 <select id="theme-dropdown">
@@ -67,25 +28,18 @@
                     <option value="fantasy">Fantasy</option>
                 </select>
             </div>
-        </div>
-
-        <!-- Existing Wordle Game Container -->
-        <div id="wordle-game-container">
-            <div id="wordle-board"></div>
-            <div id="keyboard-container"></div>
-            <div id="message"></div>
-        </div>
-
-        <!-- New 5-Word Mini Game Section -->
-        <div id="mini-game-container" class="mt-4">
-            <h2>Mini 5-Word Game</h2>
-            <p>Guess the 5-letter word in 6 tries! Green means correct letter in the right spot, yellow means correct letter in the wrong spot, gray means incorrect letter.</p>
-            <div id="mini-game-board" class="grid grid-cols-5 gap-1 w-max mx-auto"></div>
-            <div class="mt-2">
-                <input id="mini-game-input" type="text" maxlength="5" placeholder="Enter 5-letter word" class="border p-2">
-                <button id="mini-game-submit" class="btn btn-generate ml-2">Submit Guess</button>
+            <div class="buttons">
+                <button id="new-word-button" class="btn btn-generate mt-2">New Word</button>
             </div>
-            <div id="mini-game-message" class="mt-2"></div>
+        </div>
+
+        <!-- Game Container -->
+        <div id="definition-game-container" class="mt-4">
+            <h2>Match the Definition</h2>
+            <p id="game-word" class="text-2xl font-semibold mb-2"></p>
+            <div id="definition-options" class="space-y-2"></div>
+            <button id="submit-answer" class="btn btn-generate mt-2">Submit Answer</button>
+            <div id="game-message" class="mt-2"></div>
         </div>
 
         <!-- Link Back to Word Creator -->
@@ -115,8 +69,7 @@
                 await loadWordParts();
                 document.getElementById("loading-game").classList.add("hidden");
                 populateThemeDropdown();
-                initializeWordleGame();
-                initializeMiniGame(); // Initialize the new mini game
+                initializeDefinitionGame(); // Initialize the definition game
             } catch (error) {
                 console.error("Error loading word parts:", error);
                 const loadingElement = document.getElementById("loading-game");
