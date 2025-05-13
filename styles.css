@@ -99,6 +99,31 @@ select:focus {
     margin-bottom: 10px;
 }
 
+/* Add to styles.css */
+#mini-game-board {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#mini-game-board div {
+    border: 2px solid #ccc;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#mini-game-input {
+    text-transform: uppercase;
+}
+
 #otherForms,
 #amalgamations,
 #likedWords {
