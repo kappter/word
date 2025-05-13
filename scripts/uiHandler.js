@@ -131,7 +131,128 @@ function updateDisplay() {
     }
 }
 
-// Placeholder for other functions like shuffleAmalgamations, copyToClipboard, etc.
+function shuffleAmalgamations() {
+    console.log("Shuffling amalgamations...");
+    updateDisplay();
+}
+
+function copyToClipboard() {
+    const wordElement = document.getElementById("generatedWord");
+    const word = wordElement.textContent;
+    if (word && word !== "No word generated") {
+        navigator.clipboard.writeText(word).then(() => {
+            alert("Word copied to clipboard!");
+        }).catch(err => {
+            console.error("Failed to copy word:", err);
+        });
+    } else {
+        alert("No word to copy!");
+    }
+}
+
+function clearLikes() {
+    console.log("Clearing liked words...");
+    localStorage.removeItem("likedWords");
+    const likedWordsElement = document.getElementById("likedWords");
+    if (likedWordsElement) {
+        likedWordsElement.innerHTML = "";
+    }
+}
+
+function updateDisplay() {
+    console.log("Updating display...");
+
+    const themeDropdown = document.getElementById("theme-dropdown");
+    const permutationType = document.getElementById("permutationType");
+    const generatedWordElement = document.getElementById("generatedWord");
+    const pronunciationElement = document.getElementById("pronunciation");
+    const wordDefinitionElement = document.getElementById("wordDefinition");
+    const likeMainWordButton = document.getElementById("likeMainWordButton");
+    const otherFormsElement = document.getElementById("otherForms");
+    const amalgamationsElement = document.getElementById("amalgamations");
+
+    const missingElements = [];
+    if (!generatedWordElement) missingElements.push("generatedWordElement");
+    if (!pronunciationElement) missingElements.push("pronunciationElement");
+    if (!wordDefinitionElement) missingElements.push("wordDefinitionElement");
+    if (!likeMainWordButton) missingElements.push("likeMainWordButton");
+    if (!otherFormsElement) missingElements.push("otherFormsElement");
+    if (!amalgamationsElement) missingElements.push("amalgamationsElement");
+
+    if (missingElements.length > 0) {
+        console.error(`Missing required elements: ${missingElements.join(", ")}`);
+        return;
+    }
+
+    let theme = themeDropdown ? themeDropdown.value : "normal";
+    const wordType = permutationType ? permutationType.value : "pre-root-suf";
+
+    if (!theme) {
+        console.warn("Theme is empty, defaulting to 'normal'.");
+        theme = "normal";
+    }
+
+    if (!window.themes || !window.themes[theme]) {
+        console.error(`Theme ${theme} not loaded.`);
+        generatedWordElement.textContent = "Error: Theme not loaded";
+        wordDefinitionElement.textContent = "";
+        pronunciationElement.textContent = "";
+        likeMainWordButton.dataset.word = "";
+        otherFormsElement.innerHTML = "";
+        amalgamationsElement.innerHTML = "";
+        return;
+    }
+
+    const wordData = generateWordAndDefinition(wordType, theme, { removeHyphens: true });
+    console.log("Received word data in updateDisplay:", wordData);
+
+    generatedWordElement.textContent = wordData.word || "No word generated";
+    pronunciationElement.textContent = wordData.pronunciation || "";
+    wordDefinitionElement.textContent = wordData.definition || "No definition available";
+    likeMainWordButton.dataset.word = wordData.word || "";
+    console.log("Updated UI elements - Word:", generatedWordElement.textContent, "Definition:", wordDefinitionElement.textContent);
+
+    otherFormsElement.innerHTML = "";
+    if (wordData.word) {
+        const baseWord = wordData.word.toLowerCase();
+        const otherForms = [];
+        if (wordData.parts.suffix && wordData.parts.suffix.endsWith("y") && !["a", "e", "i", "o", "u"].includes(wordData.parts.root1?.slice(-1))) {
+            otherForms.push(`${baseWord.slice(0, -1)}ies`);
+        } else if (wordData.parts.suffix && ["s", "x", "z", "ch", "sh"].some(end => wordData.word.endsWith(end))) {
+            otherForms.push(`${baseWord}es`);
+        } else {
+            otherForms.push(`${baseWord}s`);
+        }
+        if (wordData.parts.suffix && ["able", "ible"].some(suf => wordData.parts.suffix.includes(suf))) {
+            otherForms.push(`${baseWord.slice(0, -4)}ity`);
+        }
+        otherFormsElement.innerHTML = otherForms.map(form => `<li>${form}</li>`).join("");
+    }
+
+    amalgamationsElement.innerHTML = "";
+    if (wordData.word && window.themes[theme]) {
+        const { prefixes, roots, suffixes } = window.themes[theme];
+        const maxAmalgamations = 3;
+        const amalgamations = new Set();
+        const validPrefixes = prefixes.filter(item => item && item.term);
+        const validRoots = roots.filter(item => item && item.term);
+        const validSuffixes = suffixes.filter(item => item && item.term);
+        while (amalgamations.size < maxAmalgamations && (validPrefixes.length > 0 || validRoots.length > 0 || validSuffixes.length > 0)) {
+            const randPrefix = validPrefixes.length > 0 ? validPrefixes[Math.floor(Math.random() * validPrefixes.length)].term : "";
+            const randRoot = validRoots.length > 0 ? validRoots[Math.floor(Math.random() * validRoots.length)].term : "";
+            const randSuffix = validSuffixes.length > 0 ? validSuffixes[Math.floor(Math.random() * validSuffixes.length)].term : "";
+            const amalgamation = (randPrefix + randRoot + randSuffix)
+                .replace(/^-/, "")
+                .replace(/-$/, "")
+                .replace(/-+/g, "-");
+            if (amalgamation && amalgamation !== wordData.word) {
+                amalgamations.add(amalgamation);
+            }
+        }
+        amalgamationsElement.innerHTML = Array.from(amalgamations).map(am => `<li>${am}</li>`).join("");
+    }
+}
+
 function shuffleAmalgamations() {
     console.log("Shuffling amalgamations...");
     updateDisplay();
