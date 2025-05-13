@@ -493,18 +493,31 @@ const exampleTemplates = {
 };
 
 async function fetchCsvData() {
-    try {
-        const response = await fetch('data/word_parts.csv');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
+    const possiblePaths = ['data/word_parts.csv', 'word_parts.csv'];
+    let csvData = null;
+
+    for (const path of possiblePaths) {
+        try {
+            console.log(`Attempting to fetch CSV from: ${path}`);
+            const response = await fetch(path);
+            console.log(`Fetch response status for ${path}: ${response.status} ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch CSV file from ${path}: ${response.statusText}`);
+            }
+            csvData = await response.text();
+            console.log(`Fetched CSV data from ${path} (first 500 characters):`, csvData.substring(0, 500));
+            break; // Successfully fetched, exit loop
+        } catch (error) {
+            console.warn(`Error fetching CSV from ${path}:`, error.message);
+            csvData = null; // Reset csvData and try the next path
         }
-        const csvData = await response.text();
-        console.log("Fetched CSV data (first 500 characters):", csvData.substring(0, 500));
-        return csvData;
-    } catch (error) {
-        console.error("Error fetching CSV data:", error);
-        throw error;
     }
+
+    if (!csvData) {
+        throw new Error("Failed to fetch CSV data from any known path.");
+    }
+
+    return csvData;
 }
 
 // Parse CSV data into an array of objects
