@@ -521,6 +521,7 @@ async function fetchCsvData() {
 }
 
 // Parse CSV data into an array of objects
+// Parse CSV data into an array of objects
 function parseCsvData(csvData) {
     if (!csvData || csvData.trim() === "") {
         console.warn("CSV data is empty or undefined.");
@@ -538,8 +539,8 @@ function parseCsvData(csvData) {
     const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
     console.log("CSV headers:", headers);
 
-    // Ensure required headers are present
-    const requiredHeaders = ['theme', 'part', 'term', 'def'];
+    // Adjust expected headers to match the CSV
+    const requiredHeaders = ['type', 'part', 'term', 'definition', 'pos']; // Match the CSV
     const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
     if (missingHeaders.length > 0) {
         console.error("Missing required headers in CSV:", missingHeaders);
@@ -551,7 +552,6 @@ function parseCsvData(csvData) {
         const line = lines[i];
         if (!line) continue;
 
-        // Handle potential quotes and commas within fields
         const values = line.match(/(?:"[^"]*"|[^,]+)(?=\s*,|\s*$)/g)?.map(value => value.trim().replace(/^"(.*)"$/, '$1')) || [];
         if (values.length < headers.length) {
             console.warn(`Skipping malformed line ${i}:`, line);
@@ -563,10 +563,19 @@ function parseCsvData(csvData) {
             entry[headers[j]] = values[j] || "";
         }
 
-        if (entry.theme && entry.part && entry.term) {
-            entries.push(entry);
+        // Map 'type' to 'theme' and 'definition' to 'def' for compatibility
+        const mappedEntry = {
+            theme: entry.type || "",
+            part: entry.part || "",
+            term: entry.term || "",
+            def: entry.definition || "",
+            pos: entry.pos || ""
+        };
+
+        if (mappedEntry.theme && mappedEntry.part && mappedEntry.term) {
+            entries.push(mappedEntry);
         } else {
-            console.warn(`Skipping invalid entry at line ${i + 1}:`, entry);
+            console.warn(`Skipping invalid entry at line ${i + 1}:`, mappedEntry);
         }
     }
 
