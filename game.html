@@ -42,150 +42,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Game</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles/styles.css">
+    <title>Word Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:,">
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
-    <header class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800">Wordle Game</h1>
-        <p class="text-lg text-gray-600">Guess the word based on the definition!</p>
-    </header>
+<body>
+    <h1>Word Game</h1>
 
-    <main class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <div id="loading-game" class="hidden text-center text-gray-500">Loading word parts...</div>
+    <div id="loading-game" class="loading-indicator">Loading word parts...</div>
 
-        <div id="game-setup" class="mb-4">
-            <label for="theme-dropdown" class="block text-sm font-medium text-gray-700">Select Theme:</label>
-            <select id="theme-dropdown" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                <option value="normal">Normal</option>
-            </select>
-            <button id="start-game" class="mt-4 w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Start Game</button>
+    <main>
+        <!-- Theme Dropdown (for Wordle game) -->
+        <div id="game-setup" class="controls">
+            <h2>Wordle Game</h2>
+            <div class="option-group">
+                <label for="theme-dropdown">Select Theme:</label>
+                <select id="theme-dropdown">
+                    <option value="all">All</option>
+                    <option value="normal">Normal</option>
+                    <option value="technical">Technical</option>
+                    <option value="shakespearian">Shakespearian</option>
+                    <option value="popculture">Pop Culture</option>
+                    <option value="astronomy">Astronomy</option>
+                    <option value="fantasy">Fantasy</option>
+                </select>
+            </div>
         </div>
 
-        <div id="game-container" class="hidden">
-            <div id="definition" class="mb-4 text-center text-gray-800"></div>
-            <div id="wordle-board" class="grid grid-cols-5 gap-2 mb-4"></div>
-            <div id="keyboard" class="mb-4"></div>
-            <div id="message" class="text-center text-lg font-semibold"></div>
-            <div id="options" class="mt-4 flex justify-center space-x-4">
-                <button id="submit-guess" class="bg-green-500 text-white p-2 rounded-md hover:bg-green-600">Submit Guess</button>
-                <button id="new-game" class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">New Game</button>
+        <!-- Existing Wordle Game Container -->
+        <div id="wordle-game-container">
+            <div id="wordle-board"></div>
+            <div id="keyboard-container"></div>
+            <div id="message"></div>
+        </div>
+
+        <!-- New 5-Word Mini Game Section -->
+        <div id="mini-game-container" class="mt-4">
+            <h2>Mini 5-Word Game</h2>
+            <p>Guess the 5-letter word in 6 tries! Green means correct letter in the right spot, yellow means correct letter in the wrong spot, gray means incorrect letter.</p>
+            <div id="mini-game-board" class="grid grid-cols-5 gap-1 w-max mx-auto"></div>
+            <div class="mt-2">
+                <input id="mini-game-input" type="text" maxlength="5" placeholder="Enter 5-letter word" class="border p-2">
+                <button id="mini-game-submit" class="btn btn-generate ml-2">Submit Guess</button>
             </div>
-            <div id="questions" class="mt-4"></div>
+            <div id="mini-game-message" class="mt-2"></div>
+        </div>
+
+        <!-- Link Back to Word Creator -->
+        <div class="mt-4">
+            <a href="index.html"><button class="btn btn-play">Back to Word Creator</button></a>
         </div>
     </main>
 
+    <footer class="fixed-footer">
+        <div class="footer-content">
+            <p>© 2025 Ken Kapptie | For educational use only | All rights reserved.</p>
+            <div class="donation-links">
+                <a href="https://github.com/kappter/word">Detailed info on app | </a>
+                <a href="https://kappter.github.io/portfolio/#projects" target="_blank">More tools like this | </a>
+                <a href="https://kappter.github.io/portfolio/proposal.html">Want your own?</a>
+            </div>
+        </div>
+    </footer>
+
     <script src="scripts/fileHandler.js"></script>
     <script src="scripts/wordGenerator.js"></script>
+    <script src="scripts/uiHandler.js"></script>
     <script src="scripts/gameLogic.js"></script>
     <script>
-        const themeDropdown = document.getElementById("theme-dropdown");
-        const startGameButton = document.getElementById("start-game");
-        const gameSetup = document.getElementById("game-setup");
-        const gameContainer = document.getElementById("game-container");
-        const definitionElement = document.getElementById("definition");
-        const questionsElement = document.getElementById("questions");
-
-        let currentTheme = themeDropdown.value;
-
-        themeDropdown.addEventListener("change", () => {
-            currentTheme = themeDropdown.value;
-            console.log(`Theme changed to: ${currentTheme}`);
-        });
-
-        function populateThemeDropdown() {
-            if (!window.themes || Object.keys(window.themes).length === 0) {
-                console.error("No themes available to populate dropdown. Current window.themes:", window.themes);
-                return;
-            }
-            themeDropdown.innerHTML = "";
-            Object.keys(window.themes).forEach(theme => {
-                const option = document.createElement("option");
-                option.value = theme;
-                option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
-                themeDropdown.appendChild(option);
-            });
-            console.log("Theme dropdown populated with:", Object.keys(window.themes));
-            currentTheme = themeDropdown.value;
-        }
-
-        function generateQuestion() {
-            const wordData = generateWordAndDefinition("pre-root-suf", currentTheme, { removeHyphens: true });
-            const targetWord = wordData.word.toLowerCase();
-            const pronunciation = wordData.pronunciation;
-            let definition = wordData.definition;
-
-            let distractors = [];
-            for (let i = 0; i < 3; i++) {
-                let distractorData = generateWordAndDefinition("pre-root-suf", currentTheme, { removeHyphens: true });
-                distractors.push(distractorData.word.toLowerCase());
-            }
-
-            const allOptions = [targetWord, ...distractors];
-            allOptions.sort(() => Math.random() - 0.5);
-
-            let questionHTML = `
-                <div class="question mb-4">
-                    <p><strong>Pronunciation:</strong> ${pronunciation}</p>
-                    <p><strong>Definition:</strong> ${definition}</p>
-                    <div class="options mt-2">
-                        ${allOptions.map((option, index) => `
-                            <button class="option-button bg-gray-200 p-2 m-1 rounded-md hover:bg-gray-300" data-word="${option}">
-                                ${option}
-                            </button>
-                        `).join("")}
-                    </div>
-                </div>
-            `;
-            questionsElement.innerHTML += questionHTML;
-
-            return { targetWord, definition: `${pronunciation}<br>${definition}` };
-        }
-
-        startGameButton.addEventListener("click", async () => {
-            gameSetup.classList.add("hidden");
-            gameContainer.classList.remove("hidden");
-
-            // Wait for themes to load before proceeding
+        document.addEventListener("DOMContentLoaded", async () => {
             try {
                 await loadWordParts();
-                console.log("Themes loaded, proceeding with game initialization.");
-                const { targetWord, definition } = generateQuestion();
-                definitionElement.innerHTML = definition;
-                initializeWordleGame(targetWord, definition);
+                document.getElementById("loading-game").classList.add("hidden");
+                populateThemeDropdown();
+                initializeWordleGame();
+                initializeMiniGame(); // Initialize the new mini game
             } catch (error) {
-                console.error("Failed to load themes:", error);
-                definitionElement.textContent = "Failed to load game data. Please try again.";
-                gameSetup.classList.remove("hidden");
-                gameContainer.classList.add("hidden");
-            }
-        });
-
-        document.getElementById("new-game").addEventListener("click", () => {
-            const { targetWord, definition } = generateQuestion();
-            definitionElement.innerHTML = definition;
-            initializeWordleGame(targetWord, definition);
-        });
-
-        questionsElement.addEventListener("click", (e) => {
-            if (e.target.classList.contains("option-button")) {
-                const selectedWord = e.target.dataset.word;
-                const targetWord = e.target.parentElement.parentElement.querySelector(".option-button[data-word='" + selectedWord + "']").parentElement.parentElement.querySelector(".option-button").dataset.word;
-                if (selectedWord === targetWord) {
-                    e.target.classList.add("bg-green-500", "text-white");
-                } else {
-                    e.target.classList.add("bg-red-500", "text-white");
+                console.error("Error loading word parts:", error);
+                const loadingElement = document.getElementById("loading-game");
+                if (loadingElement) {
+                    loadingElement.textContent = "Failed to load word parts. Please check the CSV file and refresh.";
+                    loadingElement.classList.remove("loading-indicator");
+                    loadingElement.classList.add("error-message");
                 }
             }
-        });
-
-        // Load themes and populate dropdown on page load
-        loadWordParts().then(() => {
-            console.log("Themes after load:", window.themes);
-            populateThemeDropdown();
-        }).catch(error => {
-            console.error("Error loading themes on page load:", error);
         });
     </script>
 </body>
