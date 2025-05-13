@@ -499,6 +499,7 @@ async function fetchCsvData() {
             throw new Error(`Failed to fetch CSV file: ${response.statusText}`);
         }
         const csvData = await response.text();
+        console.log("Fetched CSV data (first 500 characters):", csvData.substring(0, 500));
         return csvData;
     } catch (error) {
         console.error("Error fetching CSV data:", error);
@@ -508,118 +509,56 @@ async function fetchCsvData() {
 
 // Parse CSV data into an array of objects
 function parseCsvData(csvData) {
-    const lines = csvData.split('\n');
-    const headers = lines[0].split(',').map(header => header.trim());
-    const entries = [];
+    if (!csvData || csvData.trim() === "") {
+        console.warn("CSV data is empty or undefined.");
+        return [];
+    }
 
+    const lines = csvData.split('\n').map(line => line.trim()).filter(line => line);
+    if (lines.length === 0) {
+        console.warn("No lines found in CSV data.");
+        return [];
+    }
+
+    console.log("First few lines of CSV:", lines.slice(0, 3));
+
+    const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
+    console.log("CSV headers:", headers);
+
+    // Ensure required headers are present
+    const requiredHeaders = ['theme', 'part', 'term', 'def'];
+    const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
+    if (missingHeaders.length > 0) {
+        console.error("Missing required headers in CSV:", missingHeaders);
+        return [];
+    }
+
+    const entries = [];
     for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
+        const line = lines[i];
         if (!line) continue;
 
-        const values = line.split(',').map(value => value.trim());
-        const entry = {};
+        // Handle potential quotes and commas within fields
+        const values = line.match(/(?:"[^"]*"|[^,]+)(?=\s*,|\s*$)/g)?.map(value => value.trim().replace(/^"(.*)"$/, '$1')) || [];
+        if (values.length < headers.length) {
+            console.warn(`Skipping malformed line ${i}:`, line);
+            continue;
+        }
 
-        for (let j = 0; j < headers.length && j < values.length; j++) {
-            entry[headers[j]] = values[j];
+        const entry = {};
+        for (let j = 0; j < headers.length; j++) {
+            entry[headers[j]] = values[j] || "";
         }
 
         if (entry.theme && entry.part && entry.term) {
             entries.push(entry);
+        } else {
+            console.warn(`Skipping invalid entry at line ${i + 1}:`, entry);
         }
     }
 
+    console.log(`Successfully parsed ${entries.length} valid entries from CSV.`);
     return entries;
-}
-
-function parseCSV(csvText) {
-    const lines = csvText.trim().split("\n");
-    if (lines.length < 2) {
-        console.error("CSV file is empty or only contains headers.");
-        return [];
-    }
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
-    const result = [];
-    const expectedColumns = headers.length;
-
-    if (!headers.includes("type") || !headers.includes("part") || !headers.includes("term") || !headers.includes("definition") || !headers.includes("pos")) {
-        console.error("CSV file is missing required headers (type, part, term, definition, pos).");
-        alert("CSV file is missing required headers (type, part, term, definition, pos).");
-        return [];
-    }
-
-    const regex = /(?:"([^"]*(?:""[^"]*)*)"|([^,]*))(?:,|$)/g;
-
-    for (let i = 1; i < lines.length; i++) {
-        const currentLine = lines[i].trim();
-        if (!currentLine) continue;
-
-        let columns = [];
-        let match;
-        regex.lastIndex = 0;
-
-        while ((match = regex.exec(currentLine))) {
-            let value = match[1] !== undefined ? match[1].replace(/""/g, '"') : match[2];
-            columns.push((value || "").trim());
-            if (match[0].endsWith(",")) continue;
-            if (match[0] === "" && regex.lastIndex === currentLine.length) break;
-            if (regex.lastIndex === currentLine.length) break;
-        }
-        if (columns.length > expectedColumns && columns[columns.length - 1] === "") {
-            columns.pop();
-        }
-
-        if (columns.length === expectedColumns) {
-            const entry = {};
-            let validEntry = true;
-            headers.forEach((header, index) => {
-                const value = columns[index];
-                if ((header === "type" || header === "part" || header === "term") && !value) {
-                    validEntry = false;
-                }
-                entry[header] = value;
-            });
-
-            if (validEntry && entry.type) {
-                entry.type = entry.type.toLowerCase();
-                if (!entry.type) {
-                    validEntry = false;
-                }
-            } else if (validEntry && !entry.type) {
-                validEntry = false;
-            }
-
-            if (validEntry) {
-                const validParts = ["prefix", "root", "suffix"];
-                if (!entry.part || !validParts.includes(entry.part.toLowerCase())) {
-                    validEntry = false;
-                } else {
-                    entry.part = entry.part.toLowerCase();
-                }
-            }
-
-            if (validEntry) {
-                if (!entry.term) {
-                    validEntry = false;
-                }
-            }
-
-            if (validEntry) {
-                if (entry.part === "root" && entry.pos) {
-                    entry.pos = entry.pos.toLowerCase();
-                    const validPos = ["noun", "verb", "adjective"];
-                    if (!validPos.includes(entry.pos)) {
-                        console.warn(`Invalid POS '${entry.pos}' for root '${entry.term}', defaulting to 'noun'.`);
-                        entry.pos = "noun";
-                    }
-                } else {
-                    entry.pos = "";
-                }
-                result.push(entry);
-            }
-        }
-    }
-    console.log(`Successfully parsed ${result.length} valid entries from CSV.`);
-    return result;
 }
 
 function generateExampleSentence(word, pos, theme, root1, root2, rootDef1, rootDef2, prefixDef, rootPos1, rootPos2) {
@@ -811,6 +750,7 @@ function generateAmalgamations(parts, originalWord) {
     return permutations.length > 0 ? permutations : ["No permutations available"];
 }
 
+// Generate a word and its definition
 function generateWordAndDefinition(wordType, theme = "normal", options = {}) {
     console.log(`Generating word with wordType: ${wordType}, theme: ${theme}, options:`, options);
 
@@ -971,7 +911,6 @@ async function loadWordParts() {
     }
 
     const entries = parseCsvData(csvData);
-    console.log(`Successfully parsed ${entries.length} valid entries from CSV.`);
 
     entries.forEach((entry, index) => {
         const { theme, part, term, def } = entry;
